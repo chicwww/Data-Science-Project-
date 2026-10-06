@@ -17,6 +17,28 @@ Une version visuelle des pages est disponible dans ce dossier. Chaque fichier s'
 
 Elle fixe une première direction graphique : fond gris très clair, texte presque noir, un seul accent rouge-orangé pour les boutons et les éléments sélectionnés, titres en Bricolage Grotesque et texte en Figtree. Les passages entre crochets restent à remplir, et les graphiques affichent des données fictives.
 
+## Aperçus de la version visuelle
+
+Les images ci-dessous sont des captures des pages HTML, stockées dans le dossier `images/`.
+
+### Accueil
+![Maquette de la page Accueil](images/accueil.png)
+
+### Parcours
+![Maquette de la page Parcours](images/parcours.png)
+
+### Projets
+![Maquette de la page Projets](images/projets.png)
+
+### Compétences
+![Maquette de la page Compétences](images/competences.png)
+
+### Contact
+![Maquette de la page Contact](images/contact.png)
+
+### Accueil sur mobile
+![Maquette de l'accueil sur mobile](images/accueil-mobile.png)
+
 ## Pages et navigation
 
 Le menu est présent en haut de toutes les pages et contient les liens suivants : Accueil, Parcours, Projets, Compétences, Contact.
@@ -156,3 +178,4 @@ Sur mobile, le menu devient un bouton déroulant. Les cartes de projets passent 
 |---|---|---|
 | 6 octobre | Première version | Création initiale lors du TD1 |
 | 6 octobre | Ajout de la version visuelle des pages en HTML | Fixer l'organisation et la direction graphique avant le développement |
+| 6 octobre | Ajout des captures d'écran des pages | Consulter la maquette directement dans la documentation |
