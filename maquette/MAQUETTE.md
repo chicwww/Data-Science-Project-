@@ -1,6 +1,21 @@
 # Maquette du site portfolio
 
-Cette maquette décrit l'organisation du site avant le développement. Elle ne fixe ni les couleurs ni les polices. Elle montre les pages, la navigation, la place des visualisations et des éléments interactifs.
+Cette maquette décrit l'organisation du site avant le développement. Les schémas de ce document montrent les pages, la navigation, la place des visualisations et des éléments interactifs, sans fixer les couleurs ni les polices.
+
+## Version visuelle
+
+Une version visuelle des pages est disponible dans ce dossier. Chaque fichier s'ouvre dans un navigateur et les liens du menu fonctionnent d'une page à l'autre.
+
+| Page | Fichier |
+|---|---|
+| Accueil | `index.html` |
+| Parcours | `parcours.html` |
+| Projets | `projets.html` |
+| Compétences | `competences.html` |
+| Contact | `contact.html` |
+| Accueil sur mobile | `accueil-mobile.html` |
+
+Elle fixe une première direction graphique : fond gris très clair, texte presque noir, un seul accent rouge-orangé pour les boutons et les éléments sélectionnés, titres en Bricolage Grotesque et texte en Figtree. Les passages entre crochets restent à remplir, et les graphiques affichent des données fictives.
 
 ## Pages et navigation
 
@@ -140,3 +155,4 @@ Sur mobile, le menu devient un bouton déroulant. Les cartes de projets passent 
 | Date | Modification | Raison |
 |---|---|---|
 | 6 octobre | Première version | Création initiale lors du TD1 |
+| 6 octobre | Ajout de la version visuelle des pages en HTML | Fixer l'organisation et la direction graphique avant le développement |

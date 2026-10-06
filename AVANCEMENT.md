@@ -29,7 +29,7 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Compréhension du sujet et choix du contenu du portfolio | TD1 | 0h30 | Terminé | |
 | Initialisation du dépôt Git et du README | TD1 | 0h30 | Terminé | |
 | Planning prévisionnel | TD1 | 0h30 | Terminé | |
-| Maquette du site | TD1 | 0h30 | Terminé | Première version, appelée à évoluer |
+| Maquette du site | TD1 | 0h30 | Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
 | Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | À faire | À faire en dehors des séances |
 | Architecture générale du site et choix des technologies | TD2 | 2h | À faire | Dépend de la maquette |
 | Base de données et contrôleur | TD3 | 4h | À faire | Dépend de l'architecture |
@@ -54,7 +54,7 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 ### TD1, 6 octobre
 - Création du dépôt et du README
 - Rédaction du planning prévisionnel
-- Réalisation de la première maquette
+- Réalisation de la maquette (schémas et pages HTML)
 
 ### À faire ensuite
 - Préparer les données du portfolio avant le TD2
