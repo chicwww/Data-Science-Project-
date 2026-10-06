@@ -18,6 +18,50 @@ Ce document sert d'outil de pilotage. Il est mis à jour à chaque séance : les
 
 Au semestre 6 : 6h de projet, puis 4h de préparation et de présentation orale.
 
+## Planning visuel
+
+Légende : 🟩 terminé, 🟧 en cours, ⬜ à faire, 🟥 en retard.
+
+```mermaid
+gantt
+    title Planning du projet portfolio, semestres 5 et 6
+    dateFormat YYYY-MM-DD
+    axisFormat %d/%m
+    section TD
+    TD1 environnement, Git, maquette (2h)      :done,   td1, 2026-10-06, 1d
+    TD2 architecture générale (2h)             :        td2, 2026-10-23, 1d
+    TD3 partie serveur, BDD et contrôleur (4h) :        td3, 2026-11-23, 1d
+    TD4 partie visualisation (1h30)            :        td4, 2026-11-24, 1d
+    section Évaluations
+    Interrogation 1 (30 min)                   :crit,   i1, 2026-11-24, 1d
+    Interrogation 2 (1h)                       :crit,   i2, 2026-12-02, 1d
+    section Projet
+    Projet, développement (4h)                 :active, p1, 2026-11-24, 1d
+    Projet, interactions (2h)                  :        p2, 2026-11-30, 1d
+    Projet, tests et finalisation (3h)         :        p3, 2026-12-02, 1d
+    section Semestre 6
+    Projet complémentaire (6h)                 :        s6a, 2027-01-18, 14d
+    Préparation et oral (4h)                   :        s6b, after s6a, 14d
+```
+
+Dans le diagramme, les barres grises sont terminées, les rouges sont les évaluations, les autres restent à faire. Les dates du semestre 6 sont indicatives.
+
+### Suivi par séance
+
+| Séance | Date | Durée | Avancement | État |
+|---|---|---|---|---|
+| TD1 | 6 octobre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
+| TD2 | 23 octobre | 2h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| TD3 | 23 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Interrogation 1 | 24 novembre | 30 min | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| TD4 | 24 novembre | 1h30 | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Projet | 24 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Projet | 30 novembre | 2h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Interrogation 2 | 2 décembre | 1h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Projet | 2 décembre | 3h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Semestre 6, projet | à définir | 6h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Semestre 6, oral | à définir | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+
 ## Jalons
 
 Début du projet, puis choix des données, maquette terminée, architecture définie, partie serveur fonctionnelle, première visualisation intégrée, interactions ajoutées, tests et corrections, version finale du semestre 5, puis finalisation et oral au semestre 6.
@@ -26,24 +70,24 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 
 | Tâche | Séance ou période prévue | Heures | État | Commentaire |
 |---|---|---|---|---|
-| Compréhension du sujet et choix du contenu du portfolio | TD1 | 0h30 | Terminé | |
-| Initialisation du dépôt Git et du README | TD1 | 0h30 | Terminé | |
-| Planning prévisionnel | TD1 | 0h30 | Terminé | |
-| Maquette du site | TD1 | 0h30 | Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
-| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | À faire | À faire en dehors des séances |
-| Architecture générale du site et choix des technologies | TD2 | 2h | À faire | Dépend de la maquette |
-| Base de données et contrôleur | TD3 | 4h | À faire | Dépend de l'architecture |
-| Préparation à l'interrogation 1 | Avant le 24 novembre | à définir | À faire | |
-| Interrogation 1 | 24 novembre | 0h30 | À faire | |
-| Partie visualisation : première visualisation | TD4 | 1h30 | À faire | Dépend de la partie serveur |
-| Développement des pages et intégration des visualisations | Projet du 24 novembre | 4h | À faire | |
-| Ajout des interactions : filtres et sélecteurs | Projet du 30 novembre | 2h | À faire | |
-| Préparation à l'interrogation 2 | Avant le 2 décembre | à définir | À faire | |
-| Interrogation 2 | 2 décembre | 1h | À faire | |
-| Tests, corrections et amélioration de l'interface | Projet du 2 décembre | 3h | À faire | |
-| Mise à jour de la documentation et bilan du semestre 5 | Projet du 2 décembre | incluse | À faire | |
-| Développement complémentaire | Semestre 6 | 6h | À faire | |
-| Préparation et présentation orale | Semestre 6 | 4h | À faire | |
+| Compréhension du sujet et choix du contenu du portfolio | TD1 | 0h30 | 🟩 Terminé | |
+| Initialisation du dépôt Git et du README | TD1 | 0h30 | 🟩 Terminé | |
+| Planning prévisionnel | TD1 | 0h30 | 🟩 Terminé | |
+| Maquette du site | TD1 | 0h30 | 🟩 Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
+| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | ⬜ À faire | À faire en dehors des séances |
+| Architecture générale du site et choix des technologies | TD2 | 2h | ⬜ À faire | Dépend de la maquette |
+| Base de données et contrôleur | TD3 | 4h | ⬜ À faire | Dépend de l'architecture |
+| Préparation à l'interrogation 1 | Avant le 24 novembre | à définir | ⬜ À faire | |
+| Interrogation 1 | 24 novembre | 0h30 | ⬜ À faire | |
+| Partie visualisation : première visualisation | TD4 | 1h30 | ⬜ À faire | Dépend de la partie serveur |
+| Développement des pages et intégration des visualisations | Projet du 24 novembre | 4h | ⬜ À faire | |
+| Ajout des interactions : filtres et sélecteurs | Projet du 30 novembre | 2h | ⬜ À faire | |
+| Préparation à l'interrogation 2 | Avant le 2 décembre | à définir | ⬜ À faire | |
+| Interrogation 2 | 2 décembre | 1h | ⬜ À faire | |
+| Tests, corrections et amélioration de l'interface | Projet du 2 décembre | 3h | ⬜ À faire | |
+| Mise à jour de la documentation et bilan du semestre 5 | Projet du 2 décembre | incluse | ⬜ À faire | |
+| Développement complémentaire | Semestre 6 | 6h | ⬜ À faire | |
+| Préparation et présentation orale | Semestre 6 | 4h | ⬜ À faire | |
 
 ## Dépendances principales
 

@@ -8,7 +8,7 @@ Ce projet est un site web qui met en valeur mes compétences en science des donn
 
 ## Données utilisées et origine
 
-Les données affichées proviennent de mon propre parcours : liste de projets réalisés, technologies utilisées, niveaux de compétence, dates et durées des expériences. Elles seront regroupées dans des fichiers de données du dépôt (JSON ou CSV) et leur description complète sera ajoutée ici une fois le choix final arrêté.
+Les données affichées proviennent de mon propre parcours : liste de projets réalisés, technologies utilisées, niveaux de compétence, dates et durées des expériences. Elles seront stockées dans une base de données PostgreSQL, que le site interrogera pour alimenter les pages et les visualisations. Le schéma de la base et la description complète des données seront ajoutés ici une fois le choix final arrêté.
 
 ## Principales fonctionnalités prévues
 
@@ -24,6 +24,8 @@ Les données affichées proviennent de mon propre parcours : liste de projets r�
 
 - HTML et CSS pour la structure et la mise en page
 - JavaScript pour les interactions
+- PostgreSQL pour la base de données
+- Un langage et un cadre pour la partie serveur et le contrôleur, à choisir au TD2 et au TD3
 - Une bibliothèque de visualisation, à choisir lors de la partie visualisation
 - Git et GitHub pour le suivi du projet
 
