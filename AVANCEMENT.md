@@ -32,11 +32,13 @@ gantt
     TD2 architecture générale (2h)             :        td2, 2026-10-23, 1d
     TD3 partie serveur, BDD et contrôleur (4h) :        td3, 2026-11-23, 1d
     TD4 partie visualisation (1h30)            :        td4, 2026-11-24, 1d
+    section Données
+    Brouillon des données du portfolio         :active, d1, 2026-11-09, 14d
     section Évaluations
     Interrogation 1 (30 min)                   :crit,   i1, 2026-11-24, 1d
     Interrogation 2 (1h)                       :crit,   i2, 2026-12-02, 1d
     section Projet
-    Projet, développement (4h)                 :active, p1, 2026-11-24, 1d
+    Projet, développement (4h)                 :        p1, 2026-11-24, 1d
     Projet, interactions (2h)                  :        p2, 2026-11-30, 1d
     Projet, tests et finalisation (3h)         :        p3, 2026-12-02, 1d
     section Semestre 6
@@ -74,7 +76,7 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Initialisation du dépôt Git et du README | TD1 | 0h30 | 🟩 Terminé | |
 | Planning prévisionnel | TD1 | 0h30 | 🟩 Terminé | |
 | Maquette du site | TD1 | 0h30 | 🟩 Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
-| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | ⬜ À faire | À faire en dehors des séances |
+| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Premier brouillon dans `data/projets.csv` le 9 novembre, à relire et à compléter |
 | Architecture générale du site et choix des technologies | TD2 | 2h | ⬜ À faire | Dépend de la maquette |
 | Base de données et contrôleur | TD3 | 4h | ⬜ À faire | Dépend de l'architecture |
 | Préparation à l'interrogation 1 | Avant le 24 novembre | à définir | ⬜ À faire | |
@@ -100,9 +102,16 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Rédaction du planning prévisionnel
 - Réalisation de la maquette (schémas et pages HTML)
 
+### Point du 9 novembre
+- Ajout d'un premier brouillon des données du portfolio dans `data/` (liste de projets et description des colonnes)
+- Ajout d'une section auteure dans le README
+- Mise à jour du diagramme de Gantt : ajout de la tâche sur les données, et la tâche de développement du 24 novembre n'est plus marquée en cours puisqu'elle n'a pas commencé
+- La séance TD2 du 23 octobre est passée : son état reste à confirmer dans ce document
+
 ### À faire ensuite
-- Préparer les données du portfolio avant le TD2
-- Valider l'architecture et les technologies au TD2
+- Confirmer l'état du TD2 et les choix d'architecture et de technologies
+- Relire et compléter `data/projets.csv`, puis ajouter les compétences et le parcours
+- Préparer le TD3 du 23 novembre (base de données et contrôleur)
 
 ## Retards, difficultés et changements de planning
 
