@@ -1,0 +1,5 @@
+id,titre,type,technologies,annee,statut
+1,Plateforme de mise en relation Domessia (stage Serviciale),Stage,Next.js;Django;PostgreSQL;Dash;Plotly;scikit-learn,,A valider
+2,Plateforme de données FactoryFlow,Projet personnel,Python;PostgreSQL;dbt;Airflow;scikit-learn;Streamlit,,A valider
+3,Atlas démographique des communes françaises (données INSEE 2016-2022),Projet personnel,Python;pandas;matplotlib;Plotly;HTML,2026,A valider
+4,Analyse multivariée de candidatures (SAE 402),Projet de formation,KNIME;ARX;R;Shiny,2026,A valider
