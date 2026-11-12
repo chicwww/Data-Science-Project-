@@ -108,9 +108,13 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Mise à jour du diagramme de Gantt : ajout de la tâche sur les données, et la tâche de développement du 24 novembre n'est plus marquée en cours puisqu'elle n'a pas commencé
 - La séance TD2 du 23 octobre est passée : son état reste à confirmer dans ce document
 
+### Point du 12 novembre
+- Ajout d'un premier brouillon `data/competences.csv` : technologies comptées à partir des projets déjà listés, sans niveau de maîtrise (à définir)
+- État du TD2 toujours à confirmer
+
 ### À faire ensuite
 - Confirmer l'état du TD2 et les choix d'architecture et de technologies
-- Relire et compléter `data/projets.csv`, puis ajouter les compétences et le parcours
+- Relire et compléter `data/projets.csv`, puis ajouter les niveaux de compétence et le parcours
 - Préparer le TD3 du 23 novembre (base de données et contrôleur)
 
 ## Retards, difficultés et changements de planning

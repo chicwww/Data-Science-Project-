@@ -1,0 +1,18 @@
+technologie,nombre_projets,ids_projets,statut
+Plotly,2,1;3,A valider
+PostgreSQL,2,1;2,A valider
+Python,2,2;3,A valider
+scikit-learn,2,1;2,A valider
+Airflow,1,2,A valider
+ARX,1,4,A valider
+Dash,1,1,A valider
+dbt,1,2,A valider
+Django,1,1,A valider
+HTML,1,3,A valider
+KNIME,1,4,A valider
+matplotlib,1,3,A valider
+Next.js,1,1,A valider
+pandas,1,3,A valider
+R,1,4,A valider
+Shiny,1,4,A valider
+Streamlit,1,2,A valider

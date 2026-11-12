@@ -7,6 +7,7 @@ Ce dossier contient les données qui alimenteront les pages et les visualisation
 | Fichier | Contenu | État |
 |---|---|---|
 | `projets.csv` | Projets présentés dans la galerie et dans les visualisations | Premier brouillon |
+| `competences.csv` | Technologies utilisées, comptées à partir de `projets.csv` | Premier brouillon |
 
 ## Description des colonnes de `projets.csv`
 
@@ -19,6 +20,17 @@ Ce dossier contient les données qui alimenteront les pages et les visualisation
 | `annee` | entier | Année de réalisation (filtre « Année »), vide quand elle reste à confirmer |
 | `statut` | texte | `A valider` tant que le contenu n'a pas été relu |
 
+## Description des colonnes de `competences.csv`
+
+| Colonne | Type | Description |
+|---|---|---|
+| `technologie` | texte | Technologie citée dans au moins un projet de `projets.csv` |
+| `nombre_projets` | entier | Nombre de projets qui l'utilisent |
+| `ids_projets` | texte | Identifiants des projets concernés, séparés par des points-virgules |
+| `statut` | texte | `A valider` tant que le contenu n'a pas été relu |
+
+Le niveau de maîtrise n'est pas encore renseigné : il sera ajouté seulement une fois évalué.
+
 ## Règles
 
 - Seuls des projets dont la publication est possible figurent ici. Les projets réalisés pour une entreprise ou sous accord de confidentialité ne sont pas ajoutés sans accord écrit.
@@ -28,5 +40,5 @@ Ce dossier contient les données qui alimenteront les pages et les visualisation
 ## Prochaines étapes
 
 - Compléter les années et relire chaque ligne
-- Ajouter les fichiers `competences.csv` et `parcours.csv`
+- Ajouter le fichier `parcours.csv` et les niveaux de maîtrise dans `competences.csv`
 - Relier chaque projet aux apprentissages critiques du référentiel BUT SD
