@@ -76,7 +76,7 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Initialisation du dépôt Git et du README | TD1 | 0h30 | 🟩 Terminé | |
 | Planning prévisionnel | TD1 | 0h30 | 🟩 Terminé | |
 | Maquette du site | TD1 | 0h30 | 🟩 Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
-| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Premier brouillon dans `data/projets.csv` le 9 novembre, à relire et à compléter |
+| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Brouillons dans `data/projets.csv` (9 novembre) et `data/competences.csv` (12 novembre), à relire et à compléter |
 | Architecture générale du site et choix des technologies | TD2 | 2h | ⬜ À faire | Dépend de la maquette |
 | Base de données et contrôleur | TD3 | 4h | ⬜ À faire | Dépend de l'architecture |
 | Préparation à l'interrogation 1 | Avant le 24 novembre | à définir | ⬜ À faire | |
@@ -110,6 +110,11 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 
 ### Point du 12 novembre
 - Ajout d'un premier brouillon `data/competences.csv` : technologies comptées à partir des projets déjà listés, sans niveau de maîtrise (à définir)
+- État du TD2 toujours à confirmer
+
+### Point du 15 novembre
+- Mise en cohérence du README avec le contenu de `data/` : `competences.csv` y est maintenant mentionné
+- Aucune autre séance n'a eu lieu depuis le 12 novembre ; la prochaine séance encadrée est le TD3 du 23 novembre
 - État du TD2 toujours à confirmer
 
 ### À faire ensuite

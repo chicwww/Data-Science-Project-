@@ -14,7 +14,7 @@ Ce projet est un site web qui met en valeur mes compétences en science des donn
 
 Les données affichées proviennent de mon propre parcours : liste de projets réalisés, technologies utilisées, niveaux de compétence, dates et durées des expériences. Elles seront croisées avec le référentiel national du BUT Science des Données (compétences, niveaux, composantes essentielles et apprentissages critiques du parcours VCOD, 2e et 3e années), afin de relier chaque projet du portfolio aux apprentissages critiques qu'il démontre. Elles seront stockées dans une base de données PostgreSQL, que le site interrogera pour alimenter les pages et les visualisations. Un premier schéma relationnel est disponible dans `maquette/schema-relationnel.png` ; la description complète des données sera ajoutée ici une fois le choix final arrêté.
 
-Un premier brouillon de la liste des projets est disponible dans `data/projets.csv`, avec la description de ses colonnes dans `data/README.md`. Les projets réalisés pour une entreprise ou sous accord de confidentialité n'y figurent pas sans accord écrit.
+Un premier brouillon de la liste des projets est disponible dans `data/projets.csv`, et un brouillon des technologies utilisées dans `data/competences.csv` (sans niveau de maîtrise pour l'instant). Les colonnes de ces deux fichiers sont décrites dans `data/README.md`. Les projets réalisés pour une entreprise ou sous accord de confidentialité n'y figurent pas sans accord écrit.
 
 ## Principales fonctionnalités prévues
 
@@ -45,7 +45,7 @@ Les instructions seront complétées quand une première version fonctionnelle e
 - `AVANCEMENT.md` : planning prévisionnel et suivi de l'avancement
 - `maquette/` : maquette du site et son évolution
 - `maquette/schema-relationnel.png` : schéma relationnel reliant le référentiel national BUT SD (parcours VCOD) aux données du portfolio
-- `data/` : données du portfolio (brouillon) et description des colonnes
+- `data/` : données du portfolio (brouillon : `projets.csv`, `competences.csv`) et description des colonnes
 
 ## Difficultés et limites connues
 
