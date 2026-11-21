@@ -117,6 +117,11 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Aucune autre séance n'a eu lieu depuis le 12 novembre ; la prochaine séance encadrée est le TD3 du 23 novembre
 - État du TD2 toujours à confirmer
 
+### Point du 21 novembre
+- Aucune séance encadrée n'est prévue entre le 23 octobre et le 23 novembre : la prochaine est le TD3 du 23 novembre (partie serveur), dans deux jours
+- La tâche sur les données reste en cours dans le diagramme de Gantt (période prévue jusqu'au 23 novembre) : `data/projets.csv` et `data/competences.csv` sont toujours des brouillons à relire, avec des années à compléter
+- État du TD2 toujours à confirmer
+
 ### À faire ensuite
 - Confirmer l'état du TD2 et les choix d'architecture et de technologies
 - Relire et compléter `data/projets.csv`, puis ajouter les niveaux de compétence et le parcours
@@ -124,4 +129,4 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 
 ## Retards, difficultés et changements de planning
 
-Aucun pour l'instant.
+Aucun retard n'est constaté pour l'instant. Seul l'état du TD2 reste à confirmer.
