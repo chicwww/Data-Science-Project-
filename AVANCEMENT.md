@@ -122,6 +122,12 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - La tâche sur les données reste en cours dans le diagramme de Gantt (période prévue jusqu'au 23 novembre) : `data/projets.csv` et `data/competences.csv` sont toujours des brouillons à relire, avec des années à compléter
 - État du TD2 toujours à confirmer
 
+### Point du 23 novembre
+- Le TD3 (partie serveur, base de données et contrôleur) est prévu aujourd'hui, de 4h : son déroulement et son avancement sont à confirmer, il reste donc marqué « À faire » dans le suivi et dans le diagramme de Gantt
+- Les séances du 24 novembre (interrogation 1, TD4 et projet) suivent dès demain ; la préparation de l'interrogation 1 reste à faire
+- La période prévue pour la tâche sur les données se termine aujourd'hui : `data/projets.csv` et `data/competences.csv` restent des brouillons à relire, avec des années à compléter
+- État du TD2 toujours à confirmer
+
 ### À faire ensuite
 - Confirmer l'état du TD2 et les choix d'architecture et de technologies
 - Relire et compléter `data/projets.csv`, puis ajouter les niveaux de compétence et le parcours
