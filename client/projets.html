@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projets · Francisca Wetimane</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="entete">
+  <a class="logo" href="index.html">Francisca Wetimane</a>
+  <nav class="menu">
+    <a href="index.html">Accueil</a>
+    <a href="parcours.html">Parcours</a>
+    <a href="projets.html" class="actif">Projets</a>
+    <a href="competences.html">Compétences</a>
+    <a href="contact.html" class="bouton">Me contacter</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Mes projets</h1>
+  <p class="secondaire">Filtrez par technologie ou par type : la liste est redemandée au serveur à chaque changement.</p>
+
+  <div class="filtres">
+    <div><label for="filtre-techno">Technologie</label><select id="filtre-techno"><option value="">Toutes</option></select></div>
+    <div><label for="filtre-type">Type de projet</label>
+      <select id="filtre-type">
+        <option value="">Tous</option>
+        <option>Projet de formation</option>
+        <option>Projet personnel</option>
+      </select></div>
+    <div style="align-self:flex-end"><button class="filtre" id="reinitialiser">Réinitialiser les filtres</button></div>
+  </div>
+
+  <section class="deux-colonnes">
+    <div>
+      <div class="grille" id="liste-projets"></div>
+      <div class="carte" id="detail-projet" style="margin-top:20px" hidden></div>
+    </div>
+    <div class="carte">
+      <h3>Nombre de projets par technologie</h3>
+      <div class="graphique" style="height:560px"><canvas id="graphique-technos"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <span>BUT Sciences des Données, IUT de Besançon-Vesoul</span>
+  <span><a href="https://github.com/chicwww">GitHub</a><a href="https://www.linkedin.com/in/franciscawetimane/">LinkedIn</a></span>
+</footer>
+
+<script src="commun.js"></script>
+<script src="projets.js"></script>
+</body>
+</html>

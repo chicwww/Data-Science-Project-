@@ -60,6 +60,23 @@ async function initTables() {
 }
 
 // ==============================
+// Afficher le contenu d'une table dans le terminal
+// ==============================
+const TABLES_AUTORISEES = ["COMPETENCE", "ANNEE", "ACTIVITE_PEDAGOGIQUE", "APPRENTISSAGE_CRITIQUE",
+  "FORMATION", "EXPERIENCE", "PROJET", "TECHNOLOGIE", "PROJET_TECHNOLOGIE", "CERTIFICAT", "LANGUE", "PREUVE", "HEURES_PAR_ANNEE"];
+
+async function afficherTable(pool, nomTable) {
+  // Un nom de table ne peut pas passer par $1 : on n'accepte que les tables de la liste (anti-injection SQL)
+  if (!TABLES_AUTORISEES.includes(nomTable)) {
+    console.log(`❌ Table inconnue : ${nomTable}`);
+    return;
+  }
+  const { rows } = await pool.query(`SELECT * FROM ${nomTable};`);
+  console.log(`\n📋 Table ${nomTable} : ${rows.length} lignes`);
+  console.table(rows.slice(0, 5));   // les 5 premières lignes
+}
+
+// ==============================
 // 4️⃣ Lancer le serveur après préparation de la base
 // ==============================
 async function startServer() {
@@ -68,6 +85,10 @@ async function startServer() {
     await initTables();
 
     const pool = new Pool(DB_CONFIG);
+
+    // Contenu de quelques tables dans le terminal, pour vérifier les données au démarrage
+    await afficherTable(pool, "PROJET");
+    await afficherTable(pool, "EXPERIENCE");
 
     // Servir le dossier public
     app.use(express.static("../client")); // le site (HTML, CSS, JS, images) est dans le dossier client
@@ -127,6 +148,204 @@ app.get("/api/competence/:id", async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la récupération de la compétence" });
   }
 });
+
+    // ==============================
+    // Routes de mon parcours
+    // ==============================
+
+    // Heures par année et par compétence (vue HEURES_PAR_ANNEE)
+    app.get("/api/heures-par-annee", async (req, res) => {
+      try {
+        const { rows } = await pool.query("SELECT * FROM HEURES_PAR_ANNEE;");
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des heures par année" });
+      }
+    });
+
+    // Projets, avec filtres facultatifs : /api/projets?type=Projet personnel&techno=Python
+    const TYPES_PROJET = ["Projet de formation", "Projet personnel"];
+    app.get("/api/projets", async (req, res) => {
+      const type = req.query.type || null;     // null = pas de filtre
+      const techno = req.query.techno || null;
+
+      // Validation : un type inconnu est une requête mal formée
+      if (type && !TYPES_PROJET.includes(type)) {
+        return res.status(400).json({ error: "Type de projet inconnu" });
+      }
+
+      try {
+        const query = `
+          SELECT p.id_projet, p.titre, p.type, p.annee, p.description, p.lien,
+                 STRING_AGG(t.nom, ', ' ORDER BY t.nom) AS technologies
+          FROM PROJET p
+          LEFT JOIN PROJET_TECHNOLOGIE pt ON pt.id_projet = p.id_projet
+          LEFT JOIN TECHNOLOGIE t ON t.id_techno = pt.id_techno
+          WHERE ($1::text IS NULL OR p.type = $1)
+            AND ($2::text IS NULL OR p.id_projet IN (
+                  SELECT pt2.id_projet
+                  FROM PROJET_TECHNOLOGIE pt2
+                  JOIN TECHNOLOGIE t2 ON t2.id_techno = pt2.id_techno
+                  WHERE t2.nom = $2))
+          GROUP BY p.id_projet
+          ORDER BY p.annee DESC NULLS LAST, p.titre;
+        `;
+        const { rows } = await pool.query(query, [type, techno]);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des projets" });
+      }
+    });
+
+    // Un projet, avec ses technologies et ses preuves
+    app.get("/api/projet/:id", async (req, res) => {
+      const { id } = req.params;
+      if (isNaN(Number(id))) {
+        return res.status(400).json({ error: "Identifiant de projet invalide" });
+      }
+      try {
+        const projet = await pool.query("SELECT * FROM PROJET WHERE id_projet = $1;", [id]);
+        if (projet.rows.length === 0) {
+          return res.status(404).json({ error: "Projet non trouvé" });
+        }
+        const technos = await pool.query(`
+          SELECT t.nom, t.categorie
+          FROM PROJET_TECHNOLOGIE pt JOIN TECHNOLOGIE t ON t.id_techno = pt.id_techno
+          WHERE pt.id_projet = $1 ORDER BY t.nom;`, [id]);
+        const preuves = await pool.query(`
+          SELECT pr.id_preuve, pr.fichier, pr.texte, ac.id_ac, ac.intitule AS intitule_ac
+          FROM PREUVE pr JOIN APPRENTISSAGE_CRITIQUE ac ON ac.id_ac = pr.id_ac
+          WHERE pr.id_projet = $1 ORDER BY ac.id_ac;`, [id]);
+        res.json({ ...projet.rows[0], technologies: technos.rows, preuves: preuves.rows });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération du projet" });
+      }
+    });
+
+    // Technologies, avec le nombre de projets qui les utilisent
+    app.get("/api/technologies", async (req, res) => {
+      try {
+        const query = `
+          SELECT t.nom, t.categorie, COUNT(pt.id_projet) AS nb_projets
+          FROM TECHNOLOGIE t
+          LEFT JOIN PROJET_TECHNOLOGIE pt ON pt.id_techno = t.id_techno
+          GROUP BY t.id_techno
+          ORDER BY nb_projets DESC, t.nom;
+        `;
+        const { rows } = await pool.query(query);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des technologies" });
+      }
+    });
+
+    // Expériences, de la plus récente à la plus ancienne
+    app.get("/api/experiences", async (req, res) => {
+      try {
+        const { rows } = await pool.query(`
+          SELECT id_experience, intitule, structure, type, lieu, description,
+                 date_debut::text AS date_debut, date_fin::text AS date_fin   -- dates en texte : pas de décalage horaire
+          FROM EXPERIENCE ORDER BY date_debut DESC;`);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des expériences" });
+      }
+    });
+
+    // Formations, de la plus récente à la plus ancienne
+    app.get("/api/formations", async (req, res) => {
+      try {
+        const { rows } = await pool.query(`
+          SELECT id_formation, diplome, etablissement, lieu,
+                 date_debut::text AS date_debut, date_fin::text AS date_fin
+          FROM FORMATION ORDER BY date_debut DESC;`);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des formations" });
+      }
+    });
+
+    // Certificats et distinctions (ceux sans date à la fin)
+    app.get("/api/certificats", async (req, res) => {
+      try {
+        const { rows } = await pool.query(`
+          SELECT id_certificat, intitule, organisme, type, fichier, document, date_obtention::text AS date_obtention
+          FROM CERTIFICAT ORDER BY type, date_obtention DESC NULLS LAST;`);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des certificats" });
+      }
+    });
+
+    // Langues
+    app.get("/api/langues", async (req, res) => {
+      try {
+        const { rows } = await pool.query("SELECT nom, niveau FROM LANGUE ORDER BY id_langue;");
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des langues" });
+      }
+    });
+
+    // Les preuves d'une compétence (C1 à C4), avec leur source
+    app.get("/api/competence/:id/preuves", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const query = `
+          SELECT pr.id_preuve, pr.fichier, pr.texte, ac.id_ac, ac.intitule AS intitule_ac,
+                 COALESCE(p.titre, e.intitule || ' · ' || e.structure, c.intitule) AS source
+          FROM PREUVE pr
+          JOIN APPRENTISSAGE_CRITIQUE ac ON ac.id_ac = pr.id_ac
+          LEFT JOIN PROJET p ON p.id_projet = pr.id_projet
+          LEFT JOIN EXPERIENCE e ON e.id_experience = pr.id_experience
+          LEFT JOIN CERTIFICAT c ON c.id_certificat = pr.id_certificat
+          WHERE ac.id_competence = $1
+          ORDER BY ac.id_ac;
+        `;
+        const { rows } = await pool.query(query, [id]);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des preuves" });
+      }
+    });
+
+    // Toutes les preuves
+    app.get("/api/preuves", async (req, res) => {
+      try {
+        const { rows } = await pool.query("SELECT * FROM PREUVE ORDER BY id_preuve;");
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des preuves" });
+      }
+    });
+
+    // Une preuve selon son identifiant
+    app.get("/api/preuve/:id", async (req, res) => {
+      const { id } = req.params;
+      if (isNaN(Number(id))) {
+        return res.status(400).json({ error: "Identifiant de preuve invalide" });
+      }
+      try {
+        const { rows } = await pool.query("SELECT * FROM PREUVE WHERE id_preuve = $1;", [id]);
+        if (rows.length === 0) {
+          return res.status(404).json({ error: "Preuve non trouvée" });
+        }
+        res.json(rows[0]);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération de la preuve" });
+      }
+    });
 
     app.listen(PORT, () => {
       console.log(`🌐 Serveur en ligne sur http://localhost:${PORT}`);

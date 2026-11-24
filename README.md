@@ -68,11 +68,28 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 
 À chaque démarrage, le serveur recrée les tables à partir de `bdd/init_db.sql` : les données à garder doivent donc être écrites dans ce fichier.
 
+## Routes de l'API
+
+| Route | Données renvoyées |
+|---|---|
+| `GET /api/heures` | heures du BUT par compétence |
+| `GET /api/heures-par-annee` | heures par année et par compétence |
+| `GET /api/competences`, `GET /api/competence/:id` | compétences du BUT |
+| `GET /api/competence/:id/preuves` | preuves d'une compétence, avec leur source |
+| `GET /api/projets?type=…&techno=…` | projets, filtrables par type et par technologie |
+| `GET /api/projet/:id` | un projet, ses technologies et ses preuves |
+| `GET /api/technologies` | technologies et nombre de projets |
+| `GET /api/formations`, `GET /api/experiences` | parcours |
+| `GET /api/certificats`, `GET /api/langues` | certificats, distinctions et langues |
+| `GET /api/preuves`, `GET /api/preuve/:id` | preuves |
+
+Les images (`/preuves/<fichier>`) et les pages sont servies par la route statique du dossier `client/`.
+
 ## Organisation du dépôt
 
-- `client/` : le site vu dans le navigateur (`index.html`, `style.css`, `script.js`, images des preuves dans `preuves/`)
+- `client/` : le site vu dans le navigateur : 5 pages (`index.html`, `parcours.html`, `projets.html`, `competences.html`, `contact.html`), un script par page, `commun.js` et `style.css` partagés, images des certificats et preuves dans `preuves/`
 - `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
-- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`)
+- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`) : le référentiel du BUT SD, puis mon parcours (formations, expériences, projets, technologies, certificats, langues, preuves)
 - `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
 - `.devcontainer/` : configuration du Codespace GitHub (Node.js, Docker et lancement automatique de la base)
 - `.gitignore` : fichiers exclus de Git (`node_modules/` et `.env`, qui contient le mot de passe de la base)

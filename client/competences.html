@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compétences · Francisca Wetimane</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="entete">
+  <a class="logo" href="index.html">Francisca Wetimane</a>
+  <nav class="menu">
+    <a href="index.html">Accueil</a>
+    <a href="parcours.html">Parcours</a>
+    <a href="projets.html">Projets</a>
+    <a href="competences.html" class="actif">Compétences</a>
+    <a href="contact.html" class="bouton">Me contacter</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Mes compétences</h1>
+  <p class="secondaire">Les quatre compétences du BUT Sciences des Données. Cliquez sur une barre, une part ou une ligne du tableau pour voir sa description et mes preuves.</p>
+
+  <div class="filtres">
+    <button class="filtre actif" id="btnBarres">Graphique en barres</button>
+    <button class="filtre" id="btnCourbes">Graphique avec courbes</button>
+  </div>
+
+  <section class="deux-colonnes">
+    <div class="carte"><div class="graphique"><canvas id="chartPrincipal"></canvas></div></div>
+    <div class="carte"><div class="graphique"><canvas id="chartCamembert"></canvas></div></div>
+  </section>
+
+  <section>
+    <table id="intitulesTable">
+      <thead><tr><th>Compétence</th><th>Intitulé</th><th>Heures</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="deux-colonnes">
+    <div class="carte" id="description"><p class="secondaire">Sélectionnez une compétence.</p></div>
+    <div>
+      <h2>Mes preuves</h2>
+      <div class="grille" id="preuves"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <span>BUT Sciences des Données, IUT de Besançon-Vesoul</span>
+  <span><a href="https://github.com/chicwww">GitHub</a><a href="https://www.linkedin.com/in/franciscawetimane/">LinkedIn</a></span>
+</footer>
+
+<script src="commun.js"></script>
+<script src="competences.js"></script>
+</body>
+</html>

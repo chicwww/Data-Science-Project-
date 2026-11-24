@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parcours · Francisca Wetimane</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="entete">
+  <a class="logo" href="index.html">Francisca Wetimane</a>
+  <nav class="menu">
+    <a href="index.html">Accueil</a>
+    <a href="parcours.html" class="actif">Parcours</a>
+    <a href="projets.html">Projets</a>
+    <a href="competences.html">Compétences</a>
+    <a href="contact.html" class="bouton">Me contacter</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Mon parcours</h1>
+  <p class="secondaire">Formations et expériences, de la plus récente à la plus ancienne. Un clic sur une étape affiche son détail.</p>
+
+  <div class="filtres" id="filtres-parcours">
+    <button class="filtre actif" data-type="Tout">Tout</button>
+    <button class="filtre" data-type="Formation">Formation</button>
+    <button class="filtre" data-type="Expérience">Expérience</button>
+  </div>
+
+  <section class="deux-colonnes">
+    <ul class="frise" id="frise"></ul>
+    <div class="carte" id="detail"><p class="secondaire">Sélectionnez une étape.</p></div>
+  </section>
+
+  <section>
+    <h2>Heures de formation du BUT par année et par compétence</h2>
+    <p class="secondaire petit">Somme des heures des 254 matières du programme, par année du BUT.</p>
+    <div class="carte"><div class="graphique"><canvas id="graphique-annees"></canvas></div></div>
+  </section>
+
+  <section class="deux-colonnes">
+    <div>
+      <h2>Certificats et distinctions</h2>
+      <div class="grille" id="certificats"></div>
+    </div>
+    <div>
+      <h2>Langues</h2>
+      <table><thead><tr><th>Langue</th><th>Niveau</th></tr></thead><tbody id="langues"></tbody></table>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <span>BUT Sciences des Données, IUT de Besançon-Vesoul</span>
+  <span><a href="https://github.com/chicwww">GitHub</a><a href="https://www.linkedin.com/in/franciscawetimane/">LinkedIn</a></span>
+</footer>
+
+<script src="commun.js"></script>
+<script src="parcours.js"></script>
+</body>
+</html>

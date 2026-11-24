@@ -78,7 +78,7 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Maquette du site | TD1 | 0h30 | 🟩 Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
 | Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Brouillons dans `data/projets.csv` (9 novembre) et `data/competences.csv` (12 novembre), à relire et à compléter. Consigne du 24 novembre : les données finales doivent être dans PostgreSQL, interrogées par le serveur (pas de CSV) |
 | Architecture générale du site et choix des technologies | TD2, puis TD3 | 2h | 🟩 Terminé | Choix faits le 24 novembre : Node.js avec Express pour le serveur, PostgreSQL lancé dans Docker, Chart.js pour les graphiques, dépôt organisé en `client/`, `serveur/` et `bdd/` |
-| Base de données et contrôleur | TD3 | 4h | 🟧 En cours | Serveur fonctionnel avec la base d'exemple du cours. Reste : schéma relationnel avec la table des preuves, passage à la base complète, routes des preuves |
+| Base de données et contrôleur | TD3 | 4h | 🟧 En cours | Base personnelle et routes en place. Reste : relier chaque preuve au bon apprentissage critique et compléter les certificats sans date |
 | Préparation à l'interrogation | Avant le 11 décembre | à définir | 🟧 En cours | Notes du cours sur l'architecture client-serveur, HTTP, les routes et l'injection SQL ; sujet de l'année précédente travaillé et corrigé |
 | Partie visualisation : première visualisation | TD4 | 1h30 | ⬜ À faire | Dépend de la partie serveur |
 | Développement des pages et intégration des visualisations | Projet du 24 novembre | 4h | ⬜ À faire | |
@@ -136,6 +136,9 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Consignes du projet précisées par l'enseignante : le dépôt contient au minimum le client, le serveur et le fichier SQL ; les données sont interrogées dans une base SQL par un serveur ; `node_modules` n'est pas versionné ; un formulaire d'ajout de données est un bonus
 - Choix techniques : Node.js avec Express et PostgreSQL lancé dans Docker
 - Mise en place de la structure du dépôt (`client/`, `serveur/`, `bdd/`, `docker-compose.yml`) à partir du programme de visualisation fourni ; la chaîne complète navigateur, serveur et base fonctionne en local
+- Configuration d'un Codespace GitHub pour tester le site en ligne
+- Schéma relationnel personnel : le référentiel du BUT SD est complété par mes formations, expériences, projets, technologies, certificats, langues et preuves
+- Base enrichie (`bdd/init_db.sql`), 11 nouvelles routes dans le serveur, et 5 pages reliées à l'API (Accueil, Parcours, Projets, Compétences, Contact)
 
 ### À faire ensuite
 - TD3, exercice 1 : schéma relationnel reliant toutes les tables, avec une table des preuves (image et/ou texte), à faire valider par l'enseignante

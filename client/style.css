@@ -1,16 +1,82 @@
-body { font-family: "Segoe UI", sans-serif; background: #f5f7fa; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
-h1 { margin-bottom: 1rem; }
-.buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
-button { background: #4bc0c0; color: white; border: none; border-radius: 8px; padding: 0.7rem 1.2rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-button:hover { background: #36a2a2; }
-button.active { background: #2d8d8d; }
-.main-container { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
-.charts { display: flex; flex-direction: column; gap: 2rem; }
-canvas { max-width: 300px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1rem; transition: transform 0.3s; }
-table { border-collapse: collapse; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; width: 300px; }
-th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-th { background: #4bc0c0; color: white; }
-tr.selected { background: #ffeaa7; font-weight: bold; }
-#description { margin-top: 1rem; background: #e0f7f7; padding: 1rem; border-radius: 12px; max-width: 650px; white-space: pre-line; }
-.bottom-image { margin-top: 1rem; text-align: center; }
-.bottom-image img { max-width: 300px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+/* ============================================================
+   Style commun à toutes les pages (couleurs et polices de la maquette)
+   ============================================================ */
+:root {
+  --fond: #F4F6F8;        /* fond de page */
+  --encre: #12161C;       /* texte principal */
+  --gris: #4A5361;        /* texte secondaire */
+  --bord: #D5DAE1;        /* bordures */
+  --carte: #FFFFFF;       /* fond des cartes */
+  --accent: #D93A22;      /* rouge de la maquette */
+  --accent-fonce: #B8301B;
+  --clair: #E4E8EE;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fond); color: var(--encre); font: 16px/1.55 "Figtree", system-ui, sans-serif; }
+h1, h2, h3 { font-family: "Bricolage Grotesque", "Figtree", sans-serif; line-height: 1.12; margin: 0 0 12px; text-wrap: balance; }
+h1 { font-size: clamp(32px, 5vw, 46px); letter-spacing: -0.02em; }
+h2 { font-size: clamp(22px, 3vw, 28px); }
+h3 { font-size: 18px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent-fonce); }
+.secondaire { color: var(--gris); }
+.petit { font-size: 14px; }
+
+/* ---------- En-tête et menu ---------- */
+.entete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px;
+  padding: 14px clamp(16px, 4vw, 48px); border-bottom: 1px solid var(--bord); background: var(--fond); }
+.logo { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 20px; color: var(--encre); text-decoration: none; }
+.menu { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; }
+.menu a { color: var(--gris); text-decoration: none; font-weight: 500; padding-bottom: 3px; border-bottom: 2px solid transparent; }
+.menu a.actif { color: var(--encre); font-weight: 600; border-bottom-color: var(--accent); }
+.menu a.bouton { color: #FFF; }
+
+/* ---------- Mise en page ---------- */
+main { padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 48px); max-width: 1240px; margin: 0 auto; }
+section { margin-bottom: 48px; }
+.deux-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 32px; align-items: start; }
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 20px; }
+.carte { background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; padding: 20px; min-width: 0; }
+
+/* ---------- Boutons et étiquettes ---------- */
+.bouton { display: inline-block; background: var(--accent); color: #FFF; font-weight: 600; text-decoration: none;
+  padding: 12px 22px; border-radius: 8px; border: 0; font: inherit; font-weight: 600; cursor: pointer; }
+.bouton.contour { background: transparent; color: var(--encre); border: 1.5px solid var(--encre); padding: 10.5px 20px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.filtre { background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; padding: 8px 16px; font: inherit; cursor: pointer; }
+.filtre.actif { background: var(--encre); color: #FFF; border-color: var(--encre); }
+.etiquette { display: inline-block; background: var(--carte); border: 1px solid var(--bord); border-radius: 6px; padding: 3px 10px; font-size: 14px; margin: 0 6px 6px 0; }
+select { font: inherit; padding: 8px 12px; border: 1px solid var(--bord); border-radius: 8px; background: var(--carte); }
+label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+
+/* ---------- Chiffres clés ---------- */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+.chiffre strong { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 36px; line-height: 1; }
+
+/* ---------- Frise du parcours ---------- */
+.frise { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--bord); }
+.frise li { position: relative; padding: 0 0 20px 22px; cursor: pointer; }
+.frise li::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bord); }
+.frise li.actif::before { background: var(--accent); }
+.frise li.actif .titre { color: var(--accent-fonce); }
+.frise .date { font-size: 14px; color: var(--gris); }
+.frise .titre { font-weight: 600; }
+
+/* ---------- Graphiques et images ---------- */
+.graphique { position: relative; height: 320px; }
+.preuve img { width: 100%; border-radius: 6px; border: 1px solid var(--bord); margin-bottom: 8px; }
+tr.selectionne { background: #FBE3DE; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; background: var(--carte); }
+th, td { text-align: left; border-bottom: 1px solid var(--bord); padding: 8px 10px; vertical-align: top; }
+th { background: var(--encre); color: #FFF; }
+tbody tr { cursor: pointer; }
+
+/* ---------- Pied de page ---------- */
+.pied { border-top: 1px solid var(--bord); padding: 24px clamp(16px, 4vw, 48px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--gris); }
+.pied a { color: var(--gris); margin-left: 20px; }
+
+@media (max-width: 600px) {
+  .menu { gap: 6px 16px; font-size: 15px; }
+  .graphique { height: 260px; }
+}

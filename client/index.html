@@ -2,43 +2,56 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Heures par compétence - BUT Science des Données</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accueil · Francisca Wetimane</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Compétences</h1>
+<header class="entete">
+  <a class="logo" href="index.html">Francisca Wetimane</a>
+  <nav class="menu">
+    <a href="index.html" class="actif">Accueil</a>
+    <a href="parcours.html">Parcours</a>
+    <a href="projets.html">Projets</a>
+    <a href="competences.html">Compétences</a>
+    <a href="contact.html" class="bouton">Me contacter</a>
+  </nav>
+</header>
 
-<div class="buttons">
-  <button id="btnBarres" class="active">Graphique en barres</button>
-  <button id="btnCourbes">Graphique avec courbes</button>
-</div>
+<main>
+  <section class="deux-colonnes">
+    <div>
+      <h1>Des données lisibles, des décisions claires.</h1>
+      <p class="secondaire" style="font-size:18px">Data scientist apprentie et étudiante en 3e année de BUT Sciences des Données, parcours Visualisation et conception d'outils décisionnels.</p>
+      <p>
+        <a class="bouton" href="projets.html">Voir mes projets</a>
+        <a class="bouton contour" href="parcours.html">Mon parcours</a>
+      </p>
+    </div>
+    <div class="carte">
+      <h3>Mon parcours en chiffres</h3>
+      <div class="chiffres" id="chiffres"><p class="secondaire">Chargement…</p></div>
+    </div>
+  </section>
 
-<div class="main-container">
-  <div class="charts">
-    <canvas id="chartPrincipal"></canvas>
-  </div>
+  <section class="deux-colonnes">
+    <div class="carte" id="dernier-projet"><p class="secondaire">Chargement du dernier projet…</p></div>
+    <div>
+      <h2>Mes outils</h2>
+      <p class="secondaire petit">Technologies utilisées dans mes projets, de la plus fréquente à la moins fréquente.</p>
+      <div id="outils"></div>
+    </div>
+  </section>
+</main>
 
-  <table id="intitulesTable">
-    <thead>
-      <tr><th>Compétence</th><th>Intitulé</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<footer class="pied">
+  <span>BUT Sciences des Données, IUT de Besançon-Vesoul</span>
+  <span><a href="https://github.com/chicwww">GitHub</a><a href="https://www.linkedin.com/in/franciscawetimane/">LinkedIn</a></span>
+</footer>
 
-  <div class="charts">
-    <canvas id="chartCamembert"></canvas>
-  </div>
-</div>
-
-<div id="description">Cliquez sur une part du camembert, une barre ou le tableau pour voir la description de la compétence.</div>
-
-<div class="bottom-image">
-  <img id="preuveImg" src="" alt="Preuve de la compétence">
-</div>
-
-<script src="script.js"></script>
-
+<script src="commun.js"></script>
+<script src="accueil.js"></script>
 </body>
 </html>
