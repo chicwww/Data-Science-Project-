@@ -23,3 +23,21 @@ function moisAnnee(dateTexte) {
   const noms = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
   return `${noms[Number(mois) - 1]} ${annee}`;
 }
+
+// Captures d'écran d'une preuve : la première en grand, les autres en vignettes.
+// Un clic ouvre l'image en taille réelle dans un nouvel onglet.
+function imagesPreuve(images, titre) {
+  if (!images || images.length === 0) return "";
+  return `<div class="captures">${images.map((im, i) => `
+    <a href="/preuves/${esc(im.fichier)}" target="_blank" class="${i === 0 ? "principale" : "vignette"}">
+      <img src="/preuves/${esc(im.fichier)}" alt="${esc(im.legende ?? titre)}" loading="lazy">
+      ${im.legende ? `<span class="petit secondaire">${esc(im.legende)}</span>` : ""}
+    </a>`).join("")}</div>`;
+}
+
+// Pastille d'auto-évaluation d'un AC (Acquis, En cours d'acquisition)
+function pastille(etat, prefixe = "") {
+  if (!etat) return "";
+  const classe = etat === "Acquis" ? "acquis" : "en-cours";
+  return `<span class="pastille ${classe}">${esc(prefixe + etat)}</span>`;
+}

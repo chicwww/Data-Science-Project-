@@ -69,7 +69,7 @@ const TABLES_AUTORISEES = [
   "sae", "sae_competence", "activite_pedagogique", "heures_par_annee",
   // schéma portfolio (mon parcours)
   "formation", "experience", "projet", "publication", "technologie", "projet_technologie", "certificat", "langue",
-  "preuve", "preuve_ac", "preuve_detail", "couverture_ac"];
+  "preuve", "preuve_ac", "preuve_image", "evaluation_ac", "preuve_detail", "couverture_ac"];
 
 async function afficherTable(pool, nomTable) {
   // Un nom de table ne peut pas passer par $1 : on n'accepte que les tables de la liste (anti-injection SQL)
@@ -146,9 +146,11 @@ async function startServer() {
           "SELECT code, libelle FROM composante_essentielle WHERE id_competence = $1 ORDER BY code;", [id]);
         const niveaux = await pool.query(`
           SELECT n.numero, n.intitule, n.id_annee,
-                 JSON_AGG(JSON_BUILD_OBJECT('code_ac', ac.code_ac, 'intitule', ac.intitule) ORDER BY ac.code_ac) AS acs
+                 JSON_AGG(JSON_BUILD_OBJECT('code_ac', ac.code_ac, 'intitule', ac.intitule,
+                          'auto_evaluation', ev.auto_evaluation, 'visa_tuteur', ev.visa_tuteur) ORDER BY ac.code_ac) AS acs
           FROM niveau n
           JOIN apprentissage_critique ac ON ac.id_competence = n.id_competence AND ac.numero_niveau = n.numero
+          LEFT JOIN evaluation_ac ev ON ev.code_ac = ac.code_ac   -- LEFT : un AC sans auto-évaluation reste affiché
           WHERE n.id_competence = $1
           GROUP BY n.numero, n.intitule, n.id_annee
           ORDER BY n.numero;`, [id]);
@@ -225,11 +227,12 @@ async function startServer() {
           FROM projet_technologie pt JOIN technologie t ON t.id_techno = pt.id_techno
           WHERE pt.id_projet = $1 ORDER BY t.nom;`, [id]);
         const preuves = await pool.query(`
-          SELECT pr.id_preuve, pr.titre, pr.texte, ac.code_ac, ac.intitule AS intitule_ac
-          FROM preuve pr
-          JOIN preuve_ac pa ON pa.id_preuve = pr.id_preuve
+          SELECT pd.id_preuve, pd.titre, pd.texte, pd.images, ac.code_ac, ac.intitule AS intitule_ac
+          FROM preuve_detail pd
+          JOIN preuve pr ON pr.id_preuve = pd.id_preuve
+          JOIN preuve_ac pa ON pa.id_preuve = pd.id_preuve
           JOIN apprentissage_critique ac ON ac.code_ac = pa.code_ac
-          WHERE pr.id_projet = $1 ORDER BY ac.code_ac;`, [id]);
+          WHERE pr.id_projet = $1 ORDER BY ac.code_ac, pd.id_preuve;`, [id]);
         res.json({ ...projet.rows[0], technologies: technos.rows, preuves: preuves.rows });
       } catch (err) {
         console.error(err);
@@ -330,13 +333,13 @@ async function startServer() {
       const { id } = req.params;
       try {
         const query = `
-          SELECT pd.id_preuve, pd.titre, pd.texte, pd.fichier, pd.code_sae, pd.source,
+          SELECT pd.id_preuve, pd.titre, pd.texte, pd.images, pd.code_sae, pd.source,
                  ac.code_ac, ac.intitule AS intitule_ac
           FROM preuve_detail pd
           JOIN preuve_ac pa ON pa.id_preuve = pd.id_preuve
           JOIN apprentissage_critique ac ON ac.code_ac = pa.code_ac
           WHERE ac.id_competence = $1
-          ORDER BY ac.code_ac;
+          ORDER BY ac.code_ac, pd.id_preuve;
         `;
         const { rows } = await pool.query(query, [id]);
         res.json(rows);

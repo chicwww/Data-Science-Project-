@@ -601,6 +601,7 @@ CREATE TYPE portfolio.type_experience AS ENUM ('Alternance', 'Stage', 'Expérien
 CREATE TYPE portfolio.type_projet AS ENUM ('Projet de formation', 'Projet personnel');
 CREATE TYPE portfolio.type_certificat AS ENUM ('Certificat', 'Distinction');
 CREATE TYPE portfolio.niveau_langue AS ENUM ('Élémentaire', 'Professionnel', 'Langue maternelle ou bilingue');
+CREATE TYPE portfolio.niveau_acquisition AS ENUM ('Non acquis', 'En cours d''acquisition', 'Acquis');
 
 CREATE TABLE formation (
     id_formation  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -640,7 +641,7 @@ CREATE TABLE technologie (
     id_techno integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nom       text NOT NULL UNIQUE,
     categorie text NOT NULL CHECK (categorie IN ('Langage', 'Base de données', 'Visualisation',
-                                                 'Machine learning', 'Data engineering', 'Web', 'Outil'))
+                                                 'Machine learning', 'Statistique', 'Data engineering', 'Web', 'Outil'))
 );
 
 -- Un projet utilise plusieurs technologies, une technologie sert à plusieurs projets (N-N)
@@ -674,14 +675,12 @@ CREATE TABLE langue (
 -- se rattache à UNE SAÉ au plus, et démontre UN OU PLUSIEURS AC (table preuve_ac)
 CREATE TABLE preuve (
     id_preuve     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    titre         text NOT NULL,
-    texte         text,
-    fichier       text,
+    titre         text NOT NULL UNIQUE,
+    texte         text NOT NULL,                     -- ce que la preuve montre
     code_sae      varchar(16) REFERENCES referentiel.sae(code_sae),
     id_projet     integer REFERENCES projet(id_projet) ON DELETE CASCADE,
     id_experience integer REFERENCES experience(id_experience) ON DELETE CASCADE,
     id_certificat integer REFERENCES certificat(id_certificat) ON DELETE CASCADE,
-    CHECK (texte IS NOT NULL OR fichier IS NOT NULL),                    -- image et/ou texte
     CHECK (num_nonnulls(id_projet, id_experience, id_certificat) = 1)    -- une seule source
 );
 CREATE INDEX ON preuve (code_sae);
@@ -696,6 +695,22 @@ CREATE TABLE preuve_ac (
     PRIMARY KEY (id_preuve, code_ac)
 );
 CREATE INDEX ON preuve_ac (code_ac);
+
+-- Une preuve a zéro, une ou plusieurs captures d'écran, dans un ordre donné (1-N)
+CREATE TABLE preuve_image (
+    id_preuve integer  NOT NULL REFERENCES preuve(id_preuve) ON DELETE CASCADE,
+    ordre     smallint NOT NULL CHECK (ordre > 0),
+    fichier   text     NOT NULL UNIQUE CHECK (fichier ~ '^[a-z0-9_]+\.(png|jpg)$'),  -- dans client/preuves/
+    legende   text,
+    PRIMARY KEY (id_preuve, ordre)
+);
+
+-- Auto-évaluation de chaque AC (fiches portfolio) et visa du tuteur s'il existe
+CREATE TABLE evaluation_ac (
+    code_ac         referentiel.code_ac PRIMARY KEY REFERENCES referentiel.apprentissage_critique(code_ac),
+    auto_evaluation niveau_acquisition NOT NULL,
+    visa_tuteur     niveau_acquisition                -- vide = pas encore de visa
+);
 
 -- Règle de cohérence : si la preuve est rattachée à une SAÉ, chaque AC démontré
 -- doit appartenir à une compétence ciblée par cette SAÉ (programme national)
@@ -755,31 +770,40 @@ INSERT INTO projet (titre, type, annee, description, code_sae) VALUES
 
 INSERT INTO technologie (nom, categorie) VALUES
 ('Python', 'Langage'), ('R', 'Langage'), ('JavaScript', 'Langage'), ('SQL', 'Langage'),
-('PostgreSQL', 'Base de données'),
-('pandas', 'Data engineering'), ('dbt', 'Data engineering'), ('Airflow', 'Data engineering'),
-('matplotlib', 'Visualisation'), ('Plotly', 'Visualisation'), ('Power BI', 'Visualisation'),
-('Shiny', 'Visualisation'), ('Streamlit', 'Visualisation'), ('Chart.js', 'Visualisation'),
-('scikit-learn', 'Machine learning'),
-('HTML', 'Web'), ('Node.js', 'Web'), ('Express', 'Web'),
-('KNIME', 'Outil'), ('ARX', 'Outil'), ('Docker', 'Outil');
+('PostgreSQL', 'Base de données'), ('pandas', 'Data engineering'), ('dbt', 'Data engineering'), ('Airflow', 'Data engineering'),
+('matplotlib', 'Visualisation'), ('Plotly', 'Visualisation'), ('Power BI', 'Visualisation'), ('Shiny', 'Visualisation'),
+('Streamlit', 'Visualisation'), ('Chart.js', 'Visualisation'), ('scikit-learn', 'Machine learning'), ('HTML', 'Web'),
+('Node.js', 'Web'), ('Express', 'Web'), ('KNIME', 'Outil'), ('ARX', 'Outil'),
+('Docker', 'Outil');
 
 -- (titre du projet, nom de la technologie) : on retrouve les identifiants par jointure
 INSERT INTO projet_technologie (id_projet, id_techno)
 SELECT p.id_projet, t.id_techno
 FROM (VALUES
-    ('Portfolio de visualisation de données', 'PostgreSQL'), ('Portfolio de visualisation de données', 'SQL'),
-    ('Portfolio de visualisation de données', 'Docker'), ('Portfolio de visualisation de données', 'Node.js'),
-    ('Portfolio de visualisation de données', 'Express'), ('Portfolio de visualisation de données', 'JavaScript'),
-    ('Portfolio de visualisation de données', 'HTML'), ('Portfolio de visualisation de données', 'Chart.js'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'KNIME'), ('Analyse multivariée de candidatures (SAE 402)', 'ARX'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'R'), ('Analyse multivariée de candidatures (SAE 402)', 'Shiny'),
-    ('Atlas démographique des communes françaises', 'Python'), ('Atlas démographique des communes françaises', 'pandas'),
-    ('Atlas démographique des communes françaises', 'matplotlib'), ('Atlas démographique des communes françaises', 'Plotly'),
+    ('Portfolio de visualisation de données', 'PostgreSQL'),
+    ('Portfolio de visualisation de données', 'SQL'),
+    ('Portfolio de visualisation de données', 'Docker'),
+    ('Portfolio de visualisation de données', 'Node.js'),
+    ('Portfolio de visualisation de données', 'Express'),
+    ('Portfolio de visualisation de données', 'JavaScript'),
+    ('Portfolio de visualisation de données', 'HTML'),
+    ('Portfolio de visualisation de données', 'Chart.js'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'KNIME'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'ARX'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'R'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'Shiny'),
+    ('Atlas démographique des communes françaises', 'Python'),
+    ('Atlas démographique des communes françaises', 'pandas'),
+    ('Atlas démographique des communes françaises', 'matplotlib'),
+    ('Atlas démographique des communes françaises', 'Plotly'),
     ('Atlas démographique des communes françaises', 'HTML'),
     ('BRICOLIB : location d''outils de bricolage (SAÉ)', 'Power BI'),
-    ('Plateforme de données FactoryFlow', 'Python'), ('Plateforme de données FactoryFlow', 'PostgreSQL'),
-    ('Plateforme de données FactoryFlow', 'dbt'), ('Plateforme de données FactoryFlow', 'Airflow'),
-    ('Plateforme de données FactoryFlow', 'scikit-learn'), ('Plateforme de données FactoryFlow', 'Streamlit')
+    ('Plateforme de données FactoryFlow', 'Python'),
+    ('Plateforme de données FactoryFlow', 'PostgreSQL'),
+    ('Plateforme de données FactoryFlow', 'dbt'),
+    ('Plateforme de données FactoryFlow', 'Airflow'),
+    ('Plateforme de données FactoryFlow', 'scikit-learn'),
+    ('Plateforme de données FactoryFlow', 'Streamlit')
 ) AS v(titre, nom)
 JOIN projet p ON p.titre = v.titre
 JOIN technologie t ON t.nom = v.nom;
@@ -843,38 +867,10 @@ INSERT INTO langue (nom, niveau) VALUES
 ('Portugais', 'Langue maternelle ou bilingue'), ('Anglais', 'Langue maternelle ou bilingue'),
 ('Français', 'Professionnel'), ('Espagnol', 'Professionnel'), ('Russe', 'Élémentaire');
 
--- Preuves : PROPOSITIONS À REMPLACER par les fiches de preuves
-INSERT INTO preuve (titre, texte, fichier, code_sae, id_projet, id_experience, id_certificat) VALUES
-('Reporting d''une analyse multivariée', 'Analyse multivariée des données d''admission (KNIME, R Shiny), après anonymisation avec ARX.', NULL, 'SAE4.02',
- (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAE 402)'), NULL, NULL),
-('Atlas démographique INSEE', 'Visualisations des données démographiques des communes.', NULL, NULL,
- (SELECT id_projet FROM projet WHERE titre = 'Atlas démographique des communes françaises'), NULL, NULL),
-('Chaîne de données FactoryFlow', 'Chaîne de traitement automatisée avec Airflow et dbt.', NULL, NULL,
- (SELECT id_projet FROM projet WHERE titre = 'Plateforme de données FactoryFlow'), NULL, NULL),
-('Portfolio versionné avec Git', 'Historique Git du portfolio et suivi de l''avancement.', NULL, 'PORTFOLIO.S5',
- (SELECT id_projet FROM projet WHERE titre = 'Portfolio de visualisation de données'), NULL, NULL),
-('Qualité et simulation chez Serviciale', 'Suite de 132 tests automatisés en CI/CD et score de fiabilité validé par simulation Monte Carlo.', NULL, 'STAGE.S4',
- NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
-('Certificat CS403', 'Cours de 42 h sur les bases de données modernes.', 'certificat_cs403.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'CS403%')),
-('Certificat AWS Database Offerings', 'Panorama des bases de données proposées par AWS.', 'certificat_aws.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule = 'AWS Database Offerings')),
-('Certificat Databricks', 'Plateforme Databricks pour les grands volumes de données.', 'certificat_databricks.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'Databricks%'));
+-- Preuves : tirées de mes fiches portfolio (fiches AC, fiche SAÉ 4.02, fiche de stage), ajoutées petit à petit.
+-- Les preuves du stage sont décrites sans capture : la plateforme du stage est confidentielle.
+-- (les preuves de mes fiches arrivent dans les prochains jours)
 
-INSERT INTO preuve_ac (id_preuve, code_ac)
-SELECT p.id_preuve, v.code_ac
-FROM (VALUES
-    ('Reporting d''une analyse multivariée', 'AC22.03'), ('Reporting d''une analyse multivariée', 'AC33.01'),
-    ('Atlas démographique INSEE', 'AC13.05'),
-    ('Chaîne de données FactoryFlow', 'AC24.02VCOD'),
-    ('Portfolio versionné avec Git', 'AC34.04VCOD'),
-    ('Qualité et simulation chez Serviciale', 'AC21.04'), ('Qualité et simulation chez Serviciale', 'AC12.06'),
-    ('Certificat CS403', 'AC11.04'),
-    ('Certificat AWS Database Offerings', 'AC31.01'),
-    ('Certificat Databricks', 'AC34.01VCOD')
-) AS v(titre, code_ac)
-JOIN preuve p ON p.titre = v.titre;
 
 -- ----------------------------------------------------------------------------
 --  Vues utilisées par le site
@@ -882,21 +878,26 @@ JOIN preuve p ON p.titre = v.titre;
 -- Couverture du référentiel : pour chaque AC, le nombre de preuves qui le démontrent
 CREATE VIEW couverture_ac AS
 SELECT ac.code_ac, ac.intitule, ac.id_competence, ac.numero_niveau, n.id_annee,
-       COUNT(pa.id_preuve) AS nb_preuves
+       COUNT(pa.id_preuve) AS nb_preuves,
+       ev.auto_evaluation, ev.visa_tuteur
 FROM referentiel.apprentissage_critique ac
 JOIN referentiel.niveau n ON n.id_competence = ac.id_competence AND n.numero = ac.numero_niveau
 LEFT JOIN preuve_ac pa ON pa.code_ac = ac.code_ac
-GROUP BY ac.code_ac, n.id_annee
+LEFT JOIN evaluation_ac ev ON ev.code_ac = ac.code_ac
+GROUP BY ac.code_ac, n.id_annee, ev.auto_evaluation, ev.visa_tuteur
 ORDER BY ac.code_ac;
 
 -- Preuves détaillées : source lisible, SAÉ et liste des AC
 CREATE VIEW preuve_detail AS
-SELECT pr.id_preuve, pr.titre, pr.texte, pr.fichier, pr.code_sae, s.intitule AS intitule_sae,
+SELECT pr.id_preuve, pr.titre, pr.texte, pr.code_sae, s.intitule AS intitule_sae,
        COALESCE(p.titre, e.intitule || ' · ' || e.structure, c.intitule) AS source,
        CASE WHEN p.id_projet IS NOT NULL THEN 'Projet'
             WHEN e.id_experience IS NOT NULL THEN 'Expérience'
             ELSE 'Certificat' END AS type_source,
-       ARRAY_AGG(pa.code_ac::text ORDER BY pa.code_ac) AS codes_ac   -- ::text : liste lisible par Node
+       ARRAY_AGG(pa.code_ac::text ORDER BY pa.code_ac) AS codes_ac,  -- ::text : liste lisible par Node
+       -- sous-requête : les images ne doivent pas multiplier les lignes des AC
+       COALESCE((SELECT JSON_AGG(JSON_BUILD_OBJECT('fichier', pi.fichier, 'legende', pi.legende) ORDER BY pi.ordre)
+                 FROM preuve_image pi WHERE pi.id_preuve = pr.id_preuve), '[]') AS images
 FROM preuve pr
 LEFT JOIN referentiel.sae s ON s.code_sae = pr.code_sae
 LEFT JOIN projet p ON p.id_projet = pr.id_projet

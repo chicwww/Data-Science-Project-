@@ -66,6 +66,19 @@ label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
 /* ---------- Graphiques et images ---------- */
 .graphique { position: relative; height: 320px; }
 .preuve img { width: 100%; border-radius: 6px; border: 1px solid var(--bord); margin-bottom: 8px; }
+.carte.preuve { align-self: start; }
+.captures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+.captures a { text-decoration: none; display: block; min-width: 0; }
+.captures .principale { grid-column: 1 / -1; }
+.captures .principale img { max-height: 220px; object-fit: contain; background: #FFF; margin-bottom: 2px; }
+.captures .vignette img { height: 56px; object-fit: cover; object-position: top left; margin-bottom: 2px; }
+.captures span { display: block; font-size: 12px; line-height: 1.3; }
+.titre-ac { margin-top: 24px; }
+.titre-ac:first-child { margin-top: 0; }
+.acs li { margin-bottom: 6px; }
+.pastille { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 9px; margin: 2px 4px 0 0; border: 1px solid var(--encre); }
+.pastille.acquis { background: var(--encre); color: #FFF; }
+.pastille.en-cours { background: var(--carte); color: var(--encre); }
 tr.selectionne { background: #FBE3DE; font-weight: 600; }
 table { border-collapse: collapse; width: 100%; background: var(--carte); }
 th, td { text-align: left; border-bottom: 1px solid var(--bord); padding: 8px 10px; vertical-align: top; }

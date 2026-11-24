@@ -43,8 +43,13 @@ async function chargerDetail(id) {
     <p>${p.technologies.map(t => `<span class="etiquette">${esc(t.nom)}</span>`).join("")}</p>
     <h3>Apprentissages critiques démontrés</h3>
     ${p.preuves.length === 0 ? `<p class="secondaire">Aucune preuve pour l'instant.</p>` :
-      p.preuves.map(pr => `<p><strong>${esc(pr.code_ac)}</strong> · ${esc(pr.intitule_ac)}<br>
-        <span class="secondaire petit">${esc(pr.titre)} : ${esc(pr.texte)}</span></p>`).join("")}`;
+      `<div class="grille">${p.preuves.map(pr => `
+        <div class="carte preuve">
+          ${imagesPreuve(pr.images, pr.titre)}
+          <p class="secondaire petit"><strong>${esc(pr.code_ac)}</strong> · ${esc(pr.intitule_ac)}</p>
+          <h3>${esc(pr.titre)}</h3>
+          <p class="secondaire petit">${esc(pr.texte)}</p>
+        </div>`).join("")}</div>`}`;
   zone.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
