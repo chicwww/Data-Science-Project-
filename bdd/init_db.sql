@@ -659,7 +659,9 @@ CREATE TABLE certificat (
     date_obtention date,                 -- vide = à confirmer
     fichier        text,                 -- image dans client/preuves/
     document       text,                 -- PDF dans client/preuves/
-    lien           text CHECK (lien ~ '^https://')   -- page publique (annonce, vérification)
+    lien           text CHECK (lien ~ '^https://'),          -- page publique (annonce, vérification)
+    site_officiel  text CHECK (site_officiel ~ '^https://'), -- site officiel de l'organisme ou du cours
+    description    text
 );
 
 CREATE TABLE langue (
@@ -782,17 +784,36 @@ FROM (VALUES
 JOIN projet p ON p.titre = v.titre
 JOIN technologie t ON t.nom = v.nom;
 
-INSERT INTO certificat (intitule, organisme, type, date_obtention, fichier, document, lien) VALUES
-('Databricks Fundamentals Accreditation', 'Databricks', 'Certificat', '2026-08-01', 'certificat_databricks.png', 'certificat_databricks.pdf', NULL),
-('AWS Database Offerings', 'AWS Training & Certification', 'Certificat', '2025-07-21', 'certificat_aws.png', 'certificat_aws.pdf', NULL),
-('CS403 : Introduction to Modern Database Systems (42 h)', 'Saylor Academy', 'Certificat', '2025-07-21', 'certificat_cs403.png', 'certificat_cs403.pdf', NULL),
-('Introduction to Career Skills in Data Analytics', 'LinkedIn Learning', 'Certificat', '2025-07-20', 'certificat_data_analytics.png', 'certificat_data_analytics.pdf', NULL),
-('Introduction to Career Skills in Software Development', 'LinkedIn Learning (Microsoft et LinkedIn)', 'Certificat', NULL, NULL, NULL, NULL),
-('AI Fluency for Students', 'Anthropic Academy', 'Certificat', NULL, NULL, NULL, NULL),
-('Opérateur informatique (B.A. en ELT)', NULL, 'Certificat', NULL, NULL, NULL, NULL),
-('Gazprom Olympiad', 'Université électrotechnique « LETI »', 'Certificat', NULL, NULL, NULL, NULL),
-('2e prix du concours « Ler nas Férias » (Lire en vacances), 3e édition 2023/2024', 'Ethale Publishing', 'Distinction', NULL, NULL, NULL, NULL),
-('Runner-up du BSGCT Scientific Writing Competition 2026 : « Rewriting the Code of Life: How Gene Editing is Curing Sickle Cell Disease »', 'British Society for Gene and Cell Therapy (BSGCT)', 'Distinction', '2026-04-22', NULL, NULL, 'https://bsgct.org/bsgct-scientific-writing-competition-runner-up-rewriting-the-code-of-life/');
+INSERT INTO certificat (intitule, organisme, type, date_obtention, fichier, document, lien, site_officiel, description) VALUES
+('Databricks Fundamentals Accreditation', 'Databricks', 'Certificat', '2026-08-01', 'certificat_databricks.png', 'certificat_databricks.pdf', NULL,
+ 'https://www.databricks.com/training/catalog/databricks-fundamentals-accreditation-2308',
+ 'Accréditation Databricks Academy : questionnaire de 20 questions sur la plateforme Databricks Data Intelligence Platform.'),
+('AWS Database Offerings', 'AWS Training & Certification', 'Certificat', '2025-07-21', 'certificat_aws.png', 'certificat_aws.pdf', NULL,
+ 'https://aws.amazon.com/getting-started/use-cases/databases',
+ 'Cours en autonomie d''AWS : panorama des technologies et architectures de bases de données (relationnelles, non relationnelles, migration, serverless) et des services de bases de données AWS.'),
+('CS403 : Introduction to Modern Database Systems (42 h)', 'Saylor Academy', 'Certificat', '2025-07-21', 'certificat_cs403.png', 'certificat_cs403.pdf', NULL,
+ 'https://learn.saylor.org/course/CS403',
+ 'Cours de 42 heures validé par un examen final : histoire des bases de données, modèle entité-association, modèle relationnel, algèbre relationnelle, normalisation et SQL.'),
+('Introduction to Career Skills in Data Analytics', 'LinkedIn Learning', 'Certificat', '2025-07-20', 'certificat_data_analytics.png', 'certificat_data_analytics.pdf', NULL,
+ 'https://www.linkedin.com/learning/',
+ 'Cours de 2 h 21 min. Compétences couvertes : analyse de données et compétences pour une carrière dans la tech.'),
+('Introduction to Career Skills in Software Development', 'LinkedIn Learning (Microsoft et LinkedIn)', 'Certificat', NULL, NULL, NULL, NULL,
+ 'https://www.linkedin.com/learning/',
+ 'Premier cours du parcours « Career Essentials in Software Development » de Microsoft et LinkedIn : bases de la programmation.'),
+('AI Fluency for Students', 'Anthropic Academy', 'Certificat', NULL, NULL, NULL, NULL,
+ 'https://anthropic.skilljar.com/ai-fluency-for-students',
+ 'Cours sur la collaboration responsable avec l''IA dans les études et la carrière, autour du cadre des 4D : délégation, description, discernement, diligence.'),
+('Opérateur informatique (B.A. en ELT)', NULL, 'Certificat', NULL, NULL, NULL, NULL, NULL, NULL),
+('Gazprom Olympiad', 'Université électrotechnique de Saint-Pétersbourg « LETI »', 'Certificat', NULL, NULL, NULL, NULL,
+ 'https://etu.ru/en/university',
+ 'Olympiade Gazprom organisée à l''université électrotechnique de Saint-Pétersbourg « LETI ».'),
+('2e prix du concours « Ler nas Férias » (Lire en vacances), 3e édition 2023/2024', 'Ethale Publishing', 'Distinction', NULL, NULL, 'publication_caminhos_da_leitura_extrait.pdf', NULL,
+ 'https://www.ethalebooks.com',
+ 'Concours littéraire de la maison d''édition mozambicaine Ethale Publishing : les participants résument et analysent un livre de son catalogue. La 3e édition a réuni 304 adolescents et jeunes. Mon texte sur « As Madames » de Zukiswa Wanner est publié dans l''anthologie « Caminhos da Leitura » (2024).'),
+('Runner-up du BSGCT Scientific Writing Competition 2026 : « Rewriting the Code of Life: How Gene Editing is Curing Sickle Cell Disease »', 'British Society for Gene and Cell Therapy (BSGCT)', 'Distinction', '2026-04-22', NULL, NULL,
+ 'https://bsgct.org/bsgct-scientific-writing-competition-runner-up-rewriting-the-code-of-life/',
+ 'https://bsgct.org/scientific-writing-competition-2026/',
+ 'Concours de rédaction scientifique de la British Society for Gene and Cell Therapy. Mon article, classé parmi les runners-up, explique comment les thérapies fondées sur CRISPR transforment le traitement de la drépanocytose et ce qu''elles annoncent pour la médecine génétique.');
 
 -- Publications : textes publiés, éventuellement issus d'un concours (distinction)
 CREATE TABLE publication (

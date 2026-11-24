@@ -93,15 +93,25 @@ async function chargerCertificatsEtLangues() {
     chargerJSON("/api/langues")
   ]);
 
+  // Chaque carte est un <details> : un clic sur le résumé déplie la description et les liens
   document.getElementById("certificats").innerHTML = certificats.map(c => `
-    <div class="carte preuve">
-      ${c.fichier ? `<img src="/preuves/${esc(c.fichier)}" alt="Certificat ${esc(c.intitule)}">` : ""}
-      <p class="secondaire petit">${esc(c.type)}${c.date_obtention ? " · " + moisAnnee(c.date_obtention) : ""}</p>
-      <h3>${esc(c.intitule)}</h3>
-      <p class="secondaire petit">${esc(c.organisme ?? "")}</p>
-      ${c.document ? `<a class="petit" href="/preuves/${esc(c.document)}" target="_blank">Voir le certificat (PDF)</a>` : ""}
-      ${c.lien ? `<a class="petit" href="${esc(c.lien)}" target="_blank">Voir l'annonce</a>` : ""}
-    </div>`).join("");
+    <details class="carte preuve depliable">
+      <summary>
+        ${c.fichier ? `<img src="/preuves/${esc(c.fichier)}" alt="Certificat ${esc(c.intitule)}">` : ""}
+        <p class="secondaire petit">${esc(c.type)}${c.date_obtention ? " · " + moisAnnee(c.date_obtention) : ""}</p>
+        <h3>${esc(c.intitule)}</h3>
+        <p class="secondaire petit">${esc(c.organisme ?? "Organisme à préciser")}</p>
+        <span class="petit plus">Voir le détail</span>
+      </summary>
+      <div class="detail">
+        ${c.description ? `<p class="petit">${esc(c.description)}</p>` : `<p class="secondaire petit">Pas de description pour l'instant.</p>`}
+        <ul class="liens petit">
+          ${c.document ? `<li><a href="/preuves/${esc(c.document)}" target="_blank">${c.type === "Distinction" ? "Lire mon texte (PDF)" : "Voir le certificat (PDF)"}</a></li>` : ""}
+          ${c.lien ? `<li><a href="${esc(c.lien)}" target="_blank" rel="noopener">Voir l'annonce officielle</a></li>` : ""}
+          ${c.site_officiel ? `<li><a href="${esc(c.site_officiel)}" target="_blank" rel="noopener">Site officiel</a></li>` : ""}
+        </ul>
+      </div>
+    </details>`).join("");
 
   document.getElementById("langues").innerHTML = langues
     .map(l => `<tr><td>${esc(l.nom)}</td><td>${esc(l.niveau)}</td></tr>`).join("");

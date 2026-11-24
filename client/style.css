@@ -72,6 +72,18 @@ th, td { text-align: left; border-bottom: 1px solid var(--bord); padding: 8px 10
 th { background: var(--encre); color: #FFF; }
 tbody tr { cursor: pointer; }
 
+/* ---------- Cartes dépliables (certificats et distinctions) ---------- */
+details.depliable { align-self: start; }
+details.depliable summary { list-style: none; cursor: pointer; }
+details.depliable summary::-webkit-details-marker { display: none; }
+details.depliable .plus { color: var(--accent-fonce); font-weight: 600; }
+details.depliable .plus::after { content: " ▾"; }
+details.depliable[open] .plus::after { content: " ▴"; }
+details.depliable[open] { border-color: var(--accent); }
+details.depliable .detail { border-top: 1px solid var(--bord); margin-top: 10px; padding-top: 10px; }
+.liens { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+
 /* ---------- Pied de page ---------- */
 .pied { border-top: 1px solid var(--bord); padding: 24px clamp(16px, 4vw, 48px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--gris); }
 .pied a { color: var(--gris); margin-left: 20px; }

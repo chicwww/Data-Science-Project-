@@ -287,7 +287,7 @@ async function startServer() {
     app.get("/api/certificats", async (req, res) => {
       try {
         const { rows } = await pool.query(`
-          SELECT id_certificat, intitule, organisme, type, fichier, document, lien, date_obtention::text AS date_obtention
+          SELECT id_certificat, intitule, organisme, type, fichier, document, lien, site_officiel, description, date_obtention::text AS date_obtention
           FROM certificat ORDER BY type, date_obtention DESC NULLS LAST;`);
         res.json(rows);
       } catch (err) {
