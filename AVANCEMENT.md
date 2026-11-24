@@ -8,7 +8,7 @@ Ce document sert d'outil de pilotage. Il est mis à jour à chaque séance : les
 |---|---|---|---|
 | TD1 | 6 octobre, semaine 41 | 2h | Environnement de travail, Git, planning et maquette |
 | TD2 | 23 octobre, semaine 43 | 2h | Architecture générale |
-| TD3 | 23 novembre, semaine 48 | 4h | Partie serveur (base de données et contrôleur) |
+| TD3 | 23 et 24 novembre, semaine 48 | 4h | Partie serveur (base de données et contrôleur) : cours sur l'architecture client-serveur et HTTP, puis sujet « Retour sur le serveur : gestion de la BDD » |
 | Interrogation 1 | 24 novembre, semaine 48 | 30 min | Évaluation écrite |
 | TD4 | 24 novembre, semaine 48 | 1h30 | Partie visualisation |
 | Projet | 24 novembre, semaine 48 | 4h | Développement |
@@ -30,10 +30,13 @@ gantt
     section TD
     TD1 environnement, Git, maquette (2h)      :done,   td1, 2026-10-06, 1d
     TD2 architecture générale (2h)             :        td2, 2026-10-23, 1d
-    TD3 partie serveur, BDD et contrôleur (4h) :        td3, 2026-11-23, 1d
+    TD3 partie serveur, BDD et contrôleur (4h) :active, td3, 2026-11-23, 2d
     TD4 partie visualisation (1h30)            :        td4, 2026-11-24, 1d
     section Données
     Brouillon des données du portfolio         :active, d1, 2026-11-09, 14d
+    section Développement
+    Structure client, serveur, BDD et Docker   :done,   dev1, 2026-11-24, 1d
+    Table des preuves et routes associées      :        dev2, after dev1, 6d
     section Évaluations
     Interrogation 1 (30 min)                   :crit,   i1, 2026-11-24, 1d
     Interrogation 2 (1h)                       :crit,   i2, 2026-12-02, 1d
@@ -54,7 +57,7 @@ Dans le diagramme, les barres grises sont terminées, les rouges sont les évalu
 |---|---|---|---|---|
 | TD1 | 6 octobre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
 | TD2 | 23 octobre | 2h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
-| TD3 | 23 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| TD3 | 23 et 24 novembre | 4h | 🟩⬜⬜⬜⬜ environ 20 % | 🟧 En cours |
 | Interrogation 1 | 24 novembre | 30 min | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | TD4 | 24 novembre | 1h30 | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Projet | 24 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
@@ -76,10 +79,10 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Initialisation du dépôt Git et du README | TD1 | 0h30 | 🟩 Terminé | |
 | Planning prévisionnel | TD1 | 0h30 | 🟩 Terminé | |
 | Maquette du site | TD1 | 0h30 | 🟩 Terminé | Schémas et version visuelle en HTML, appelées à évoluer |
-| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Brouillons dans `data/projets.csv` (9 novembre) et `data/competences.csv` (12 novembre), à relire et à compléter |
-| Architecture générale du site et choix des technologies | TD2 | 2h | ⬜ À faire | Dépend de la maquette |
-| Base de données et contrôleur | TD3 | 4h | ⬜ À faire | Dépend de l'architecture |
-| Préparation à l'interrogation 1 | Avant le 24 novembre | à définir | ⬜ À faire | |
+| Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Brouillons dans `data/projets.csv` (9 novembre) et `data/competences.csv` (12 novembre), à relire et à compléter. Consigne du 24 novembre : les données finales doivent être dans PostgreSQL, interrogées par le serveur (pas de CSV) |
+| Architecture générale du site et choix des technologies | TD2, puis TD3 | 2h | 🟩 Terminé | Choix faits le 24 novembre : Node.js avec Express pour le serveur, PostgreSQL lancé dans Docker, Chart.js pour les graphiques, dépôt organisé en `client/`, `serveur/` et `bdd/` |
+| Base de données et contrôleur | TD3 | 4h | 🟧 En cours | Serveur fonctionnel avec la base d'exemple du cours. Reste : schéma relationnel avec la table des preuves, passage à la base complète, routes des preuves |
+| Préparation à l'interrogation 1 | Avant l'interrogation | à définir | 🟧 En cours | Notes du cours sur l'architecture client-serveur, HTTP, les routes et l'injection SQL ; sujet de l'année précédente travaillé et corrigé |
 | Interrogation 1 | 24 novembre | 0h30 | ⬜ À faire | |
 | Partie visualisation : première visualisation | TD4 | 1h30 | ⬜ À faire | Dépend de la partie serveur |
 | Développement des pages et intégration des visualisations | Projet du 24 novembre | 4h | ⬜ À faire | |
@@ -128,11 +131,24 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - La période prévue pour la tâche sur les données se termine aujourd'hui : `data/projets.csv` et `data/competences.csv` restent des brouillons à relire, avec des années à compléter
 - État du TD2 toujours à confirmer
 
+### TD3, 23 et 24 novembre
+- Cours sur l'architecture client-serveur : rôle du client, du serveur et du SGBD, protocole HTTP, méthodes et CRUD, codes de statut, routes et paramètres, format JSON, injection SQL et validation des données
+- Comparaison de Laragon et Docker
+- Entraînement sur le sujet d'interrogation de l'année précédente, corrigé en classe
+- Distribution du sujet « Retour sur le serveur : gestion de la BDD » (exercices 1 à 6 : schéma relationnel avec les preuves, routes, environnement, images et table des preuves, finitions)
+- Consignes du projet précisées par l'enseignante : le dépôt contient au minimum le client, le serveur et le fichier SQL ; les données sont interrogées dans une base SQL par un serveur ; `node_modules` n'est pas versionné ; un formulaire d'ajout de données est un bonus
+- Choix techniques : Node.js avec Express et PostgreSQL lancé dans Docker
+- Mise en place de la structure du dépôt (`client/`, `serveur/`, `bdd/`, `docker-compose.yml`) à partir du programme de visualisation fourni ; la chaîne complète navigateur, serveur et base fonctionne en local
+
 ### À faire ensuite
-- Confirmer l'état du TD2 et les choix d'architecture et de technologies
-- Relire et compléter `data/projets.csv`, puis ajouter les niveaux de compétence et le parcours
-- Préparer le TD3 du 23 novembre (base de données et contrôleur)
+- TD3, exercice 1 : schéma relationnel reliant toutes les tables, avec une table des preuves (image et/ou texte), à faire valider par l'enseignante
+- TD3, exercices 4 et 5 : intégrer la table des preuves dans `bdd/init_db.sql`, ajouter les routes d'accès à une preuve et à toutes les preuves, les afficher dans le site
+- Remplacer les images de test par les preuves du portfolio
+- Relire et compléter `data/projets.csv`, puis transférer les données dans la base
+- Confirmer l'état du TD2 et les dates des interrogations
 
 ## Retards, difficultés et changements de planning
 
-Aucun retard n'est constaté pour l'instant. Seul l'état du TD2 reste à confirmer.
+- 24 novembre : les technologies du site sont choisies (Node.js, Express, PostgreSQL dans Docker, Chart.js). L'option Flask fournie en exemple n'est pas retenue.
+- Dates des interrogations à confirmer : le planning indique le 24 novembre et le 2 décembre, mais une interrogation a été annoncée pour la fin du cours, le 11 décembre.
+- L'état du TD2 reste à confirmer.
