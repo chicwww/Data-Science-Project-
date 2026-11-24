@@ -9,12 +9,11 @@ Ce document sert d'outil de pilotage. Il est mis à jour à chaque séance : les
 | TD1 | 6 octobre, semaine 41 | 2h | Environnement de travail, Git, planning et maquette |
 | TD2 | 23 novembre, semaine 48 | 2h | Architecture client-serveur et communication HTTP |
 | TD3 | 24 novembre, semaine 48 | 4h | Retour sur le serveur : gestion de la base de données |
-| Interrogation 1 | 24 novembre, semaine 48 | 30 min | Évaluation écrite |
 | TD4 | 24 novembre, semaine 48 | 1h30 | Partie visualisation |
 | Projet | 24 novembre, semaine 48 | 4h | Développement |
 | Projet | 30 novembre, semaine 49 | 2h | Développement |
-| Interrogation 2 | 2 décembre, semaine 49 | 1h | Évaluation écrite |
 | Projet | 2 décembre, semaine 49 | 3h | Développement et finalisation du semestre |
+| Interrogation | 11 décembre, semaine 50 | à confirmer | Évaluation écrite, à la fin du cours |
 
 Au semestre 6 : 6h de projet, puis 4h de préparation et de présentation orale.
 
@@ -38,8 +37,7 @@ gantt
     Structure client, serveur, BDD et Docker   :done,   dev1, 2026-11-24, 1d
     Table des preuves et routes associées      :        dev2, after dev1, 6d
     section Évaluations
-    Interrogation 1 (30 min)                   :crit,   i1, 2026-11-24, 1d
-    Interrogation 2 (1h)                       :crit,   i2, 2026-12-02, 1d
+    Interrogation (11 décembre)                :crit,   i1, 2026-12-11, 1d
     section Projet
     Projet, développement (4h)                 :        p1, 2026-11-24, 1d
     Projet, interactions (2h)                  :        p2, 2026-11-30, 1d
@@ -58,12 +56,11 @@ Dans le diagramme, les barres grises sont terminées, les rouges sont les évalu
 | TD1 | 6 octobre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
 | TD2 | 23 novembre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
 | TD3 | 24 novembre | 4h | 🟩⬜⬜⬜⬜ environ 20 % | 🟧 En cours |
-| Interrogation 1 | 24 novembre | 30 min | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | TD4 | 24 novembre | 1h30 | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Projet | 24 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Projet | 30 novembre | 2h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
-| Interrogation 2 | 2 décembre | 1h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Projet | 2 décembre | 3h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
+| Interrogation | 11 décembre | à confirmer | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Semestre 6, projet | à définir | 6h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Semestre 6, oral | à définir | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 
@@ -82,15 +79,13 @@ Début du projet, puis choix des données, maquette terminée, architecture déf
 | Choix et préparation des données du portfolio | Entre TD1 et TD2 | à définir | 🟧 En cours | Brouillons dans `data/projets.csv` (9 novembre) et `data/competences.csv` (12 novembre), à relire et à compléter. Consigne du 24 novembre : les données finales doivent être dans PostgreSQL, interrogées par le serveur (pas de CSV) |
 | Architecture générale du site et choix des technologies | TD2, puis TD3 | 2h | 🟩 Terminé | Choix faits le 24 novembre : Node.js avec Express pour le serveur, PostgreSQL lancé dans Docker, Chart.js pour les graphiques, dépôt organisé en `client/`, `serveur/` et `bdd/` |
 | Base de données et contrôleur | TD3 | 4h | 🟧 En cours | Serveur fonctionnel avec la base d'exemple du cours. Reste : schéma relationnel avec la table des preuves, passage à la base complète, routes des preuves |
-| Préparation à l'interrogation 1 | Avant l'interrogation | à définir | 🟧 En cours | Notes du cours sur l'architecture client-serveur, HTTP, les routes et l'injection SQL ; sujet de l'année précédente travaillé et corrigé |
-| Interrogation 1 | 24 novembre | 0h30 | ⬜ À faire | |
+| Préparation à l'interrogation | Avant le 11 décembre | à définir | 🟧 En cours | Notes du cours sur l'architecture client-serveur, HTTP, les routes et l'injection SQL ; sujet de l'année précédente travaillé et corrigé |
 | Partie visualisation : première visualisation | TD4 | 1h30 | ⬜ À faire | Dépend de la partie serveur |
 | Développement des pages et intégration des visualisations | Projet du 24 novembre | 4h | ⬜ À faire | |
 | Ajout des interactions : filtres et sélecteurs | Projet du 30 novembre | 2h | ⬜ À faire | |
-| Préparation à l'interrogation 2 | Avant le 2 décembre | à définir | ⬜ À faire | |
-| Interrogation 2 | 2 décembre | 1h | ⬜ À faire | |
 | Tests, corrections et amélioration de l'interface | Projet du 2 décembre | 3h | ⬜ À faire | |
 | Mise à jour de la documentation et bilan du semestre 5 | Projet du 2 décembre | incluse | ⬜ À faire | |
+| Interrogation | 11 décembre | durée à confirmer | ⬜ À faire | Une seule interrogation, à la fin du cours |
 | Développement complémentaire | Semestre 6 | 6h | ⬜ À faire | |
 | Préparation et présentation orale | Semestre 6 | 4h | ⬜ À faire | |
 
@@ -147,10 +142,9 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - TD3, exercices 4 et 5 : intégrer la table des preuves dans `bdd/init_db.sql`, ajouter les routes d'accès à une preuve et à toutes les preuves, les afficher dans le site
 - Remplacer les images de test par les preuves du portfolio
 - Relire et compléter `data/projets.csv`, puis transférer les données dans la base
-- Confirmer les dates des interrogations
 
 ## Retards, difficultés et changements de planning
 
 - 24 novembre : les technologies du site sont choisies (Node.js, Express, PostgreSQL dans Docker, Chart.js). L'option Flask fournie en exemple n'est pas retenue.
-- Dates des interrogations à confirmer : le planning indique le 24 novembre et le 2 décembre, mais une interrogation a été annoncée pour la fin du cours, le 11 décembre.
+- Évaluations : il n'y a qu'une seule interrogation, le 11 décembre, à la fin du cours. Les interrogations prévues le 24 novembre et le 2 décembre dans la première version du planning n'ont pas lieu.
 - Le TD2, prévu le 23 octobre, a eu lieu le 23 novembre ; le TD3 a suivi le 24 novembre.
