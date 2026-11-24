@@ -40,7 +40,7 @@ Un premier brouillon de la liste des projets est disponible dans `data/projets.c
 
 Prérequis : Docker Desktop et Node.js (version 20.6 ou plus récente).
 
-1. Créer un fichier `.env` à la racine du dépôt, en copiant `.env.example`, et y choisir un mot de passe. Ce fichier n'est jamais envoyé sur GitHub.
+1. Créer un fichier `.env` à la racine du dépôt, contenant une seule ligne : `POSTGRES_PASSWORD=` suivi du mot de passe choisi. Ce fichier est ignoré par Git (voir `.gitignore`) et n'est donc jamais envoyé sur GitHub.
 2. Lancer la base de données, depuis la racine du dépôt :
    ```
    docker compose up -d
@@ -63,7 +63,7 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 - `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
 - `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`)
 - `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
-- `.env.example` : modèle du fichier `.env` qui contient le mot de passe de la base
+- `.gitignore` : fichiers exclus de Git (`node_modules/` et `.env`, qui contient le mot de passe de la base)
 - `README.md` : présentation du projet
 - `AVANCEMENT.md` : planning prévisionnel et suivi de l'avancement
 - `maquette/` : maquette du site et son évolution
