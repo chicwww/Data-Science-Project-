@@ -7,8 +7,8 @@ Ce document sert d'outil de pilotage. Il est mis à jour à chaque séance : les
 | Séance | Date | Durée | Contenu prévu |
 |---|---|---|---|
 | TD1 | 6 octobre, semaine 41 | 2h | Environnement de travail, Git, planning et maquette |
-| TD2 | 23 octobre, semaine 43 | 2h | Architecture générale |
-| TD3 | 23 et 24 novembre, semaine 48 | 4h | Partie serveur (base de données et contrôleur) : cours sur l'architecture client-serveur et HTTP, puis sujet « Retour sur le serveur : gestion de la BDD » |
+| TD2 | 23 novembre, semaine 48 | 2h | Architecture client-serveur et communication HTTP |
+| TD3 | 24 novembre, semaine 48 | 4h | Retour sur le serveur : gestion de la base de données |
 | Interrogation 1 | 24 novembre, semaine 48 | 30 min | Évaluation écrite |
 | TD4 | 24 novembre, semaine 48 | 1h30 | Partie visualisation |
 | Projet | 24 novembre, semaine 48 | 4h | Développement |
@@ -29,8 +29,8 @@ gantt
     axisFormat %d/%m
     section TD
     TD1 environnement, Git, maquette (2h)      :done,   td1, 2026-10-06, 1d
-    TD2 architecture générale (2h)             :        td2, 2026-10-23, 1d
-    TD3 partie serveur, BDD et contrôleur (4h) :active, td3, 2026-11-23, 2d
+    TD2 architecture client-serveur (2h)       :done,   td2, 2026-11-23, 1d
+    TD3 serveur, gestion de la BDD (4h)        :active, td3, 2026-11-24, 1d
     TD4 partie visualisation (1h30)            :        td4, 2026-11-24, 1d
     section Données
     Brouillon des données du portfolio         :active, d1, 2026-11-09, 14d
@@ -56,8 +56,8 @@ Dans le diagramme, les barres grises sont terminées, les rouges sont les évalu
 | Séance | Date | Durée | Avancement | État |
 |---|---|---|---|---|
 | TD1 | 6 octobre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
-| TD2 | 23 octobre | 2h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
-| TD3 | 23 et 24 novembre | 4h | 🟩⬜⬜⬜⬜ environ 20 % | 🟧 En cours |
+| TD2 | 23 novembre | 2h | 🟩🟩🟩🟩🟩 100 % | 🟩 Terminé |
+| TD3 | 24 novembre | 4h | 🟩⬜⬜⬜⬜ environ 20 % | 🟧 En cours |
 | Interrogation 1 | 24 novembre | 30 min | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | TD4 | 24 novembre | 1h30 | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
 | Projet | 24 novembre | 4h | ⬜⬜⬜⬜⬜ 0 % | ⬜ À faire |
@@ -131,10 +131,12 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - La période prévue pour la tâche sur les données se termine aujourd'hui : `data/projets.csv` et `data/competences.csv` restent des brouillons à relire, avec des années à compléter
 - État du TD2 toujours à confirmer
 
-### TD3, 23 et 24 novembre
+### TD2, 23 novembre
 - Cours sur l'architecture client-serveur : rôle du client, du serveur et du SGBD, protocole HTTP, méthodes et CRUD, codes de statut, routes et paramètres, format JSON, injection SQL et validation des données
 - Comparaison de Laragon et Docker
-- Entraînement sur le sujet d'interrogation de l'année précédente, corrigé en classe
+- TD sur papier « Architecture client-serveur et communication HTTP » (sujet de l'année précédente), corrigé en classe le 24 novembre
+
+### TD3, 24 novembre
 - Distribution du sujet « Retour sur le serveur : gestion de la BDD » (exercices 1 à 6 : schéma relationnel avec les preuves, routes, environnement, images et table des preuves, finitions)
 - Consignes du projet précisées par l'enseignante : le dépôt contient au minimum le client, le serveur et le fichier SQL ; les données sont interrogées dans une base SQL par un serveur ; `node_modules` n'est pas versionné ; un formulaire d'ajout de données est un bonus
 - Choix techniques : Node.js avec Express et PostgreSQL lancé dans Docker
@@ -145,10 +147,10 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - TD3, exercices 4 et 5 : intégrer la table des preuves dans `bdd/init_db.sql`, ajouter les routes d'accès à une preuve et à toutes les preuves, les afficher dans le site
 - Remplacer les images de test par les preuves du portfolio
 - Relire et compléter `data/projets.csv`, puis transférer les données dans la base
-- Confirmer l'état du TD2 et les dates des interrogations
+- Confirmer les dates des interrogations
 
 ## Retards, difficultés et changements de planning
 
 - 24 novembre : les technologies du site sont choisies (Node.js, Express, PostgreSQL dans Docker, Chart.js). L'option Flask fournie en exemple n'est pas retenue.
 - Dates des interrogations à confirmer : le planning indique le 24 novembre et le 2 décembre, mais une interrogation a été annoncée pour la fin du cours, le 11 décembre.
-- L'état du TD2 reste à confirmer.
+- Le TD2, prévu le 23 octobre, a eu lieu le 23 novembre ; le TD3 a suivi le 24 novembre.
