@@ -140,6 +140,8 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Schéma relationnel personnel : le référentiel du BUT SD est complété par mes formations, expériences, projets, technologies, certificats, langues et preuves
 - Base enrichie (`bdd/init_db.sql`), 11 nouvelles routes dans le serveur, et 5 pages reliées à l'API (Accueil, Parcours, Projets, Compétences, Contact)
 - Refonte de la base sur le programme national du BUT SD : schéma `referentiel` (compétences, composantes essentielles, niveaux, 54 AC, 30 SAÉ, stages et portfolios) et schéma `portfolio` ; une preuve peut démontrer plusieurs AC et se rattache à une SAÉ au plus ; règles de cohérence vérifiées par la base
+- Corrections : les matières de BUT1 rattachées à C4 passent en C1 (C4 commence en 2e année) ; stage Serviciale rattaché au stage officiel du S4, portfolio rattaché au portfolio du S5
+- Ajout de la publication « Entre Raças e Papéis » (Caminhos da Leitura, Ethale Publishing, 2024) avec un extrait en annexe, et de la distinction BSGCT 2026 avec sa date ; maquette mise à jour avec le nouveau schéma de la base, pages HTML de la maquette remplacées par leurs images
 
 ### À faire ensuite
 - TD3, exercice 1 : schéma relationnel reliant toutes les tables, avec une table des preuves (image et/ou texte), à faire valider par l'enseignante

@@ -68,7 +68,7 @@ const TABLES_AUTORISEES = [
   "annee", "semestre", "competence", "composante_essentielle", "niveau", "apprentissage_critique",
   "sae", "sae_competence", "activite_pedagogique", "heures_par_annee",
   // schéma portfolio (mon parcours)
-  "formation", "experience", "projet", "technologie", "projet_technologie", "certificat", "langue",
+  "formation", "experience", "projet", "publication", "technologie", "projet_technologie", "certificat", "langue",
   "preuve", "preuve_ac", "preuve_detail", "couverture_ac"];
 
 async function afficherTable(pool, nomTable) {
@@ -287,12 +287,30 @@ async function startServer() {
     app.get("/api/certificats", async (req, res) => {
       try {
         const { rows } = await pool.query(`
-          SELECT id_certificat, intitule, organisme, type, fichier, document, date_obtention::text AS date_obtention
+          SELECT id_certificat, intitule, organisme, type, fichier, document, lien, date_obtention::text AS date_obtention
           FROM certificat ORDER BY type, date_obtention DESC NULLS LAST;`);
         res.json(rows);
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Erreur lors de la récupération des certificats" });
+      }
+    });
+
+    // Publications, avec la distinction liée
+    app.get("/api/publications", async (req, res) => {
+      try {
+        const { rows } = await pool.query(`
+          SELECT p.id_publication, p.titre, p.ouvrage, p.editeur, p.isbn, p.langue, p.resume,
+                 p.fichier, p.document, p.date_parution::text AS date_parution,
+                 lower(p.pages) AS page_debut, upper(p.pages) - 1 AS page_fin,
+                 c.intitule AS distinction
+          FROM publication p
+          LEFT JOIN certificat c ON c.id_certificat = p.id_certificat
+          ORDER BY p.date_parution DESC;`);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des publications" });
       }
     });
 

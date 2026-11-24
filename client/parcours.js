@@ -100,12 +100,31 @@ async function chargerCertificatsEtLangues() {
       <h3>${esc(c.intitule)}</h3>
       <p class="secondaire petit">${esc(c.organisme ?? "")}</p>
       ${c.document ? `<a class="petit" href="/preuves/${esc(c.document)}" target="_blank">Voir le certificat (PDF)</a>` : ""}
+      ${c.lien ? `<a class="petit" href="${esc(c.lien)}" target="_blank">Voir l'annonce</a>` : ""}
     </div>`).join("");
 
   document.getElementById("langues").innerHTML = langues
     .map(l => `<tr><td>${esc(l.nom)}</td><td>${esc(l.niveau)}</td></tr>`).join("");
 }
 
+// ---------- 4. Publications ----------
+async function chargerPublications() {
+  const publications = await chargerJSON("/api/publications");
+  document.getElementById("publications").innerHTML = publications.map(p => `
+    <div class="carte deux-colonnes preuve">
+      ${p.fichier ? `<img src="/preuves/${esc(p.fichier)}" alt="Première page du texte ${esc(p.titre)}">` : ""}
+      <div>
+        <p class="secondaire petit">${esc(p.langue)} · ${moisAnnee(p.date_parution)} · pages ${p.page_debut} à ${p.page_fin}</p>
+        <h3>${esc(p.titre)}</h3>
+        <p><em>${esc(p.ouvrage)}</em>, ${esc(p.editeur)}, ISBN ${esc(p.isbn)}</p>
+        <p class="secondaire">${esc(p.resume)}</p>
+        ${p.distinction ? `<p class="petit"><strong>Distinction liée :</strong> ${esc(p.distinction)}</p>` : ""}
+        ${p.document ? `<a href="/preuves/${esc(p.document)}" target="_blank">Lire l'extrait (PDF)</a>` : ""}
+      </div>
+    </div>`).join("");
+}
+
 chargerFrise();
+chargerPublications();
 chargerHeuresParAnnee();
 chargerCertificatsEtLangues();

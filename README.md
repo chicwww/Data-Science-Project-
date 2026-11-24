@@ -12,7 +12,7 @@ Ce projet est un site web qui met en valeur mes compétences en science des donn
 
 ## Données utilisées et origine
 
-Les données affichées proviennent de mon propre parcours : liste de projets réalisés, technologies utilisées, niveaux de compétence, dates et durées des expériences. Elles seront croisées avec le référentiel national du BUT Science des Données (compétences, niveaux, composantes essentielles et apprentissages critiques du parcours VCOD, 2e et 3e années), afin de relier chaque projet du portfolio aux apprentissages critiques qu'il démontre. Elles seront stockées dans une base de données PostgreSQL, que le site interrogera pour alimenter les pages et les visualisations. Un premier schéma relationnel est disponible dans `maquette/schema-relationnel.png` ; la description complète des données sera ajoutée ici une fois le choix final arrêté.
+Les données affichées proviennent de mon propre parcours : liste de projets réalisés, technologies utilisées, niveaux de compétence, dates et durées des expériences. Elles seront croisées avec le référentiel national du BUT Science des Données (compétences, niveaux, composantes essentielles et apprentissages critiques du parcours VCOD, 2e et 3e années), afin de relier chaque projet du portfolio aux apprentissages critiques qu'il démontre. Elles seront stockées dans une base de données PostgreSQL, que le site interrogera pour alimenter les pages et les visualisations. Le schéma relationnel de la base est présenté dans la partie « Base de données » ci-dessous.
 
 Un premier brouillon de la liste des projets est disponible dans `data/projets.csv`, et un brouillon des technologies utilisées dans `data/competences.csv` (sans niveau de maîtrise pour l'instant). Les colonnes de ces deux fichiers sont décrites dans `data/README.md`. Les projets réalisés pour une entreprise ou sous accord de confidentialité n'y figurent pas sans accord écrit.
 
@@ -90,6 +90,7 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 | `GET /api/technologies` | technologies et nombre de projets |
 | `GET /api/formations`, `GET /api/experiences` | parcours |
 | `GET /api/certificats`, `GET /api/langues` | certificats, distinctions et langues |
+| `GET /api/publications` | publications et distinction liée |
 | `GET /api/preuves`, `GET /api/preuve/:id` | preuves |
 | `GET /api/couverture` | nombre de preuves par apprentissage critique |
 | `GET /api/sae` | SAÉ du programme national et compétences ciblées |
@@ -100,14 +101,13 @@ Les images (`/preuves/<fichier>`) et les pages sont servies par la route statiqu
 
 - `client/` : le site vu dans le navigateur : 5 pages (`index.html`, `parcours.html`, `projets.html`, `competences.html`, `contact.html`), un script par page, `commun.js` et `style.css` partagés, images des certificats et preuves dans `preuves/`
 - `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
-- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`) et son diagramme (`schema-relationnel.png`). Deux schémas PostgreSQL : `referentiel` (programme national du BUT SD, parcours VCOD : compétences, composantes essentielles, niveaux, apprentissages critiques, SAÉ) et `portfolio` (formations, expériences, projets, technologies, certificats, langues, preuves)
+- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`) et son diagramme (`schema-relationnel.png`). Deux schémas PostgreSQL : `referentiel` (programme national du BUT SD, parcours VCOD : compétences, composantes essentielles, niveaux, apprentissages critiques, SAÉ) et `portfolio` (formations, expériences, projets, technologies, certificats, publications, langues, preuves)
 - `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
 - `.devcontainer/` : configuration du Codespace GitHub (Node.js, Docker et lancement automatique de la base)
 - `.gitignore` : fichiers exclus de Git (`node_modules/` et `.env`, qui contient le mot de passe de la base)
 - `README.md` : présentation du projet
 - `AVANCEMENT.md` : planning prévisionnel et suivi de l'avancement
-- `maquette/` : maquette du site et son évolution
-- `maquette/schema-relationnel.png` : schéma relationnel reliant le référentiel national BUT SD (parcours VCOD) aux données du portfolio
+- `maquette/` : maquette du site (captures des pages dans `images/`) et schéma relationnel à jour
 - `data/` : données du portfolio (brouillon : `projets.csv`, `competences.csv`) et description des colonnes
 
 ## Difficultés et limites connues

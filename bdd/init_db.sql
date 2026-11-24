@@ -658,7 +658,8 @@ CREATE TABLE certificat (
     type           type_certificat NOT NULL,
     date_obtention date,                 -- vide = à confirmer
     fichier        text,                 -- image dans client/preuves/
-    document       text                  -- PDF dans client/preuves/
+    document       text,                 -- PDF dans client/preuves/
+    lien           text CHECK (lien ~ '^https://')   -- page publique (annonce, vérification)
 );
 
 CREATE TABLE langue (
@@ -781,17 +782,41 @@ FROM (VALUES
 JOIN projet p ON p.titre = v.titre
 JOIN technologie t ON t.nom = v.nom;
 
-INSERT INTO certificat (intitule, organisme, type, date_obtention, fichier, document) VALUES
-('Databricks Fundamentals Accreditation', 'Databricks', 'Certificat', '2026-08-01', 'certificat_databricks.png', 'certificat_databricks.pdf'),
-('AWS Database Offerings', 'AWS Training & Certification', 'Certificat', '2025-07-21', 'certificat_aws.png', 'certificat_aws.pdf'),
-('CS403 : Introduction to Modern Database Systems (42 h)', 'Saylor Academy', 'Certificat', '2025-07-21', 'certificat_cs403.png', 'certificat_cs403.pdf'),
-('Introduction to Career Skills in Data Analytics', 'LinkedIn Learning', 'Certificat', '2025-07-20', 'certificat_data_analytics.png', 'certificat_data_analytics.pdf'),
-('Introduction to Career Skills in Software Development', 'LinkedIn Learning (Microsoft et LinkedIn)', 'Certificat', NULL, NULL, NULL),
-('AI Fluency for Students', 'Anthropic Academy', 'Certificat', NULL, NULL, NULL),
-('Opérateur informatique (B.A. en ELT)', NULL, 'Certificat', NULL, NULL, NULL),
-('Gazprom Olympiad', 'Université électrotechnique « LETI »', 'Certificat', NULL, NULL, NULL),
-('2e prix du concours « Lire en vacances » 2023/2024', 'Ethale Publishing', 'Distinction', NULL, NULL, NULL),
-('BSGCT Scientific Writing Competition 2026', NULL, 'Distinction', NULL, NULL, NULL);
+INSERT INTO certificat (intitule, organisme, type, date_obtention, fichier, document, lien) VALUES
+('Databricks Fundamentals Accreditation', 'Databricks', 'Certificat', '2026-08-01', 'certificat_databricks.png', 'certificat_databricks.pdf', NULL),
+('AWS Database Offerings', 'AWS Training & Certification', 'Certificat', '2025-07-21', 'certificat_aws.png', 'certificat_aws.pdf', NULL),
+('CS403 : Introduction to Modern Database Systems (42 h)', 'Saylor Academy', 'Certificat', '2025-07-21', 'certificat_cs403.png', 'certificat_cs403.pdf', NULL),
+('Introduction to Career Skills in Data Analytics', 'LinkedIn Learning', 'Certificat', '2025-07-20', 'certificat_data_analytics.png', 'certificat_data_analytics.pdf', NULL),
+('Introduction to Career Skills in Software Development', 'LinkedIn Learning (Microsoft et LinkedIn)', 'Certificat', NULL, NULL, NULL, NULL),
+('AI Fluency for Students', 'Anthropic Academy', 'Certificat', NULL, NULL, NULL, NULL),
+('Opérateur informatique (B.A. en ELT)', NULL, 'Certificat', NULL, NULL, NULL, NULL),
+('Gazprom Olympiad', 'Université électrotechnique « LETI »', 'Certificat', NULL, NULL, NULL, NULL),
+('2e prix du concours « Ler nas Férias » (Lire en vacances), 3e édition 2023/2024', 'Ethale Publishing', 'Distinction', NULL, NULL, NULL, NULL),
+('Runner-up du BSGCT Scientific Writing Competition 2026 : « Rewriting the Code of Life: How Gene Editing is Curing Sickle Cell Disease »', 'British Society for Gene and Cell Therapy (BSGCT)', 'Distinction', '2026-04-22', NULL, NULL, 'https://bsgct.org/bsgct-scientific-writing-competition-runner-up-rewriting-the-code-of-life/');
+
+-- Publications : textes publiés, éventuellement issus d'un concours (distinction)
+CREATE TABLE publication (
+    id_publication integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    titre          text NOT NULL,
+    ouvrage        text NOT NULL,
+    editeur        text NOT NULL,
+    isbn           varchar(17) CHECK (isbn ~ '^97[89]-[0-9]+-[0-9]+-[0-9]+-[0-9]$'),
+    date_parution  date NOT NULL,
+    langue         text NOT NULL,
+    pages          int4range,                        -- pages du texte dans l'ouvrage
+    resume         text,
+    fichier        text,                             -- aperçu dans client/preuves/
+    document       text,                             -- extrait PDF dans client/preuves/
+    id_certificat  integer REFERENCES certificat(id_certificat)   -- distinction liée
+);
+
+INSERT INTO publication (titre, ouvrage, editeur, isbn, date_parution, langue, pages, resume, fichier, document, id_certificat) VALUES
+('Entre Raças e Papéis: A Nova Realidade das Madames',
+ 'Caminhos da Leitura: O que dizem os nossos leitores? (coord. Jennifer Banze)',
+ 'Ethale Publishing, Maputo', '978-989-9318-02-1', '2024-11-01', 'Portugais', '[18,21)',
+ 'Analyse du roman « As Madames » de Zukiswa Wanner : féminisme, rapports sociaux et inégalités dans l''Afrique du Sud post-apartheid. Texte retenu dans l''anthologie issue de la 3e édition du concours « Ler nas Férias ».',
+ 'publication_caminhos_da_leitura.png', 'publication_caminhos_da_leitura_extrait.pdf',
+ (SELECT id_certificat FROM certificat WHERE intitule LIKE '2e prix du concours%'));
 
 INSERT INTO langue (nom, niveau) VALUES
 ('Portugais', 'Langue maternelle ou bilingue'), ('Anglais', 'Langue maternelle ou bilingue'),

@@ -4,22 +4,15 @@ Cette maquette décrit l'organisation du site avant le développement. Les sché
 
 ## Version visuelle
 
-Une version visuelle des pages est disponible dans ce dossier. Chaque fichier s'ouvre dans un navigateur et les liens du menu fonctionnent d'une page à l'autre.
+La version visuelle des pages est conservée sous forme d'images dans le dossier `images/` : Accueil, Parcours, Projets, Compétences, Contact et Accueil sur mobile. Elle fixe la direction graphique reprise par le site : fond gris très clair, texte presque noir, un seul accent rouge-orangé pour les boutons et les éléments sélectionnés, titres en Bricolage Grotesque et texte en Figtree. Les passages entre crochets et les données fictives de ces images ont été remplacés, dans le site, par les données de la base.
 
-| Page | Fichier |
-|---|---|
-| Accueil | `index.html` |
-| Parcours | `parcours.html` |
-| Projets | `projets.html` |
-| Compétences | `competences.html` |
-| Contact | `contact.html` |
-| Accueil sur mobile | `accueil-mobile.html` |
+## Schéma de la base de données
 
-Elle fixe une première direction graphique : fond gris très clair, texte presque noir, un seul accent rouge-orangé pour les boutons et les éléments sélectionnés, titres en Bricolage Grotesque et texte en Figtree. Les passages entre crochets restent à remplir, et les graphiques affichent des données fictives.
+Le schéma relationnel ci-dessous est généré depuis le catalogue PostgreSQL. Il remplace le premier schéma d'octobre : le schéma `referentiel` reprend le programme national du BUT Science des données (parcours VCOD), le schéma `portfolio` contient mon parcours, mes publications et mes preuves.
+
+![Schéma relationnel de la base](schema-relationnel.png)
 
 ## Aperçus de la version visuelle
-
-Les images ci-dessous sont des captures des pages HTML, stockées dans le dossier `images/`.
 
 ### Accueil
 ![Maquette de la page Accueil](images/accueil.png)
