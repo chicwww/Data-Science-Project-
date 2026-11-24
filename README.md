@@ -53,6 +53,17 @@ Prérequis : Docker Desktop et Node.js (version 20.6 ou plus récente).
    ```
 4. Ouvrir `http://localhost:3000` dans le navigateur.
 
+### Dans un Codespace GitHub (sans rien installer)
+
+1. Sur la page du dépôt : bouton **Code**, onglet **Codespaces**, **Create codespace on main**.
+2. Attendre la fin de la préparation : le fichier `.env` (mot de passe aléatoire), les dépendances et la base PostgreSQL sont mis en place automatiquement par les scripts du dossier `.devcontainer/`.
+3. Dans le terminal du Codespace :
+   ```
+   cd serveur
+   npm start
+   ```
+4. Ouvrir l'onglet **Ports**, puis le port 3000 (« Site du portfolio ») : le site s'affiche dans le navigateur.
+
 Pour arrêter la base : `docker compose down` (les données sont conservées dans un volume Docker).
 
 À chaque démarrage, le serveur recrée les tables à partir de `bdd/init_db.sql` : les données à garder doivent donc être écrites dans ce fichier.
@@ -63,6 +74,7 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 - `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
 - `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`)
 - `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
+- `.devcontainer/` : configuration du Codespace GitHub (Node.js, Docker et lancement automatique de la base)
 - `.gitignore` : fichiers exclus de Git (`node_modules/` et `.env`, qui contient le mot de passe de la base)
 - `README.md` : présentation du projet
 - `AVANCEMENT.md` : planning prévisionnel et suivi de l'avancement
