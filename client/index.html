@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Heures par compétence - BUT Science des Données</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Compétences</h1>
+
+<div class="buttons">
+  <button id="btnBarres" class="active">Graphique en barres</button>
+  <button id="btnCourbes">Graphique avec courbes</button>
+</div>
+
+<div class="main-container">
+  <div class="charts">
+    <canvas id="chartPrincipal"></canvas>
+  </div>
+
+  <table id="intitulesTable">
+    <thead>
+      <tr><th>Compétence</th><th>Intitulé</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="charts">
+    <canvas id="chartCamembert"></canvas>
+  </div>
+</div>
+
+<div id="description">Cliquez sur une part du camembert, une barre ou le tableau pour voir la description de la compétence.</div>
+
+<div class="bottom-image">
+  <img id="preuveImg" src="" alt="Preuve de la compétence">
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

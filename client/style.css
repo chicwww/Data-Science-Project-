@@ -1,0 +1,16 @@
+body { font-family: "Segoe UI", sans-serif; background: #f5f7fa; padding: 2rem; display: flex; flex-direction: column; align-items: center; }
+h1 { margin-bottom: 1rem; }
+.buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
+button { background: #4bc0c0; color: white; border: none; border-radius: 8px; padding: 0.7rem 1.2rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+button:hover { background: #36a2a2; }
+button.active { background: #2d8d8d; }
+.main-container { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+.charts { display: flex; flex-direction: column; gap: 2rem; }
+canvas { max-width: 300px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1rem; transition: transform 0.3s; }
+table { border-collapse: collapse; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; width: 300px; }
+th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+th { background: #4bc0c0; color: white; }
+tr.selected { background: #ffeaa7; font-weight: bold; }
+#description { margin-top: 1rem; background: #e0f7f7; padding: 1rem; border-radius: 12px; max-width: 650px; white-space: pre-line; }
+.bottom-image { margin-top: 1rem; text-align: center; }
+.bottom-image img { max-width: 300px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }

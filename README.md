@@ -31,16 +31,39 @@ Un premier brouillon de la liste des projets est disponible dans `data/projets.c
 - HTML et CSS pour la structure et la mise en page
 - JavaScript pour les interactions
 - PostgreSQL pour la base de données
-- Un langage et un cadre pour la partie serveur et le contrôleur, à choisir au TD2 et au TD3
-- Une bibliothèque de visualisation, à choisir lors de la partie visualisation
+- Node.js avec Express pour le serveur (routes de l'API)
+- Chart.js pour les graphiques
+- Docker pour lancer la base PostgreSQL dans un conteneur
 - Git et GitHub pour le suivi du projet
 
 ## Exécution du projet
 
-Les instructions seront complétées quand une première version fonctionnelle existera. À ce stade, le dépôt contient uniquement la documentation, le planning et la maquette.
+Prérequis : Docker Desktop et Node.js (version 20.6 ou plus récente).
+
+1. Créer un fichier `.env` à la racine du dépôt, en copiant `.env.example`, et y choisir un mot de passe. Ce fichier n'est jamais envoyé sur GitHub.
+2. Lancer la base de données, depuis la racine du dépôt :
+   ```
+   docker compose up -d
+   ```
+3. Installer les dépendances puis lancer le serveur :
+   ```
+   cd serveur
+   npm install
+   npm start
+   ```
+4. Ouvrir `http://localhost:3000` dans le navigateur.
+
+Pour arrêter la base : `docker compose down` (les données sont conservées dans un volume Docker).
+
+À chaque démarrage, le serveur recrée les tables à partir de `bdd/init_db.sql` : les données à garder doivent donc être écrites dans ce fichier.
 
 ## Organisation du dépôt
 
+- `client/` : le site vu dans le navigateur (`index.html`, `style.css`, `script.js`, images des preuves dans `preuves/`)
+- `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
+- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`)
+- `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
+- `.env.example` : modèle du fichier `.env` qui contient le mot de passe de la base
 - `README.md` : présentation du projet
 - `AVANCEMENT.md` : planning prévisionnel et suivi de l'avancement
 - `maquette/` : maquette du site et son évolution

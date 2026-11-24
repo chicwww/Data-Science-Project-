@@ -1,0 +1,17 @@
+# Base de données PostgreSQL du portfolio, lancée dans un conteneur Docker.
+# Commande : docker compose up -d
+services:
+  bdd:
+    image: postgres:16              # image officielle de PostgreSQL, version 16
+    container_name: portfolio-bdd   # nom du conteneur
+    environment:
+      POSTGRES_USER: postgres                       # utilisateur (le même que dans server.js)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}       # mot de passe lu dans le fichier .env
+      POSTGRES_DB: butsd                            # base créée au premier démarrage
+    ports:
+      - "5432:5432"                 # port de ton PC : port du conteneur
+    volumes:
+      - donnees_bdd:/var/lib/postgresql/data   # les données survivent si on supprime le conteneur
+
+volumes:
+  donnees_bdd:

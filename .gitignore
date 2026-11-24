@@ -1,0 +1,5 @@
+# Dependances installees par npm install (propres a chaque ordinateur)
+node_modules/
+
+# Mot de passe de la base
+.env
