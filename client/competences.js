@@ -71,7 +71,8 @@ async function highlightSelection(comp) {
         <ul class="petit">${data.composantes.map(c => `<li>${esc(c.libelle)}</li>`).join("")}</ul>
         ${data.niveaux.map(n => `
           <h3>Niveau ${n.numero} · ${esc(n.intitule)} <span class="secondaire petit">(${esc(n.id_annee)})</span></h3>
-          <ul class="petit">${n.acs.map(ac => `<li><strong>${esc(ac.code_ac)}</strong> ${esc(ac.intitule)}</li>`).join("")}</ul>`).join("")}`;
+          <ul class="petit acs">${n.acs.map(ac => `<li><strong>${esc(ac.code_ac)}</strong> ${esc(ac.intitule)}
+            ${pastille(ac.auto_evaluation, "Auto-évaluation : ")}${pastille(ac.visa_tuteur, "Visa du tuteur : ")}</li>`).join("")}</ul>`).join("")}`;
     }
     afficherPreuves(await chargerJSON(`/api/competence/${comp}/preuves`));
   } catch {
@@ -131,21 +132,28 @@ function setActive(id){
 document.getElementById("btnBarres").addEventListener("click",()=>{ setActive("btnBarres"); switchChart("bar"); });
 document.getElementById("btnCourbes").addEventListener("click",()=>{ setActive("btnCourbes"); switchChart("line"); });
 
-// Preuves de la compétence sélectionnée (route /api/competence/:id/preuves)
+// Preuves de la compétence sélectionnée (route /api/competence/:id/preuves),
+// regroupées par apprentissage critique
 function afficherPreuves(preuves) {
   const zone = document.getElementById("preuves");
   if (preuves.length === 0) {
     zone.innerHTML = `<p class="secondaire">Pas encore de preuve pour cette compétence.</p>`;
     return;
   }
-  zone.innerHTML = preuves.map(p => `
-    <div class="carte preuve">
-      ${p.fichier ? `<img src="/preuves/${esc(p.fichier)}" alt="Preuve ${esc(p.code_ac)}">` : ""}
-      <p class="secondaire petit">${esc(p.code_ac)}${p.code_sae ? " · " + esc(p.code_sae) : ""} · ${esc(p.source)}</p>
-      <h3>${esc(p.titre)}</h3>
-      <p class="petit"><strong>${esc(p.intitule_ac)}</strong></p>
-      <p class="secondaire petit">${esc(p.texte ?? "")}</p>
-    </div>`).join("");
+  const codes = [...new Set(preuves.map(p => p.code_ac))];   // AC dans l'ordre reçu
+  zone.innerHTML = codes.map(code => {
+    const liste = preuves.filter(p => p.code_ac === code);
+    return `
+      <h3 class="titre-ac">${esc(code)} <span class="secondaire petit">${esc(liste[0].intitule_ac)}</span></h3>
+      <div class="grille">${liste.map(p => `
+        <div class="carte preuve">
+          ${imagesPreuve(p.images, p.titre)}
+          <p class="secondaire petit">${esc(p.source)}</p>
+          <h3>${esc(p.titre)}</h3>
+          <p class="secondaire petit">${esc(p.texte)}</p>
+        </div>`).join("")}
+      </div>`;
+  }).join("");
 }
 
 // Couverture du référentiel : AC démontrés par au moins une preuve, par compétence

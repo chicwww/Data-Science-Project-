@@ -75,6 +75,8 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 - Une preuve démontre un ou plusieurs apprentissages critiques (table `preuve_ac`), se rattache à une SAÉ au plus, et vient d'un projet, d'une expérience ou d'un certificat.
 - Une SAÉ cible une ou plusieurs compétences (table `sae_competence`), comme dans le programme national.
 - Un déclencheur refuse qu'une preuve démontre un AC qui n'appartient à aucune compétence de sa SAÉ.
+- Une preuve a un texte et zéro, une ou plusieurs captures d'écran ordonnées (table `preuve_image`).
+- Chaque AC peut avoir mon auto-évaluation et le visa du tuteur (table `evaluation_ac`), repris dans la vue `couverture_ac`.
 - Types fermés (ENUM), domaines pour les codes de compétence et d'AC, contraintes CHECK et index sur les clés étrangères.
 
 ## Routes de l'API
@@ -84,7 +86,7 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 | `GET /api/heures` | heures du BUT par compétence |
 | `GET /api/heures-par-annee` | heures par année et par compétence |
 | `GET /api/competences`, `GET /api/competence/:id` | compétences du BUT |
-| `GET /api/competence/:id/preuves` | preuves d'une compétence, avec leur source |
+| `GET /api/competence/:id/preuves` | preuves d'une compétence, avec leur source et leurs captures |
 | `GET /api/projets?type=…&techno=…` | projets, filtrables par type et par technologie |
 | `GET /api/projet/:id` | un projet, ses technologies et ses preuves |
 | `GET /api/technologies` | technologies et nombre de projets |

@@ -1,0 +1,926 @@
+[
+ {
+  "titre": "Structure JSON hiérarchique des conférences",
+  "texte": "Les données extraites sont rangées en trois niveaux (metadata, conferences, delays) : les délais dépendent des conférences, et la structure reflète cette relation.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC21.01"
+  ],
+  "images": [
+   [
+    "s301_json_hierarchique.png",
+    null
+   ]
+  ],
+  "jour": 8
+ },
+ {
+  "titre": "Classe DatePatternMatcher : formats de dates hétérogènes",
+  "texte": "Plusieurs expressions régulières isolent les formats de dates rencontrés sur les sites (DD/MM/YYYY ou Month DD, YYYY) au lieu d'une règle unique trop permissive.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC21.03"
+  ],
+  "images": [
+   [
+    "s301_date_pattern_matcher.png",
+    null
+   ]
+  ],
+  "jour": 8
+ },
+ {
+  "titre": "Section « Dépannage » du README",
+  "texte": "Le README documente les problèmes courants (aucune date trouvée, erreurs de parsing, délais dépassés) et le mode debug.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC21.04"
+  ],
+  "images": [
+   [
+    "s301_readme_depannage.png",
+    null
+   ]
+  ],
+  "jour": 8
+ },
+ {
+  "titre": "Bibliothèques Python du collecteur",
+  "texte": "Le collecteur s'appuie sur des briques existantes : requests, BeautifulSoup, python-dateutil, json.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC21.05"
+  ],
+  "images": [
+   [
+    "s301_imports.png",
+    null
+   ]
+  ],
+  "jour": 8
+ },
+ {
+  "titre": "Test d'hypothèse du tableau de bord tennis",
+  "texte": "Partie 2 : test d'hypothèse avec vérification préalable de la normalité (Shapiro-Wilk), calcul de la p-value et interprétation. Le choix d'un test de Student plutôt qu'un test Z est argumenté : échantillon de moins de 30 joueuses et écart-type de la population inconnu.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC22.05",
+   "AC23.02"
+  ],
+  "images": [
+   [
+    "s301_test_hypothese.png",
+    null
+   ]
+  ],
+  "jour": 9
+ },
+ {
+  "titre": "Choix de BeautifulSoup plutôt que Selenium",
+  "texte": "Partie 1 : BeautifulSoup est retenu pour les sites statiques parce qu'il est plus rapide que Selenium, et l'extraction combine plusieurs motifs de dates plutôt qu'un seul.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC23.02"
+  ],
+  "images": [],
+  "jour": 9
+ },
+ {
+  "titre": "README multi-niveaux et tableau de bord pédagogique",
+  "texte": "Partie 1 : README pour les utilisateurs, les développeurs et les administrateurs, et rapports HTML interactifs. Partie 2 : tableau de bord à 7 vues avec l'explication des formules.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC23.01"
+  ],
+  "images": [
+   [
+    "s301_rapport_conferences.png",
+    "Rapport HTML des conférences extraites"
+   ],
+   [
+    "s301_dashboard_wta.png",
+    "Menu du tableau de bord WTA"
+   ]
+  ],
+  "jour": 9
+ },
+ {
+  "titre": "Architecture modulaire extraction / calendrier",
+  "texte": "Le module d'extraction (backend) et le calendrier (frontend) sont séparés et communiquent par un fichier JSON, parce que les conférences et les délais ne se mettent pas à jour au même rythme.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC24.01VCOD"
+  ],
+  "images": [
+   [
+    "s301_architecture.png",
+    null
+   ]
+  ],
+  "jour": 9
+ },
+ {
+  "titre": "Quatre formats de sortie et FullCalendar",
+  "texte": "Un seul traitement produit quatre sorties (JSON, HTML, ICS, index) ; le JSON alimente directement le calendrier FullCalendar et les fichiers ICS s'importent dans un agenda.",
+  "sae": "SAE3.VCOD.01",
+  "source": "Collecte automatisée de données web (SAÉ 3.01)",
+  "acs": [
+   "AC24.02VCOD"
+  ],
+  "images": [
+   [
+    "s301_formats_sortie.png",
+    null
+   ]
+  ],
+  "jour": 9
+ },
+ {
+  "titre": "Schéma en étoile de l'entrepôt",
+  "texte": "Table de faits des subventions et dimensions temps, localisation, association et programme, définies avant le premier job ETL.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC21.01"
+  ],
+  "images": [
+   [
+    "s302_schema_etoile.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "Job Master_ETL : orchestration de la chaîne",
+  "texte": "Le job maître enchaîne les sous-jobs (extraction, normalisation, chargement des dimensions puis des faits) : chaque couche a sa responsabilité dans la qualité des données finales.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC21.02"
+  ],
+  "images": [
+   [
+    "s302_master_etl.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "tMap de Normalisation_2012 : formats variés",
+  "texte": "Le composant tMap harmonise des colonnes dont le format varie d'une année de subventions à l'autre.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC21.03"
+  ],
+  "images": [
+   [
+    "s302_tmap_normalisation.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "tFilterRow et tLogRow pour la validation",
+  "texte": "Les lignes sont filtrées puis tracées dans les journaux pour contrôler ce qui est chargé.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC21.04"
+  ],
+  "images": [
+   [
+    "s302_tfilterrow_tlogrow.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "tUniqRow pour le dédoublonnage",
+  "texte": "Le dédoublonnage s'appuie sur un composant Talend existant, sans écrire de code.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC21.05"
+  ],
+  "images": [
+   [
+    "s302_tuniqrow.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "Tableau de bord Power BI des subventions",
+  "texte": "Indicateurs adaptés aux subventions publiques (montant total, nombre d'associations et de départements, taux de croissance annuel calculé en DAX).",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC23.03"
+  ],
+  "images": [
+   [
+    "s302_powerbi.png",
+    "Vue d'ensemble"
+   ],
+   [
+    "s302_powerbi_dax.png",
+    "Mesure DAX du taux de croissance"
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "Arborescence du projet Talend",
+  "texte": "Les jobs sont rangés par étape (dimensions, faits, ETL, orchestration) pour un projet lisible et cohérent.",
+  "sae": "SAE3.02",
+  "source": "Entrepôt de données des subventions publiques (SAÉ 3.02)",
+  "acs": [
+   "AC23.04"
+  ],
+  "images": [
+   [
+    "s302_arborescence_talend.png",
+    null
+   ]
+  ],
+  "jour": 10
+ },
+ {
+  "titre": "Évolution mensuelle des consultations (2007-2024)",
+  "texte": "Analyse exploratoire de la série observée, avec sa moyenne et le seuil épidémique, avant toute modélisation.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC22.01"
+  ],
+  "images": [
+   [
+    "s303_evolution_mensuelle.jpg",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Composante saisonnière de la série",
+  "texte": "La décomposition met en évidence la saisonnalité, propre aux données temporelles par opposition aux données transversales.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC22.02"
+  ],
+  "images": [
+   [
+    "s303_saisonnalite.jpg",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Hypothèse d'un effet du COVID jusqu'en 2024",
+  "texte": "Un modèle entraîné avant mars 2020 est appliqué à la période qui suit ; la comparaison visuelle et l'erreur quadratique moyenne confrontent l'hypothèse à la réalité.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC22.04"
+  ],
+  "images": [
+   [
+    "s303_hypothese_covid.png",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Commentaire du faible R² de la tendance",
+  "texte": "Un R² de 0,01 pour la tendance seule montre que l'ajustement linéaire ne suffit pas : il faut tenir compte de la saisonnalité.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC22.05"
+  ],
+  "images": [
+   [
+    "s303_r2_faible.png",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Seuil épidémique sur le graphique",
+  "texte": "Le seuil épidémique replace la série dans son contexte sanitaire : il est régulièrement dépassé pendant les pics saisonniers, surtout entre 2008 et 2016.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC23.01"
+  ],
+  "images": [
+   [
+    "s303_seuil_epidemique.png",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Validation de la tendance par triangulation",
+  "texte": "Trois méthodes d'estimation de la tendance (droite de Mayer, moindres carrés, polynôme de degré 2) donnent des résultats presque superposés, ce qui valide les estimations.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC23.02"
+  ],
+  "images": [
+   [
+    "s303_triangulation.png",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Quantification des effets saisonniers",
+  "texte": "Le profil saisonnier chiffre l'amplitude : environ +30 000 consultations en juin et −25 000 en août, soit un écart d'environ 55 000.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC23.03"
+  ],
+  "images": [
+   [
+    "s303_profil_saisonnier.png",
+    null
+   ]
+  ],
+  "jour": 11
+ },
+ {
+  "titre": "Documentation technique en sections",
+  "texte": "Le document d'analyse est organisé en sections Markdown, de la description de la série aux prévisions.",
+  "sae": "SAE3.03",
+  "source": "Séries temporelles de la varicelle (SAÉ 3.03)",
+  "acs": [
+   "AC23.04"
+  ],
+  "images": [],
+  "jour": 11
+ },
+ {
+  "titre": "Triade CIA et acteurs du traitement",
+  "texte": "Schéma de la triade confidentialité, intégrité, disponibilité et identification des acteurs (responsable de traitement, sous-traitant, DPO) : l'organisation des données porte aussi des contraintes légales.",
+  "sae": "SAE3.VCOD.04",
+  "source": "Conformité réglementaire des données (SAÉ 3.04)",
+  "acs": [
+   "AC21.01"
+  ],
+  "images": [],
+  "jour": 12
+ },
+ {
+  "titre": "Cas d'étude : anonymat d'un sondage",
+  "texte": "Analyse du cas du sondage de Julie (anonymat ou pseudonymat) et d'une entreprise japonaise avec des expatriés français : des variables combinées peuvent permettre de réidentifier un répondant.",
+  "sae": "SAE3.VCOD.04",
+  "source": "Conformité réglementaire des données (SAÉ 3.04)",
+  "acs": [
+   "AC22.05"
+  ],
+  "images": [],
+  "jour": 12
+ },
+ {
+  "titre": "Mesures de sécurité argumentées",
+  "texte": "Argumentation des mesures proposées : gestionnaire de mots de passe, authentification multifacteur, VPN, chiffrement.",
+  "sae": "SAE3.VCOD.04",
+  "source": "Conformité réglementaire des données (SAÉ 3.04)",
+  "acs": [
+   "AC23.02"
+  ],
+  "images": [],
+  "jour": 12
+ },
+ {
+  "titre": "Notes sur l'hygiène informatique",
+  "texte": "Documentation des règles d'hygiène informatique et de la triade CIA.",
+  "sae": "SAE3.VCOD.04",
+  "source": "Conformité réglementaire des données (SAÉ 3.04)",
+  "acs": [
+   "AC23.04"
+  ],
+  "images": [],
+  "jour": 12
+ },
+ {
+  "titre": "Mise en situation : DPO, RSSI et direction",
+  "texte": "Adaptation du discours sur la protection des données selon l'interlocuteur : DPO, RSSI ou direction.",
+  "sae": "SAE3.VCOD.04",
+  "source": "Conformité réglementaire des données (SAÉ 3.04)",
+  "acs": [
+   "AC23.05"
+  ],
+  "images": [],
+  "jour": 12
+ },
+ {
+  "titre": "Section « Fichier Excel » du README",
+  "texte": "Le README décrit chaque feuille du fichier source et ses colonnes : c'est le contrat de données entre le fichier et l'application.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC21.01"
+  ],
+  "images": [
+   [
+    "s401_readme_fichier_excel.png",
+    null
+   ]
+  ],
+  "jour": 6
+ },
+ {
+  "titre": "Fonction load_all_excel() : une seule source",
+  "texte": "Un seul fichier alimente tout le tableau de bord ; une modification de la source se propage à tous les onglets.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC21.02"
+  ],
+  "images": [
+   [
+    "s401_load_all_excel.png",
+    null
+   ]
+  ],
+  "jour": 6
+ },
+ {
+  "titre": "Fonction build_orders() : feuilles hétérogènes",
+  "texte": "Les commandes sont reconstruites à partir de feuilles Excel de structures différentes (identifiants résolus en noms, colonnes renommées).",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC21.03"
+  ],
+  "images": [
+   [
+    "s401_build_orders.png",
+    null
+   ]
+  ],
+  "jour": 6
+ },
+ {
+  "titre": "Fonction _require() et README",
+  "texte": "Un fichier manquant déclenche une erreur explicite qui indique quoi faire.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC21.04"
+  ],
+  "images": [
+   [
+    "s401_require.png",
+    null
+   ]
+  ],
+  "jour": 6
+ },
+ {
+  "titre": "Imports Dash et composants Bootstrap",
+  "texte": "L'application assemble Dash, dash_bootstrap_components, Plotly et pandas plutôt que de tout réimplémenter.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC21.05"
+  ],
+  "images": [
+   [
+    "s401_imports.png",
+    null
+   ]
+  ],
+  "jour": 6
+ },
+ {
+  "titre": "Contexte économique dans les indicateurs",
+  "texte": "Les économies de l'étudiant sont calculées par rapport à un repas à 8 € dans un restaurant classique.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC23.01"
+  ],
+  "images": [
+   [
+    "s401_kpi_economies.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Graphiques justifiés par des questions métier",
+  "texte": "Chaque graphique répond à une décision : le top 5 des plats oriente les achats, la répartition par filière aide à calibrer les capacités d'accueil.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC23.02"
+  ],
+  "images": [
+   [
+    "s401_top_plats.png",
+    "Plats les plus commandés"
+   ],
+   [
+    "s401_commandes_filiere.png",
+    "Commandes par filière"
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Quatre indicateurs pour le gestionnaire",
+  "texte": "Total dépensé, réservations, satisfaction et économies, formulés pour un gestionnaire et non en termes techniques.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC23.03"
+  ],
+  "images": [
+   [
+    "s401_kpis.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Valeurs manquantes et cas limites",
+  "texte": "L'espace personnel vérifie la présence de chaque colonne et gère les données incomplètes sans planter.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC23.04"
+  ],
+  "images": [
+   [
+    "s401_valeurs_manquantes.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Analyse préalable : deux profils, cinq onglets",
+  "texte": "Deux profils aux besoins distincts (administrateur, étudiant) structurent l'application en cinq onglets différenciés. Mot de passe masqué sur la capture.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC24.01VCOD"
+  ],
+  "images": [
+   [
+    "s401_profils_utilisateurs.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Fonction _ensure_next_weeks() : menus automatiques",
+  "texte": "Les menus des quatre semaines suivantes sont générés automatiquement, sans intervention de l'administrateur.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC24.02VCOD"
+  ],
+  "images": [
+   [
+    "s401_ensure_next_weeks.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Choix de Dash pour le tableau de bord",
+  "texte": "Dash pour des graphiques interactifs en Python, pandas pour lire le fichier Excel, Bootstrap pour une mise en page adaptable.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC24.03VCOD"
+  ],
+  "images": [
+   [
+    "s401_choix_dash.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Bloc de démarrage de l'application",
+  "texte": "Le bloc __main__ montre les phases du cycle de vie : chargement des données, vérifications, configuration, lancement en mode debug. Mot de passe masqué sur la capture.",
+  "sae": "SAE4.VCOD.01",
+  "source": "Tableau de bord du restaurant universitaire (SAÉ 4.01)",
+  "acs": [
+   "AC24.04VCOD"
+  ],
+  "images": [
+   [
+    "s401_demarrage.png",
+    null
+   ]
+  ],
+  "jour": 7
+ },
+ {
+  "titre": "Préparation des variables des candidats",
+  "texte": "La fonction de chargement structure les variables (sexe, statut boursier, type de bac, zone géographique) après avoir compris la logique de la filière Santé de l'UBFC.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC21.01"
+  ],
+  "images": [
+   [
+    "s402_data_preparation.png",
+    null
+   ]
+  ],
+  "jour": 3
+ },
+ {
+  "titre": "Unification de la palette de couleurs",
+  "texte": "Les graphiques de classification utilisaient deux palettes différentes ; une palette unique et une légende explicite ont corrigé l'incohérence.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC21.04"
+  ],
+  "images": [
+   [
+    "s402_palette_code.png",
+    "Code"
+   ],
+   [
+    "s402_palette_rapport.png",
+    "Rapport de modifications"
+   ]
+  ],
+  "jour": 3
+ },
+ {
+  "titre": "Packages R de l'application Shiny",
+  "texte": "L'application s'appuie sur des packages existants : shiny et shinydashboard, FactoMineR et factoextra, leaflet, DT, ggplot2.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC21.05"
+  ],
+  "images": [
+   [
+    "s402_packages.png",
+    null
+   ]
+  ],
+  "jour": 3
+ },
+ {
+  "titre": "Classification sur les résultats de l'ACM",
+  "texte": "La classification (fonction HCPC de FactoMineR) explore la structure des données sans hypothèse préalable sur les groupes : c'est de l'exploration, pas de la modélisation.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC22.01"
+  ],
+  "images": [
+   [
+    "s402_hcpc.png",
+    null
+   ]
+  ],
+  "jour": 4
+ },
+ {
+  "titre": "ACM sur les variables qualitatives des candidats",
+  "texte": "L'analyse des correspondances multiples résume l'information portée par de nombreuses variables qualitatives en quelques axes.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC22.03"
+  ],
+  "images": [
+   [
+    "s402_acm.png",
+    null
+   ]
+  ],
+  "jour": 4
+ },
+ {
+  "titre": "CAH, dendrogramme et courbe d'inertie",
+  "texte": "La classification ascendante hiérarchique sur les coordonnées de l'ACM forme des groupes homogènes ; le nombre de classes est choisi avec la courbe d'inertie.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC22.03"
+  ],
+  "images": [
+   [
+    "s402_dendrogramme.png",
+    "Code du dendrogramme"
+   ],
+   [
+    "s402_courbe_inertie.png",
+    "Onglet Classification de l'application"
+   ]
+  ],
+  "jour": 4
+ },
+ {
+  "titre": "Limite : la zone géographique est une variable active",
+  "texte": "La zone géographique a servi à construire les classes : dire qu'elle est le facteur le plus discriminant est en partie circulaire. L'interprétation est reformulée en homogénéité des profils dans une même zone.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC22.05"
+  ],
+  "images": [
+   [
+    "s402_limite_code.png",
+    "Code"
+   ],
+   [
+    "s402_limite_rapport.png",
+    "Rapport de changements"
+   ]
+  ],
+  "jour": 4
+ },
+ {
+  "titre": "Contexte du commanditaire et biais territorial",
+  "texte": "Le rapport de changements et le message destiné au commanditaire traduisent les classes en enjeux d'admission, avec l'objectif de réduire le biais territorial.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC23.01"
+  ],
+  "images": [
+   [
+    "s402_rapport_changements.png",
+    "Rapport de changements"
+   ],
+   [
+    "s402_zones.png",
+    "Regroupement des zones géographiques"
+   ],
+   [
+    "s402_message_commanditaire.png",
+    "Message au commanditaire"
+   ]
+  ],
+  "jour": 5
+ },
+ {
+  "titre": "Courbe du coude et tableau d'inertie",
+  "texte": "Le choix de trois classes est justifié par la courbe du coude et par un tableau qui compare les partitions de 2 à 6 classes.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC23.02"
+  ],
+  "images": [
+   [
+    "s402_courbe_coude.png",
+    null
+   ]
+  ],
+  "jour": 5
+ },
+ {
+  "titre": "Associations du V de Cramer commentées",
+  "texte": "Seules les associations avec un V de Cramer d'au moins 0,30 sont retenues, et chacune reçoit une interprétation au lieu d'une simple carte de chaleur.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC23.03"
+  ],
+  "images": [
+   [
+    "s402_v_cramer.png",
+    null
+   ]
+  ],
+  "jour": 5
+ },
+ {
+  "titre": "Correction du libellé « Non-boursiers »",
+  "texte": "Un groupe étiqueté « Non-boursiers » contenait environ 35 % de boursiers, soit la moyenne nationale : le libellé dépend désormais du taux réel et une ligne de référence à 35 % est ajoutée.",
+  "sae": "SAE4.02",
+  "source": "Analyse multivariée de candidatures (SAÉ 4.02)",
+  "acs": [
+   "AC23.04"
+  ],
+  "images": [
+   [
+    "s402_non_boursiers.png",
+    null
+   ]
+  ],
+  "jour": 5
+ },
+ {
+  "titre": "Détection d'anomalies multivariée",
+  "texte": "Un modèle IsolationForest synthétise 8 variables par prestataire (scores partiels, ancienneté, volume de missions) pour repérer les profils atypiques, sans étiquettes disponibles.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC22.03"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Robustesse du score de fiabilité par simulation Monte Carlo",
+  "texte": "10 000 simulations avec des poids perturbés de ±20 % : le classement des prestataires reste stable (corrélation de Spearman de 0,9748), donc la pondération est conservée.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC22.04"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Choix du paramètre de contamination",
+  "texte": "Le taux de contamination de 0,05 est documenté avec son effet sur les faux positifs et testé sur 5 profils synthétiques injectés.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC22.05"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Suite de 132 tests automatisés",
+  "texte": "Tests pytest, Jest et Playwright exécutés en intégration continue avec GitHub Actions : aucune fusion sur la branche principale si un test échoue.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC21.04"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Choix des outils selon les contraintes",
+  "texte": "Next.js, Django Ninja, scikit-learn, Dash et Plotly, Keycloak : chaque brique est choisie pour une contrainte du projet, par exemple Dash parce que Power BI ne pouvait pas se connecter à la base hébergée.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC21.05",
+   "AC24.03VCOD"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Tableau de bord à 4 onglets",
+  "texte": "Disparités territoriales, santé de la plateforme, qualité et revenus, actions de recrutement : chaque onglet répond à une question de décision pour un public précis.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC23.03"
+  ],
+  "images": [],
+  "jour": 13
+ },
+ {
+  "titre": "Automatisation des tâches de la plateforme",
+  "texte": "Intégration continue et tâches asynchrones (validation des missions à J+1, notifications, expiration des badges) : le système reste fiable sans intervention de l'équipe.",
+  "sae": "STAGE.S4",
+  "source": "STAGE",
+  "acs": [
+   "AC24.02VCOD"
+  ],
+  "images": [],
+  "jour": 13
+ }
+]

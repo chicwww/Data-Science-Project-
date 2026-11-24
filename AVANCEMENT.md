@@ -142,11 +142,11 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Refonte de la base sur le programme national du BUT SD : schéma `referentiel` (compétences, composantes essentielles, niveaux, 54 AC, 30 SAÉ, stages et portfolios) et schéma `portfolio` ; une preuve peut démontrer plusieurs AC et se rattache à une SAÉ au plus ; règles de cohérence vérifiées par la base
 - Corrections : les matières de BUT1 rattachées à C4 passent en C1 (C4 commence en 2e année) ; stage Serviciale rattaché au stage officiel du S4, portfolio rattaché au portfolio du S5
 - Ajout de la publication « Entre Raças e Papéis » (Caminhos da Leitura, Ethale Publishing, 2024) avec un extrait en annexe, et de la distinction BSGCT 2026 avec sa date ; maquette mise à jour avec le nouveau schéma de la base, pages HTML de la maquette remplacées par leurs images
+- Preuves réelles tirées de mes fiches portfolio : 60 preuves (SAÉ 3.01 à 4.02 et stage) qui couvrent tous les AC du niveau 2 de C1, C2, C3 et du niveau 1 de C4 ; 5 projets de SAÉ ajoutés ; captures d'écran rangées dans une table `preuve_image` ; auto-évaluation et visa du tuteur par AC dans une table `evaluation_ac`, affichés sur la page Compétences
 
 ### À faire ensuite
 - TD3, exercice 1 : schéma relationnel reliant toutes les tables, avec une table des preuves (image et/ou texte), à faire valider par l'enseignante
 - TD3, exercices 4 et 5 : intégrer la table des preuves dans `bdd/init_db.sql`, ajouter les routes d'accès à une preuve et à toutes les preuves, les afficher dans le site
-- Remplacer les images de test par les preuves du portfolio
 - Relire et compléter `data/projets.csv`, puis transférer les données dans la base
 
 ## Retards, difficultés et changements de planning

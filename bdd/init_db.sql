@@ -601,6 +601,7 @@ CREATE TYPE portfolio.type_experience AS ENUM ('Alternance', 'Stage', 'Expérien
 CREATE TYPE portfolio.type_projet AS ENUM ('Projet de formation', 'Projet personnel');
 CREATE TYPE portfolio.type_certificat AS ENUM ('Certificat', 'Distinction');
 CREATE TYPE portfolio.niveau_langue AS ENUM ('Élémentaire', 'Professionnel', 'Langue maternelle ou bilingue');
+CREATE TYPE portfolio.niveau_acquisition AS ENUM ('Non acquis', 'En cours d''acquisition', 'Acquis');
 
 CREATE TABLE formation (
     id_formation  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -640,7 +641,7 @@ CREATE TABLE technologie (
     id_techno integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nom       text NOT NULL UNIQUE,
     categorie text NOT NULL CHECK (categorie IN ('Langage', 'Base de données', 'Visualisation',
-                                                 'Machine learning', 'Data engineering', 'Web', 'Outil'))
+                                                 'Machine learning', 'Statistique', 'Data engineering', 'Web', 'Outil'))
 );
 
 -- Un projet utilise plusieurs technologies, une technologie sert à plusieurs projets (N-N)
@@ -674,14 +675,12 @@ CREATE TABLE langue (
 -- se rattache à UNE SAÉ au plus, et démontre UN OU PLUSIEURS AC (table preuve_ac)
 CREATE TABLE preuve (
     id_preuve     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    titre         text NOT NULL,
-    texte         text,
-    fichier       text,
+    titre         text NOT NULL UNIQUE,
+    texte         text NOT NULL,                     -- ce que la preuve montre
     code_sae      varchar(16) REFERENCES referentiel.sae(code_sae),
     id_projet     integer REFERENCES projet(id_projet) ON DELETE CASCADE,
     id_experience integer REFERENCES experience(id_experience) ON DELETE CASCADE,
     id_certificat integer REFERENCES certificat(id_certificat) ON DELETE CASCADE,
-    CHECK (texte IS NOT NULL OR fichier IS NOT NULL),                    -- image et/ou texte
     CHECK (num_nonnulls(id_projet, id_experience, id_certificat) = 1)    -- une seule source
 );
 CREATE INDEX ON preuve (code_sae);
@@ -696,6 +695,22 @@ CREATE TABLE preuve_ac (
     PRIMARY KEY (id_preuve, code_ac)
 );
 CREATE INDEX ON preuve_ac (code_ac);
+
+-- Une preuve a zéro, une ou plusieurs captures d'écran, dans un ordre donné (1-N)
+CREATE TABLE preuve_image (
+    id_preuve integer  NOT NULL REFERENCES preuve(id_preuve) ON DELETE CASCADE,
+    ordre     smallint NOT NULL CHECK (ordre > 0),
+    fichier   text     NOT NULL UNIQUE CHECK (fichier ~ '^[a-z0-9_]+\.(png|jpg)$'),  -- dans client/preuves/
+    legende   text,
+    PRIMARY KEY (id_preuve, ordre)
+);
+
+-- Auto-évaluation de chaque AC (fiches portfolio) et visa du tuteur s'il existe
+CREATE TABLE evaluation_ac (
+    code_ac         referentiel.code_ac PRIMARY KEY REFERENCES referentiel.apprentissage_critique(code_ac),
+    auto_evaluation niveau_acquisition NOT NULL,
+    visa_tuteur     niveau_acquisition                -- vide = pas encore de visa
+);
 
 -- Règle de cohérence : si la preuve est rattachée à une SAÉ, chaque AC démontré
 -- doit appartenir à une compétence ciblée par cette SAÉ (programme national)
@@ -744,8 +759,18 @@ INSERT INTO experience (intitule, structure, type, lieu, date_debut, date_fin, d
 INSERT INTO projet (titre, type, annee, description, code_sae) VALUES
 ('Portfolio de visualisation de données', 'Projet de formation', 2026,
  'Ce site : base PostgreSQL lancée dans Docker, serveur Express qui expose une API, pages qui affichent les données avec Chart.js.', 'PORTFOLIO.S5'),
-('Analyse multivariée de candidatures (SAE 402)', 'Projet de formation', 2026,
- 'Analyse de données d''admission avec KNIME, anonymisation avec ARX et restitution dans une application R Shiny.', 'SAE4.02'),
+('Analyse multivariée de candidatures (SAÉ 4.02)', 'Projet de formation', 2026,
+ 'Restitution d''une analyse multivariée des candidatures à la filière Santé de l''UBFC : préparation avec KNIME, anonymisation avec ARX (k-anonymat k = 5, l-diversité l = 3), ACM puis classification ascendante hiérarchique en 3 classes, application R Shiny pour un commanditaire non statisticien. Projet en équipe de 3 : 80 h au total, dont 41 h pour ma part (anonymisation, application Shiny et analyse statistique).', 'SAE4.02'),
+('Tableau de bord du restaurant universitaire (SAÉ 4.01)', 'Projet de formation', 2026,
+ 'Application Dash de réservation de repas d''un restaurant universitaire, alimentée par un fichier Excel : deux profils (administrateur et étudiant), cinq onglets, indicateurs pour le gestionnaire et génération automatique des menus des semaines suivantes.', 'SAE4.VCOD.01'),
+('Collecte automatisée de données web (SAÉ 3.01)', 'Projet de formation', 2025,
+ 'Partie 1 : extraction automatique des dates clés de conférences scientifiques (BeautifulSoup, expressions régulières), exportées en JSON, HTML et ICS et affichées dans un calendrier FullCalendar servi par Flask. Partie 2 : tableau de bord d''analyse des joueuses du top 50 WTA, avec tests d''hypothèse.', 'SAE3.VCOD.01'),
+('Entrepôt de données des subventions publiques (SAÉ 3.02)', 'Projet de formation', 2025,
+ 'Entrepôt en étoile sur les subventions publiques aux associations de 2012 à 2016 : jobs ETL Talend (nettoyage, normalisation, dédoublonnage, chargement des dimensions et des faits, orchestration) et tableau de bord Power BI.', 'SAE3.02'),
+('Séries temporelles de la varicelle (SAÉ 3.03)', 'Projet de formation', 2025,
+ 'Consultations mensuelles pour varicelle de 2007 à 2024 (Réseau Sentinelles) : analyse exploratoire, décomposition tendance et saisonnalité, comparaison de méthodes d''estimation de la tendance, et confrontation d''un modèle entraîné avant mars 2020 à la période qui suit.', 'SAE3.03'),
+('Conformité réglementaire des données (SAÉ 3.04)', 'Projet de formation', 2025,
+ 'Protection des données et RGPD : triade confidentialité, intégrité, disponibilité, acteurs du traitement, cas d''étude sur l''anonymat et mises en situation face à un DPO, un RSSI ou une direction.', 'SAE3.VCOD.04'),
 ('Atlas démographique des communes françaises', 'Projet personnel', 2026,
  'Exploration et visualisation des données INSEE 2016-2022 sur les communes françaises.', NULL),
 ('BRICOLIB : location d''outils de bricolage (SAÉ)', 'Projet de formation', 2025,
@@ -761,7 +786,10 @@ INSERT INTO technologie (nom, categorie) VALUES
 ('Shiny', 'Visualisation'), ('Streamlit', 'Visualisation'), ('Chart.js', 'Visualisation'),
 ('scikit-learn', 'Machine learning'),
 ('HTML', 'Web'), ('Node.js', 'Web'), ('Express', 'Web'),
-('KNIME', 'Outil'), ('ARX', 'Outil'), ('Docker', 'Outil');
+('KNIME', 'Outil'), ('ARX', 'Outil'), ('Docker', 'Outil'),
+('Dash', 'Visualisation'), ('Leaflet', 'Visualisation'), ('FactoMineR', 'Statistique'),
+('Talend', 'Data engineering'), ('BeautifulSoup', 'Data engineering'), ('Selenium', 'Data engineering'),
+('Flask', 'Web');
 
 -- (titre du projet, nom de la technologie) : on retrouve les identifiants par jointure
 INSERT INTO projet_technologie (id_projet, id_techno)
@@ -771,8 +799,17 @@ FROM (VALUES
     ('Portfolio de visualisation de données', 'Docker'), ('Portfolio de visualisation de données', 'Node.js'),
     ('Portfolio de visualisation de données', 'Express'), ('Portfolio de visualisation de données', 'JavaScript'),
     ('Portfolio de visualisation de données', 'HTML'), ('Portfolio de visualisation de données', 'Chart.js'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'KNIME'), ('Analyse multivariée de candidatures (SAE 402)', 'ARX'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'R'), ('Analyse multivariée de candidatures (SAE 402)', 'Shiny'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'KNIME'), ('Analyse multivariée de candidatures (SAÉ 4.02)', 'ARX'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'R'), ('Analyse multivariée de candidatures (SAÉ 4.02)', 'Shiny'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'FactoMineR'), ('Analyse multivariée de candidatures (SAÉ 4.02)', 'Leaflet'),
+    ('Tableau de bord du restaurant universitaire (SAÉ 4.01)', 'Python'), ('Tableau de bord du restaurant universitaire (SAÉ 4.01)', 'Dash'),
+    ('Tableau de bord du restaurant universitaire (SAÉ 4.01)', 'Plotly'), ('Tableau de bord du restaurant universitaire (SAÉ 4.01)', 'pandas'),
+    ('Collecte automatisée de données web (SAÉ 3.01)', 'Python'), ('Collecte automatisée de données web (SAÉ 3.01)', 'BeautifulSoup'),
+    ('Collecte automatisée de données web (SAÉ 3.01)', 'Selenium'), ('Collecte automatisée de données web (SAÉ 3.01)', 'Flask'),
+    ('Collecte automatisée de données web (SAÉ 3.01)', 'HTML'),
+    ('Entrepôt de données des subventions publiques (SAÉ 3.02)', 'Talend'),
+    ('Entrepôt de données des subventions publiques (SAÉ 3.02)', 'Power BI'),
+    ('Séries temporelles de la varicelle (SAÉ 3.03)', 'R'),
     ('Atlas démographique des communes françaises', 'Python'), ('Atlas démographique des communes françaises', 'pandas'),
     ('Atlas démographique des communes françaises', 'matplotlib'), ('Atlas démographique des communes françaises', 'Plotly'),
     ('Atlas démographique des communes françaises', 'HTML'),
@@ -843,38 +880,337 @@ INSERT INTO langue (nom, niveau) VALUES
 ('Portugais', 'Langue maternelle ou bilingue'), ('Anglais', 'Langue maternelle ou bilingue'),
 ('Français', 'Professionnel'), ('Espagnol', 'Professionnel'), ('Russe', 'Élémentaire');
 
--- Preuves : PROPOSITIONS À REMPLACER par les fiches de preuves
-INSERT INTO preuve (titre, texte, fichier, code_sae, id_projet, id_experience, id_certificat) VALUES
-('Reporting d''une analyse multivariée', 'Analyse multivariée des données d''admission (KNIME, R Shiny), après anonymisation avec ARX.', NULL, 'SAE4.02',
- (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAE 402)'), NULL, NULL),
-('Atlas démographique INSEE', 'Visualisations des données démographiques des communes.', NULL, NULL,
- (SELECT id_projet FROM projet WHERE titre = 'Atlas démographique des communes françaises'), NULL, NULL),
-('Chaîne de données FactoryFlow', 'Chaîne de traitement automatisée avec Airflow et dbt.', NULL, NULL,
- (SELECT id_projet FROM projet WHERE titre = 'Plateforme de données FactoryFlow'), NULL, NULL),
-('Portfolio versionné avec Git', 'Historique Git du portfolio et suivi de l''avancement.', NULL, 'PORTFOLIO.S5',
- (SELECT id_projet FROM projet WHERE titre = 'Portfolio de visualisation de données'), NULL, NULL),
-('Qualité et simulation chez Serviciale', 'Suite de 132 tests automatisés en CI/CD et score de fiabilité validé par simulation Monte Carlo.', NULL, 'STAGE.S4',
- NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
-('Certificat CS403', 'Cours de 42 h sur les bases de données modernes.', 'certificat_cs403.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'CS403%')),
-('Certificat AWS Database Offerings', 'Panorama des bases de données proposées par AWS.', 'certificat_aws.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule = 'AWS Database Offerings')),
-('Certificat Databricks', 'Plateforme Databricks pour les grands volumes de données.', 'certificat_databricks.png', NULL,
- NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'Databricks%'));
+-- Preuves : tirées de mes fiches portfolio (fiches AC, fiche SAÉ 4.02, fiche de stage).
+-- Les preuves du stage sont décrites sans capture : la plateforme du stage est confidentielle.
+INSERT INTO preuve (titre, texte, code_sae, id_projet, id_experience, id_certificat) VALUES
+('Structure JSON hiérarchique des conférences',
+ 'Les données extraites sont rangées en trois niveaux (metadata, conferences, delays) : les délais dépendent des conférences, et la structure reflète cette relation.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Classe DatePatternMatcher : formats de dates hétérogènes',
+ 'Plusieurs expressions régulières isolent les formats de dates rencontrés sur les sites (DD/MM/YYYY ou Month DD, YYYY) au lieu d''une règle unique trop permissive.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Section « Dépannage » du README',
+ 'Le README documente les problèmes courants (aucune date trouvée, erreurs de parsing, délais dépassés) et le mode debug.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Bibliothèques Python du collecteur',
+ 'Le collecteur s''appuie sur des briques existantes : requests, BeautifulSoup, python-dateutil, json.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Test d''hypothèse du tableau de bord tennis',
+ 'Partie 2 : test d''hypothèse avec vérification préalable de la normalité (Shapiro-Wilk), calcul de la p-value et interprétation. Le choix d''un test de Student plutôt qu''un test Z est argumenté : échantillon de moins de 30 joueuses et écart-type de la population inconnu.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Choix de BeautifulSoup plutôt que Selenium',
+ 'Partie 1 : BeautifulSoup est retenu pour les sites statiques parce qu''il est plus rapide que Selenium, et l''extraction combine plusieurs motifs de dates plutôt qu''un seul.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('README multi-niveaux et tableau de bord pédagogique',
+ 'Partie 1 : README pour les utilisateurs, les développeurs et les administrateurs, et rapports HTML interactifs. Partie 2 : tableau de bord à 7 vues avec l''explication des formules.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Architecture modulaire extraction / calendrier',
+ 'Le module d''extraction (backend) et le calendrier (frontend) sont séparés et communiquent par un fichier JSON, parce que les conférences et les délais ne se mettent pas à jour au même rythme.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Quatre formats de sortie et FullCalendar',
+ 'Un seul traitement produit quatre sorties (JSON, HTML, ICS, index) ; le JSON alimente directement le calendrier FullCalendar et les fichiers ICS s''importent dans un agenda.',
+ 'SAE3.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Collecte automatisée de données web (SAÉ 3.01)'), NULL, NULL),
+('Schéma en étoile de l''entrepôt',
+ 'Table de faits des subventions et dimensions temps, localisation, association et programme, définies avant le premier job ETL.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('Job Master_ETL : orchestration de la chaîne',
+ 'Le job maître enchaîne les sous-jobs (extraction, normalisation, chargement des dimensions puis des faits) : chaque couche a sa responsabilité dans la qualité des données finales.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('tMap de Normalisation_2012 : formats variés',
+ 'Le composant tMap harmonise des colonnes dont le format varie d''une année de subventions à l''autre.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('tFilterRow et tLogRow pour la validation',
+ 'Les lignes sont filtrées puis tracées dans les journaux pour contrôler ce qui est chargé.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('tUniqRow pour le dédoublonnage',
+ 'Le dédoublonnage s''appuie sur un composant Talend existant, sans écrire de code.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('Tableau de bord Power BI des subventions',
+ 'Indicateurs adaptés aux subventions publiques (montant total, nombre d''associations et de départements, taux de croissance annuel calculé en DAX).',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('Arborescence du projet Talend',
+ 'Les jobs sont rangés par étape (dimensions, faits, ETL, orchestration) pour un projet lisible et cohérent.',
+ 'SAE3.02', (SELECT id_projet FROM projet WHERE titre = 'Entrepôt de données des subventions publiques (SAÉ 3.02)'), NULL, NULL),
+('Évolution mensuelle des consultations (2007-2024)',
+ 'Analyse exploratoire de la série observée, avec sa moyenne et le seuil épidémique, avant toute modélisation.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Composante saisonnière de la série',
+ 'La décomposition met en évidence la saisonnalité, propre aux données temporelles par opposition aux données transversales.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Hypothèse d''un effet du COVID jusqu''en 2024',
+ 'Un modèle entraîné avant mars 2020 est appliqué à la période qui suit ; la comparaison visuelle et l''erreur quadratique moyenne confrontent l''hypothèse à la réalité.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Commentaire du faible R² de la tendance',
+ 'Un R² de 0,01 pour la tendance seule montre que l''ajustement linéaire ne suffit pas : il faut tenir compte de la saisonnalité.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Seuil épidémique sur le graphique',
+ 'Le seuil épidémique replace la série dans son contexte sanitaire : il est régulièrement dépassé pendant les pics saisonniers, surtout entre 2008 et 2016.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Validation de la tendance par triangulation',
+ 'Trois méthodes d''estimation de la tendance (droite de Mayer, moindres carrés, polynôme de degré 2) donnent des résultats presque superposés, ce qui valide les estimations.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Quantification des effets saisonniers',
+ 'Le profil saisonnier chiffre l''amplitude : environ +30 000 consultations en juin et −25 000 en août, soit un écart d''environ 55 000.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Documentation technique en sections',
+ 'Le document d''analyse est organisé en sections Markdown, de la description de la série aux prévisions.',
+ 'SAE3.03', (SELECT id_projet FROM projet WHERE titre = 'Séries temporelles de la varicelle (SAÉ 3.03)'), NULL, NULL),
+('Triade CIA et acteurs du traitement',
+ 'Schéma de la triade confidentialité, intégrité, disponibilité et identification des acteurs (responsable de traitement, sous-traitant, DPO) : l''organisation des données porte aussi des contraintes légales.',
+ 'SAE3.VCOD.04', (SELECT id_projet FROM projet WHERE titre = 'Conformité réglementaire des données (SAÉ 3.04)'), NULL, NULL),
+('Cas d''étude : anonymat d''un sondage',
+ 'Analyse du cas du sondage de Julie (anonymat ou pseudonymat) et d''une entreprise japonaise avec des expatriés français : des variables combinées peuvent permettre de réidentifier un répondant.',
+ 'SAE3.VCOD.04', (SELECT id_projet FROM projet WHERE titre = 'Conformité réglementaire des données (SAÉ 3.04)'), NULL, NULL),
+('Mesures de sécurité argumentées',
+ 'Argumentation des mesures proposées : gestionnaire de mots de passe, authentification multifacteur, VPN, chiffrement.',
+ 'SAE3.VCOD.04', (SELECT id_projet FROM projet WHERE titre = 'Conformité réglementaire des données (SAÉ 3.04)'), NULL, NULL),
+('Notes sur l''hygiène informatique',
+ 'Documentation des règles d''hygiène informatique et de la triade CIA.',
+ 'SAE3.VCOD.04', (SELECT id_projet FROM projet WHERE titre = 'Conformité réglementaire des données (SAÉ 3.04)'), NULL, NULL),
+('Mise en situation : DPO, RSSI et direction',
+ 'Adaptation du discours sur la protection des données selon l''interlocuteur : DPO, RSSI ou direction.',
+ 'SAE3.VCOD.04', (SELECT id_projet FROM projet WHERE titre = 'Conformité réglementaire des données (SAÉ 3.04)'), NULL, NULL),
+('Section « Fichier Excel » du README',
+ 'Le README décrit chaque feuille du fichier source et ses colonnes : c''est le contrat de données entre le fichier et l''application.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Fonction load_all_excel() : une seule source',
+ 'Un seul fichier alimente tout le tableau de bord ; une modification de la source se propage à tous les onglets.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Fonction build_orders() : feuilles hétérogènes',
+ 'Les commandes sont reconstruites à partir de feuilles Excel de structures différentes (identifiants résolus en noms, colonnes renommées).',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Fonction _require() et README',
+ 'Un fichier manquant déclenche une erreur explicite qui indique quoi faire.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Imports Dash et composants Bootstrap',
+ 'L''application assemble Dash, dash_bootstrap_components, Plotly et pandas plutôt que de tout réimplémenter.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Contexte économique dans les indicateurs',
+ 'Les économies de l''étudiant sont calculées par rapport à un repas à 8 € dans un restaurant classique.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Graphiques justifiés par des questions métier',
+ 'Chaque graphique répond à une décision : le top 5 des plats oriente les achats, la répartition par filière aide à calibrer les capacités d''accueil.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Quatre indicateurs pour le gestionnaire',
+ 'Total dépensé, réservations, satisfaction et économies, formulés pour un gestionnaire et non en termes techniques.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Valeurs manquantes et cas limites',
+ 'L''espace personnel vérifie la présence de chaque colonne et gère les données incomplètes sans planter.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Analyse préalable : deux profils, cinq onglets',
+ 'Deux profils aux besoins distincts (administrateur, étudiant) structurent l''application en cinq onglets différenciés. Mot de passe masqué sur la capture.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Fonction _ensure_next_weeks() : menus automatiques',
+ 'Les menus des quatre semaines suivantes sont générés automatiquement, sans intervention de l''administrateur.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Choix de Dash pour le tableau de bord',
+ 'Dash pour des graphiques interactifs en Python, pandas pour lire le fichier Excel, Bootstrap pour une mise en page adaptable.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Bloc de démarrage de l''application',
+ 'Le bloc __main__ montre les phases du cycle de vie : chargement des données, vérifications, configuration, lancement en mode debug. Mot de passe masqué sur la capture.',
+ 'SAE4.VCOD.01', (SELECT id_projet FROM projet WHERE titre = 'Tableau de bord du restaurant universitaire (SAÉ 4.01)'), NULL, NULL),
+('Préparation des variables des candidats',
+ 'La fonction de chargement structure les variables (sexe, statut boursier, type de bac, zone géographique) après avoir compris la logique de la filière Santé de l''UBFC.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Unification de la palette de couleurs',
+ 'Les graphiques de classification utilisaient deux palettes différentes ; une palette unique et une légende explicite ont corrigé l''incohérence.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Packages R de l''application Shiny',
+ 'L''application s''appuie sur des packages existants : shiny et shinydashboard, FactoMineR et factoextra, leaflet, DT, ggplot2.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Classification sur les résultats de l''ACM',
+ 'La classification (fonction HCPC de FactoMineR) explore la structure des données sans hypothèse préalable sur les groupes : c''est de l''exploration, pas de la modélisation.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('ACM sur les variables qualitatives des candidats',
+ 'L''analyse des correspondances multiples résume l''information portée par de nombreuses variables qualitatives en quelques axes.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('CAH, dendrogramme et courbe d''inertie',
+ 'La classification ascendante hiérarchique sur les coordonnées de l''ACM forme des groupes homogènes ; le nombre de classes est choisi avec la courbe d''inertie.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Limite : la zone géographique est une variable active',
+ 'La zone géographique a servi à construire les classes : dire qu''elle est le facteur le plus discriminant est en partie circulaire. L''interprétation est reformulée en homogénéité des profils dans une même zone.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Contexte du commanditaire et biais territorial',
+ 'Le rapport de changements et le message destiné au commanditaire traduisent les classes en enjeux d''admission, avec l''objectif de réduire le biais territorial.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Courbe du coude et tableau d''inertie',
+ 'Le choix de trois classes est justifié par la courbe du coude et par un tableau qui compare les partitions de 2 à 6 classes.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Associations du V de Cramer commentées',
+ 'Seules les associations avec un V de Cramer d''au moins 0,30 sont retenues, et chacune reçoit une interprétation au lieu d''une simple carte de chaleur.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Correction du libellé « Non-boursiers »',
+ 'Un groupe étiqueté « Non-boursiers » contenait environ 35 % de boursiers, soit la moyenne nationale : le libellé dépend désormais du taux réel et une ligne de référence à 35 % est ajoutée.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Détection d''anomalies multivariée',
+ 'Un modèle IsolationForest synthétise 8 variables par prestataire (scores partiels, ancienneté, volume de missions) pour repérer les profils atypiques, sans étiquettes disponibles.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Robustesse du score de fiabilité par simulation Monte Carlo',
+ '10 000 simulations avec des poids perturbés de ±20 % : le classement des prestataires reste stable (corrélation de Spearman de 0,9748), donc la pondération est conservée.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Choix du paramètre de contamination',
+ 'Le taux de contamination de 0,05 est documenté avec son effet sur les faux positifs et testé sur 5 profils synthétiques injectés.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Suite de 132 tests automatisés',
+ 'Tests pytest, Jest et Playwright exécutés en intégration continue avec GitHub Actions : aucune fusion sur la branche principale si un test échoue.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Choix des outils selon les contraintes',
+ 'Next.js, Django Ninja, scikit-learn, Dash et Plotly, Keycloak : chaque brique est choisie pour une contrainte du projet, par exemple Dash parce que Power BI ne pouvait pas se connecter à la base hébergée.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Tableau de bord à 4 onglets',
+ 'Disparités territoriales, santé de la plateforme, qualité et revenus, actions de recrutement : chaque onglet répond à une question de décision pour un public précis.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Automatisation des tâches de la plateforme',
+ 'Intégration continue et tâches asynchrones (validation des missions à J+1, notifications, expiration des badges) : le système reste fiable sans intervention de l''équipe.',
+ 'STAGE.S4', NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL);
 
+-- (titre de la preuve, AC démontré) : le déclencheur vérifie chaque ligne
 INSERT INTO preuve_ac (id_preuve, code_ac)
 SELECT p.id_preuve, v.code_ac
 FROM (VALUES
-    ('Reporting d''une analyse multivariée', 'AC22.03'), ('Reporting d''une analyse multivariée', 'AC33.01'),
-    ('Atlas démographique INSEE', 'AC13.05'),
-    ('Chaîne de données FactoryFlow', 'AC24.02VCOD'),
-    ('Portfolio versionné avec Git', 'AC34.04VCOD'),
-    ('Qualité et simulation chez Serviciale', 'AC21.04'), ('Qualité et simulation chez Serviciale', 'AC12.06'),
-    ('Certificat CS403', 'AC11.04'),
-    ('Certificat AWS Database Offerings', 'AC31.01'),
-    ('Certificat Databricks', 'AC34.01VCOD')
+    ('Structure JSON hiérarchique des conférences', 'AC21.01'),
+    ('Classe DatePatternMatcher : formats de dates hétérogènes', 'AC21.03'),
+    ('Section « Dépannage » du README', 'AC21.04'),
+    ('Bibliothèques Python du collecteur', 'AC21.05'),
+    ('Test d''hypothèse du tableau de bord tennis', 'AC22.05'),
+    ('Test d''hypothèse du tableau de bord tennis', 'AC23.02'),
+    ('Choix de BeautifulSoup plutôt que Selenium', 'AC23.02'),
+    ('README multi-niveaux et tableau de bord pédagogique', 'AC23.01'),
+    ('Architecture modulaire extraction / calendrier', 'AC24.01VCOD'),
+    ('Quatre formats de sortie et FullCalendar', 'AC24.02VCOD'),
+    ('Schéma en étoile de l''entrepôt', 'AC21.01'),
+    ('Job Master_ETL : orchestration de la chaîne', 'AC21.02'),
+    ('tMap de Normalisation_2012 : formats variés', 'AC21.03'),
+    ('tFilterRow et tLogRow pour la validation', 'AC21.04'),
+    ('tUniqRow pour le dédoublonnage', 'AC21.05'),
+    ('Tableau de bord Power BI des subventions', 'AC23.03'),
+    ('Arborescence du projet Talend', 'AC23.04'),
+    ('Évolution mensuelle des consultations (2007-2024)', 'AC22.01'),
+    ('Composante saisonnière de la série', 'AC22.02'),
+    ('Hypothèse d''un effet du COVID jusqu''en 2024', 'AC22.04'),
+    ('Commentaire du faible R² de la tendance', 'AC22.05'),
+    ('Seuil épidémique sur le graphique', 'AC23.01'),
+    ('Validation de la tendance par triangulation', 'AC23.02'),
+    ('Quantification des effets saisonniers', 'AC23.03'),
+    ('Documentation technique en sections', 'AC23.04'),
+    ('Triade CIA et acteurs du traitement', 'AC21.01'),
+    ('Cas d''étude : anonymat d''un sondage', 'AC22.05'),
+    ('Mesures de sécurité argumentées', 'AC23.02'),
+    ('Notes sur l''hygiène informatique', 'AC23.04'),
+    ('Mise en situation : DPO, RSSI et direction', 'AC23.05'),
+    ('Section « Fichier Excel » du README', 'AC21.01'),
+    ('Fonction load_all_excel() : une seule source', 'AC21.02'),
+    ('Fonction build_orders() : feuilles hétérogènes', 'AC21.03'),
+    ('Fonction _require() et README', 'AC21.04'),
+    ('Imports Dash et composants Bootstrap', 'AC21.05'),
+    ('Contexte économique dans les indicateurs', 'AC23.01'),
+    ('Graphiques justifiés par des questions métier', 'AC23.02'),
+    ('Quatre indicateurs pour le gestionnaire', 'AC23.03'),
+    ('Valeurs manquantes et cas limites', 'AC23.04'),
+    ('Analyse préalable : deux profils, cinq onglets', 'AC24.01VCOD'),
+    ('Fonction _ensure_next_weeks() : menus automatiques', 'AC24.02VCOD'),
+    ('Choix de Dash pour le tableau de bord', 'AC24.03VCOD'),
+    ('Bloc de démarrage de l''application', 'AC24.04VCOD'),
+    ('Préparation des variables des candidats', 'AC21.01'),
+    ('Unification de la palette de couleurs', 'AC21.04'),
+    ('Packages R de l''application Shiny', 'AC21.05'),
+    ('Classification sur les résultats de l''ACM', 'AC22.01'),
+    ('ACM sur les variables qualitatives des candidats', 'AC22.03'),
+    ('CAH, dendrogramme et courbe d''inertie', 'AC22.03'),
+    ('Limite : la zone géographique est une variable active', 'AC22.05'),
+    ('Contexte du commanditaire et biais territorial', 'AC23.01'),
+    ('Courbe du coude et tableau d''inertie', 'AC23.02'),
+    ('Associations du V de Cramer commentées', 'AC23.03'),
+    ('Correction du libellé « Non-boursiers »', 'AC23.04'),
+    ('Détection d''anomalies multivariée', 'AC22.03'),
+    ('Robustesse du score de fiabilité par simulation Monte Carlo', 'AC22.04'),
+    ('Choix du paramètre de contamination', 'AC22.05'),
+    ('Suite de 132 tests automatisés', 'AC21.04'),
+    ('Choix des outils selon les contraintes', 'AC21.05'),
+    ('Choix des outils selon les contraintes', 'AC24.03VCOD'),
+    ('Tableau de bord à 4 onglets', 'AC23.03'),
+    ('Automatisation des tâches de la plateforme', 'AC24.02VCOD')
 ) AS v(titre, code_ac)
 JOIN preuve p ON p.titre = v.titre;
+
+-- Captures d'écran des preuves (dans client/preuves/)
+INSERT INTO preuve_image (id_preuve, ordre, fichier, legende)
+SELECT p.id_preuve, v.ordre, v.fichier, v.legende
+FROM (VALUES
+    ('Structure JSON hiérarchique des conférences', 1, 's301_json_hierarchique.png', NULL),
+    ('Classe DatePatternMatcher : formats de dates hétérogènes', 1, 's301_date_pattern_matcher.png', NULL),
+    ('Section « Dépannage » du README', 1, 's301_readme_depannage.png', NULL),
+    ('Bibliothèques Python du collecteur', 1, 's301_imports.png', NULL),
+    ('Test d''hypothèse du tableau de bord tennis', 1, 's301_test_hypothese.png', NULL),
+    ('README multi-niveaux et tableau de bord pédagogique', 1, 's301_rapport_conferences.png', 'Rapport HTML des conférences extraites'),
+    ('README multi-niveaux et tableau de bord pédagogique', 2, 's301_dashboard_wta.png', 'Menu du tableau de bord WTA'),
+    ('Architecture modulaire extraction / calendrier', 1, 's301_architecture.png', NULL),
+    ('Quatre formats de sortie et FullCalendar', 1, 's301_formats_sortie.png', NULL),
+    ('Schéma en étoile de l''entrepôt', 1, 's302_schema_etoile.png', NULL),
+    ('Job Master_ETL : orchestration de la chaîne', 1, 's302_master_etl.png', NULL),
+    ('tMap de Normalisation_2012 : formats variés', 1, 's302_tmap_normalisation.png', NULL),
+    ('tFilterRow et tLogRow pour la validation', 1, 's302_tfilterrow_tlogrow.png', NULL),
+    ('tUniqRow pour le dédoublonnage', 1, 's302_tuniqrow.png', NULL),
+    ('Tableau de bord Power BI des subventions', 1, 's302_powerbi.png', 'Vue d''ensemble'),
+    ('Tableau de bord Power BI des subventions', 2, 's302_powerbi_dax.png', 'Mesure DAX du taux de croissance'),
+    ('Arborescence du projet Talend', 1, 's302_arborescence_talend.png', NULL),
+    ('Évolution mensuelle des consultations (2007-2024)', 1, 's303_evolution_mensuelle.jpg', NULL),
+    ('Composante saisonnière de la série', 1, 's303_saisonnalite.jpg', NULL),
+    ('Hypothèse d''un effet du COVID jusqu''en 2024', 1, 's303_hypothese_covid.png', NULL),
+    ('Commentaire du faible R² de la tendance', 1, 's303_r2_faible.png', NULL),
+    ('Seuil épidémique sur le graphique', 1, 's303_seuil_epidemique.png', NULL),
+    ('Validation de la tendance par triangulation', 1, 's303_triangulation.png', NULL),
+    ('Quantification des effets saisonniers', 1, 's303_profil_saisonnier.png', NULL),
+    ('Section « Fichier Excel » du README', 1, 's401_readme_fichier_excel.png', NULL),
+    ('Fonction load_all_excel() : une seule source', 1, 's401_load_all_excel.png', NULL),
+    ('Fonction build_orders() : feuilles hétérogènes', 1, 's401_build_orders.png', NULL),
+    ('Fonction _require() et README', 1, 's401_require.png', NULL),
+    ('Imports Dash et composants Bootstrap', 1, 's401_imports.png', NULL),
+    ('Contexte économique dans les indicateurs', 1, 's401_kpi_economies.png', NULL),
+    ('Graphiques justifiés par des questions métier', 1, 's401_top_plats.png', 'Plats les plus commandés'),
+    ('Graphiques justifiés par des questions métier', 2, 's401_commandes_filiere.png', 'Commandes par filière'),
+    ('Quatre indicateurs pour le gestionnaire', 1, 's401_kpis.png', NULL),
+    ('Valeurs manquantes et cas limites', 1, 's401_valeurs_manquantes.png', NULL),
+    ('Analyse préalable : deux profils, cinq onglets', 1, 's401_profils_utilisateurs.png', NULL),
+    ('Fonction _ensure_next_weeks() : menus automatiques', 1, 's401_ensure_next_weeks.png', NULL),
+    ('Choix de Dash pour le tableau de bord', 1, 's401_choix_dash.png', NULL),
+    ('Bloc de démarrage de l''application', 1, 's401_demarrage.png', NULL),
+    ('Préparation des variables des candidats', 1, 's402_data_preparation.png', NULL),
+    ('Unification de la palette de couleurs', 1, 's402_palette_code.png', 'Code'),
+    ('Unification de la palette de couleurs', 2, 's402_palette_rapport.png', 'Rapport de modifications'),
+    ('Packages R de l''application Shiny', 1, 's402_packages.png', NULL),
+    ('Classification sur les résultats de l''ACM', 1, 's402_hcpc.png', NULL),
+    ('ACM sur les variables qualitatives des candidats', 1, 's402_acm.png', NULL),
+    ('CAH, dendrogramme et courbe d''inertie', 1, 's402_dendrogramme.png', 'Code du dendrogramme'),
+    ('CAH, dendrogramme et courbe d''inertie', 2, 's402_courbe_inertie.png', 'Onglet Classification de l''application'),
+    ('Limite : la zone géographique est une variable active', 1, 's402_limite_code.png', 'Code'),
+    ('Limite : la zone géographique est une variable active', 2, 's402_limite_rapport.png', 'Rapport de changements'),
+    ('Contexte du commanditaire et biais territorial', 1, 's402_rapport_changements.png', 'Rapport de changements'),
+    ('Contexte du commanditaire et biais territorial', 2, 's402_zones.png', 'Regroupement des zones géographiques'),
+    ('Contexte du commanditaire et biais territorial', 3, 's402_message_commanditaire.png', 'Message au commanditaire'),
+    ('Courbe du coude et tableau d''inertie', 1, 's402_courbe_coude.png', NULL),
+    ('Associations du V de Cramer commentées', 1, 's402_v_cramer.png', NULL),
+    ('Correction du libellé « Non-boursiers »', 1, 's402_non_boursiers.png', NULL)
+) AS v(titre, ordre, fichier, legende)
+JOIN preuve p ON p.titre = v.titre;
+
+-- Auto-évaluation des AC (fiches portfolio) ; visa du tuteur pour la compétence Traiter niveau 2.
+-- Les AC de la compétence Valoriser ne sont pas évalués dans les fiches : pas de ligne.
+INSERT INTO evaluation_ac (code_ac, auto_evaluation, visa_tuteur) VALUES
+('AC21.01', 'Acquis', 'Acquis'),
+('AC21.02', 'Acquis', 'Acquis'),
+('AC21.03', 'En cours d''acquisition', 'En cours d''acquisition'),
+('AC21.04', 'Acquis', 'Acquis'),
+('AC21.05', 'En cours d''acquisition', 'Acquis'),
+('AC22.01', 'En cours d''acquisition', NULL),
+('AC22.02', 'En cours d''acquisition', NULL),
+('AC22.03', 'En cours d''acquisition', NULL),
+('AC22.04', 'Acquis', NULL),
+('AC22.05', 'Acquis', NULL),
+('AC24.01VCOD', 'Acquis', NULL),
+('AC24.02VCOD', 'Acquis', NULL),
+('AC24.03VCOD', 'En cours d''acquisition', NULL),
+('AC24.04VCOD', 'Acquis', NULL);
 
 -- ----------------------------------------------------------------------------
 --  Vues utilisées par le site
@@ -882,21 +1218,26 @@ JOIN preuve p ON p.titre = v.titre;
 -- Couverture du référentiel : pour chaque AC, le nombre de preuves qui le démontrent
 CREATE VIEW couverture_ac AS
 SELECT ac.code_ac, ac.intitule, ac.id_competence, ac.numero_niveau, n.id_annee,
-       COUNT(pa.id_preuve) AS nb_preuves
+       COUNT(pa.id_preuve) AS nb_preuves,
+       ev.auto_evaluation, ev.visa_tuteur
 FROM referentiel.apprentissage_critique ac
 JOIN referentiel.niveau n ON n.id_competence = ac.id_competence AND n.numero = ac.numero_niveau
 LEFT JOIN preuve_ac pa ON pa.code_ac = ac.code_ac
-GROUP BY ac.code_ac, n.id_annee
+LEFT JOIN evaluation_ac ev ON ev.code_ac = ac.code_ac
+GROUP BY ac.code_ac, n.id_annee, ev.auto_evaluation, ev.visa_tuteur
 ORDER BY ac.code_ac;
 
 -- Preuves détaillées : source lisible, SAÉ et liste des AC
 CREATE VIEW preuve_detail AS
-SELECT pr.id_preuve, pr.titre, pr.texte, pr.fichier, pr.code_sae, s.intitule AS intitule_sae,
+SELECT pr.id_preuve, pr.titre, pr.texte, pr.code_sae, s.intitule AS intitule_sae,
        COALESCE(p.titre, e.intitule || ' · ' || e.structure, c.intitule) AS source,
        CASE WHEN p.id_projet IS NOT NULL THEN 'Projet'
             WHEN e.id_experience IS NOT NULL THEN 'Expérience'
             ELSE 'Certificat' END AS type_source,
-       ARRAY_AGG(pa.code_ac::text ORDER BY pa.code_ac) AS codes_ac   -- ::text : liste lisible par Node
+       ARRAY_AGG(pa.code_ac::text ORDER BY pa.code_ac) AS codes_ac,  -- ::text : liste lisible par Node
+       -- sous-requête : les images ne doivent pas multiplier les lignes des AC
+       COALESCE((SELECT JSON_AGG(JSON_BUILD_OBJECT('fichier', pi.fichier, 'legende', pi.legende) ORDER BY pi.ordre)
+                 FROM preuve_image pi WHERE pi.id_preuve = pr.id_preuve), '[]') AS images
 FROM preuve pr
 LEFT JOIN referentiel.sae s ON s.code_sae = pr.code_sae
 LEFT JOIN projet p ON p.id_projet = pr.id_projet

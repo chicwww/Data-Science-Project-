@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schéma relationnel du portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: planche technique d'expert, dense mais calme
+   IDEA: le plan d'architecte de la base, deux quartiers reliés par un pont (PREUVE)
+   PICTURE: le diagramme entité-relation lui-même, généré depuis le catalogue PostgreSQL
+   COLOUR and TYPE: noir et blanc, bleu ardoise pour le référentiel, rouge de la maquette pour le portfolio ; Space Grotesk, Inter, JetBrains Mono
+   LAYOUT: titre, chiffres clés, diagramme pleine largeur, puis dictionnaire et règles */
+:root{color-scheme:light dark;--bg:light-dark(#fbfbfa,#101214);--ink:light-dark(#14171c,#eceef1);--soft:light-dark(#5d6571,#9aa3ae);--line:light-dark(#d9dde3,#2b3037);--card:light-dark(#ffffff,#171a1e);--ref:light-dark(#2f4a6d,#8fb0d8);--refbg:light-dark(#eef2f8,#18212c);--port:light-dark(#c2331d,#ff8a74);--portbg:light-dark(#fcefec,#2a1916)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,48px) max(4vw,16px);max-width:1560px;margin:0 auto}
+h1,h2{font-family:"Space Grotesk",Inter,sans-serif;line-height:1.08;margin:0 0 .4em;text-wrap:balance}
+h1{font-size:clamp(30px,4.5vw,46px)}h2{font-size:clamp(22px,2.6vw,30px)}
+p{max-width:75ch;margin:.4em 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi b{display:block;font:700 30px/1 "Space Grotesk",sans-serif}.kpi span{color:var(--soft);font-size:14px}
+.fig{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:20px;overflow:auto}
+.fig svg{display:block;width:100%;min-width:1100px;height:auto;color:var(--ink)}
+.cap{color:var(--soft);font-size:14px;margin-top:8px}
+.key{display:flex;flex-wrap:wrap;gap:8px 22px;list-style:none;padding:0;margin:12px 0 0;font-size:14px}
+.key li{display:flex;align-items:center;gap:8px}.sw{width:22px;height:12px;border-radius:3px;flex:none}
+g.tb{cursor:pointer}g.tb.dim{opacity:.18}path.rel{transition:opacity .15s}path.rel.dim{opacity:.06}path.rel.on{stroke-width:2.4;opacity:1}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:12px}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+th{font-family:"Space Grotesk",sans-serif}code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.9em}
+.cols2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:28px}
+.scroll{overflow-x:auto}
+@media (prefers-reduced-motion:reduce){path.rel{transition:none}}
+@media(max-width:600px){table{font-size:13px}}
+</style>
+</head>
+<body>
+<section class="band">
+<h1>Schéma relationnel du portfolio · PostgreSQL</h1>
+<p>Deux schémas : <strong style="color:var(--ref)">referentiel</strong>, le programme national du BUT Science des données (parcours VCOD), et <strong style="color:var(--port)">portfolio</strong>, mon parcours et mes preuves. Le diagramme est généré depuis le catalogue de la base (<code>information_schema</code>, <code>pg_constraint</code>). Survolez ou touchez une table pour isoler ses relations.</p>
+<div class="kpis" id="kpis"></div>
+<div class="fig"><svg id="erd" viewBox="0 0 1610 840" role="img" aria-label="Diagramme entité-relation : 9 tables du référentiel national reliées à 12 tables du portfolio par les preuves, les projets et les expériences."></svg></div>
+<ul class="key">
+<li><span class="sw" style="background:var(--refbg);border:1.5px solid var(--ref)"></span>schéma referentiel</li>
+<li><span class="sw" style="background:var(--portbg);border:1.5px solid var(--port)"></span>schéma portfolio</li>
+<li><code>PK</code> clé primaire · <code>FK</code> clé étrangère · <code>*</code> obligatoire</li>
+<li>Trait : clé étrangère, de la table qui référence (N) vers la clé primaire (1)</li>
+</ul>
+<p class="cap">Le nombre sous chaque table est son nombre de lignes. Les tables d'association (sae_competence, projet_technologie, preuve_ac) portent les liens N-N.</p>
+</section>
+
+<section class="band cols2">
+<div>
+<h2>Règles garanties par la base</h2>
+<div class="scroll"><table><thead><tr><th>Règle</th><th>Mécanisme</th></tr></thead><tbody id="regles"></tbody></table></div>
+</div>
+<div>
+<h2>Vues et déclencheur</h2>
+<div class="scroll"><table><thead><tr><th>Objet</th><th>Rôle</th></tr></thead><tbody id="objets"></tbody></table></div>
+</div>
+</section>
+
+<section class="band">
+<h2>Dictionnaire des tables</h2>
+<div class="scroll"><table><thead><tr><th>Schéma</th><th>Table</th><th>Colonnes</th><th>Lignes</th></tr></thead><tbody id="dico"></tbody></table></div>
+</section>
+
+<script>
+{
+const M={"tables": [{"s": "portfolio", "t": "publication", "checks": 1, "cols": [{"c": "id_publication", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "titre", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "ouvrage", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "editeur", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "isbn", "typ": "character varying", "nn": false, "pk": false, "fk": null}, {"c": "date_parution", "typ": "date", "nn": true, "pk": false, "fk": null}, {"c": "langue", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "pages", "typ": "int4range", "nn": false, "pk": false, "fk": null}, {"c": "resume", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "fichier", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "document", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "id_certificat", "typ": "integer", "nn": false, "pk": false, "fk": "certificat"}], "x": 1350, "y": 470, "n": 1}, {"s": "portfolio", "t": "certificat", "checks": 2, "cols": [{"c": "id_certificat", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "organisme", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "type", "typ": "type_certificat", "nn": true, "pk": false, "fk": null}, {"c": "date_obtention", "typ": "date", "nn": false, "pk": false, "fk": null}, {"c": "fichier", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "document", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "lien", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "site_officiel", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "description", "typ": "text", "nn": false, "pk": false, "fk": null}], "x": 830, "y": 570, "n": 10}, {"s": "referentiel", "t": "composante_essentielle", "checks": 2, "cols": [{"c": "code", "typ": "character varying", "nn": true, "pk": true, "fk": null}, {"c": "id_competence", "typ": "code_competence", "nn": true, "pk": false, "fk": "competence"}, {"c": "libelle", "typ": "text", "nn": true, "pk": false, "fk": null}], "x": 540, "y": 375, "n": 23}, {"s": "portfolio", "t": "preuve", "checks": 1, "cols": [{"c": "id_preuve", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "titre", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "texte", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "code_sae", "typ": "character varying", "nn": false, "pk": false, "fk": "sae"}, {"c": "id_projet", "typ": "integer", "nn": false, "pk": false, "fk": "projet"}, {"c": "id_experience", "typ": "integer", "nn": false, "pk": false, "fk": "experience"}, {"c": "id_certificat", "typ": "integer", "nn": false, "pk": false, "fk": "certificat"}], "x": 1090, "y": 250, "n": 60}, {"s": "portfolio", "t": "evaluation_ac", "checks": 0, "cols": [{"c": "code_ac", "typ": "code_ac", "nn": true, "pk": true, "fk": "apprentissage_critique"}, {"c": "auto_evaluation", "typ": "niveau_acquisition", "nn": true, "pk": false, "fk": null}, {"c": "visa_tuteur", "typ": "niveau_acquisition", "nn": false, "pk": false, "fk": null}], "x": 1090, "y": 710, "n": 14}, {"s": "portfolio", "t": "projet_technologie", "checks": 0, "cols": [{"c": "id_projet", "typ": "integer", "nn": true, "pk": true, "fk": "projet"}, {"c": "id_techno", "typ": "integer", "nn": true, "pk": true, "fk": "technologie"}], "x": 1090, "y": 80, "n": 38}, {"s": "portfolio", "t": "preuve_ac", "checks": 0, "cols": [{"c": "id_preuve", "typ": "integer", "nn": true, "pk": true, "fk": "preuve"}, {"c": "code_ac", "typ": "code_ac", "nn": true, "pk": true, "fk": "apprentissage_critique"}], "x": 1090, "y": 480, "n": 62}, {"s": "portfolio", "t": "technologie", "checks": 1, "cols": [{"c": "id_techno", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "nom", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "categorie", "typ": "text", "nn": true, "pk": false, "fk": null}], "x": 1350, "y": 80, "n": 28}, {"s": "referentiel", "t": "annee", "checks": 2, "cols": [{"c": "id_annee", "typ": "character", "nn": true, "pk": true, "fk": null}, {"c": "numero", "typ": "smallint", "nn": true, "pk": false, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}], "x": 40, "y": 80, "n": 3}, {"s": "portfolio", "t": "langue", "checks": 0, "cols": [{"c": "id_langue", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "nom", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "niveau", "typ": "niveau_langue", "nn": true, "pk": false, "fk": null}], "x": 1350, "y": 360, "n": 5}, {"s": "referentiel", "t": "sae", "checks": 1, "cols": [{"c": "code_sae", "typ": "character varying", "nn": true, "pk": true, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "type", "typ": "type_sae", "nn": true, "pk": false, "fk": null}, {"c": "semestre", "typ": "smallint", "nn": true, "pk": false, "fk": "semestre"}, {"c": "parcours", "typ": "text", "nn": false, "pk": false, "fk": null}], "x": 540, "y": 80, "n": 30}, {"s": "referentiel", "t": "semestre", "checks": 2, "cols": [{"c": "numero", "typ": "smallint", "nn": true, "pk": true, "fk": null}, {"c": "id_annee", "typ": "character", "nn": true, "pk": false, "fk": "annee"}], "x": 40, "y": 265, "n": 6}, {"s": "referentiel", "t": "niveau", "checks": 1, "cols": [{"c": "id_competence", "typ": "code_competence", "nn": true, "pk": true, "fk": "competence"}, {"c": "numero", "typ": "smallint", "nn": true, "pk": true, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "id_annee", "typ": "character", "nn": true, "pk": false, "fk": "annee"}], "x": 290, "y": 265, "n": 11}, {"s": "referentiel", "t": "sae_competence", "checks": 0, "cols": [{"c": "code_sae", "typ": "character varying", "nn": true, "pk": true, "fk": "sae"}, {"c": "id_competence", "typ": "code_competence", "nn": true, "pk": true, "fk": "competence"}], "x": 540, "y": 265, "n": 75}, {"s": "referentiel", "t": "competence", "checks": 1, "cols": [{"c": "id_competence", "typ": "code_competence", "nn": true, "pk": true, "fk": null}, {"c": "verbe", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "parcours", "typ": "text", "nn": false, "pk": false, "fk": null}], "x": 290, "y": 80, "n": 4}, {"s": "portfolio", "t": "projet", "checks": 2, "cols": [{"c": "id_projet", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "titre", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "type", "typ": "type_projet", "nn": true, "pk": false, "fk": null}, {"c": "annee", "typ": "smallint", "nn": false, "pk": false, "fk": null}, {"c": "description", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "lien", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "code_sae", "typ": "character varying", "nn": false, "pk": false, "fk": "sae"}], "x": 830, "y": 80, "n": 10}, {"s": "portfolio", "t": "experience", "checks": 1, "cols": [{"c": "id_experience", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "structure", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "type", "typ": "type_experience", "nn": true, "pk": false, "fk": null}, {"c": "lieu", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "date_debut", "typ": "date", "nn": true, "pk": false, "fk": null}, {"c": "date_fin", "typ": "date", "nn": false, "pk": false, "fk": null}, {"c": "description", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "code_sae", "typ": "character varying", "nn": false, "pk": false, "fk": "sae"}], "x": 830, "y": 290, "n": 5}, {"s": "portfolio", "t": "preuve_image", "checks": 2, "cols": [{"c": "id_preuve", "typ": "integer", "nn": true, "pk": true, "fk": "preuve"}, {"c": "ordre", "typ": "smallint", "nn": true, "pk": true, "fk": null}, {"c": "fichier", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "legende", "typ": "text", "nn": false, "pk": false, "fk": null}], "x": 1090, "y": 580, "n": 54}, {"s": "referentiel", "t": "apprentissage_critique", "checks": 1, "cols": [{"c": "code_ac", "typ": "code_ac", "nn": true, "pk": true, "fk": null}, {"c": "intitule", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "id_competence", "typ": "code_competence", "nn": true, "pk": false, "fk": "niveau"}, {"c": "numero_niveau", "typ": "smallint", "nn": true, "pk": false, "fk": "niveau"}], "x": 290, "y": 455, "n": 54}, {"s": "portfolio", "t": "formation", "checks": 1, "cols": [{"c": "id_formation", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "diplome", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "etablissement", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "lieu", "typ": "text", "nn": false, "pk": false, "fk": null}, {"c": "date_debut", "typ": "date", "nn": true, "pk": false, "fk": null}, {"c": "date_fin", "typ": "date", "nn": false, "pk": false, "fk": null}], "x": 1350, "y": 195, "n": 4}, {"s": "referentiel", "t": "activite_pedagogique", "checks": 2, "cols": [{"c": "num", "typ": "integer", "nn": true, "pk": true, "fk": null}, {"c": "semestre", "typ": "smallint", "nn": true, "pk": false, "fk": "semestre"}, {"c": "heure", "typ": "integer", "nn": true, "pk": false, "fk": null}, {"c": "skill", "typ": "text", "nn": true, "pk": false, "fk": null}, {"c": "id_competence", "typ": "code_competence", "nn": true, "pk": false, "fk": "competence"}], "x": 40, "y": 430, "n": 254}], "fks": [{"n": "apprentissage_critique_id_competence_numero_niveau_fkey", "t": "apprentissage_critique", "c": "id_competence", "tf": "niveau", "cf": "id_competence"}, {"n": "apprentissage_critique_id_competence_numero_niveau_fkey", "t": "apprentissage_critique", "c": "numero_niveau", "tf": "niveau", "cf": "numero"}, {"n": "semestre_id_annee_fkey", "t": "semestre", "c": "id_annee", "tf": "annee", "cf": "id_annee"}, {"n": "composante_essentielle_id_competence_fkey", "t": "composante_essentielle", "c": "id_competence", "tf": "competence", "cf": "id_competence"}, {"n": "niveau_id_annee_fkey", "t": "niveau", "c": "id_annee", "tf": "annee", "cf": "id_annee"}, {"n": "niveau_id_competence_fkey", "t": "niveau", "c": "id_competence", "tf": "competence", "cf": "id_competence"}, {"n": "sae_competence_id_competence_fkey", "t": "sae_competence", "c": "id_competence", "tf": "competence", "cf": "id_competence"}, {"n": "sae_competence_code_sae_fkey", "t": "sae_competence", "c": "code_sae", "tf": "sae", "cf": "code_sae"}, {"n": "sae_semestre_fkey", "t": "sae", "c": "semestre", "tf": "semestre", "cf": "numero"}, {"n": "activite_pedagogique_id_competence_fkey", "t": "activite_pedagogique", "c": "id_competence", "tf": "competence", "cf": "id_competence"}, {"n": "activite_pedagogique_semestre_fkey", "t": "activite_pedagogique", "c": "semestre", "tf": "semestre", "cf": "numero"}, {"n": "experience_code_sae_fkey", "t": "experience", "c": "code_sae", "tf": "sae", "cf": "code_sae"}, {"n": "projet_code_sae_fkey", "t": "projet", "c": "code_sae", "tf": "sae", "cf": "code_sae"}, {"n": "projet_technologie_id_techno_fkey", "t": "projet_technologie", "c": "id_techno", "tf": "technologie", "cf": "id_techno"}, {"n": "projet_technologie_id_projet_fkey", "t": "projet_technologie", "c": "id_projet", "tf": "projet", "cf": "id_projet"}, {"n": "preuve_id_certificat_fkey", "t": "preuve", "c": "id_certificat", "tf": "certificat", "cf": "id_certificat"}, {"n": "preuve_id_experience_fkey", "t": "preuve", "c": "id_experience", "tf": "experience", "cf": "id_experience"}, {"n": "preuve_id_projet_fkey", "t": "preuve", "c": "id_projet", "tf": "projet", "cf": "id_projet"}, {"n": "preuve_code_sae_fkey", "t": "preuve", "c": "code_sae", "tf": "sae", "cf": "code_sae"}, {"n": "preuve_ac_code_ac_fkey", "t": "preuve_ac", "c": "code_ac", "tf": "apprentissage_critique", "cf": "code_ac"}, {"n": "preuve_ac_id_preuve_fkey", "t": "preuve_ac", "c": "id_preuve", "tf": "preuve", "cf": "id_preuve"}, {"n": "publication_id_certificat_fkey", "t": "publication", "c": "id_certificat", "tf": "certificat", "cf": "id_certificat"}, {"n": "preuve_image_id_preuve_fkey", "t": "preuve_image", "c": "id_preuve", "tf": "preuve", "cf": "id_preuve"}, {"n": "evaluation_ac_code_ac_fkey", "t": "evaluation_ac", "c": "code_ac", "tf": "apprentissage_critique", "cf": "code_ac"}], "views": ["referentiel.heures_par_annee", "portfolio.couverture_ac", "portfolio.preuve_detail"], "triggers": ["preuve_ac_coherence ON preuve_ac"], "nrows": {"annee": 3, "langue": 5, "apprentissage_critique": 54, "certificat": 10, "technologie": 28, "formation": 4, "preuve": 60, "evaluation_ac": 14, "niveau": 11, "projet": 10, "semestre": 6, "competence": 4, "preuve_image": 54, "sae_competence": 75, "projet_technologie": 38, "activite_pedagogique": 254, "sae": 30, "preuve_ac": 62, "experience": 5, "composante_essentielle": 23, "publication": 1}};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const W=230,H=24,R=17;
+const T={};M.tables.forEach(t=>T[t.t]=t);
+const colY=(t,c)=>{const i=T[t].cols.findIndex(x=>x.c===c);return T[t].y+H+R*i+R/2};
+const hgt=t=>H+R*T[t].cols.length+18;
+const short=s=>({'character varying':'varchar','character':'char','integer':'int','smallint':'int2','text':'text','date':'date',
+  'code_competence':'dom. code_comp','code_ac':'dom. code_ac','type_sae':'enum','type_experience':'enum','type_projet':'enum','type_certificat':'enum','niveau_langue':'enum'}[s]||s);
+
+let svg=`<defs><marker id="one" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M9 0V10M5 0V10" stroke="currentColor" stroke-width="1.4" fill="none"/></marker>
+<marker id="many" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M10 5L1 0M10 5L1 10M10 5H1" stroke="currentColor" stroke-width="1.2" fill="none"/></marker></defs>`;
+svg+=`<rect x="16" y="20" width="772" height="800" rx="16" fill="var(--refbg)" opacity=".55"/><text x="34" y="52" font-family="Space Grotesk" font-weight="700" font-size="17" fill="var(--ref)">referentiel · programme national BUT SD</text>`;
+svg+=`<rect x="806" y="20" width="792" height="800" rx="16" fill="var(--portbg)" opacity=".55"/><text x="824" y="52" font-family="Space Grotesk" font-weight="700" font-size="17" fill="var(--port)">portfolio · mon parcours et mes preuves</text>`;
+
+/* relations */
+let rels='';
+const done=new Set();
+M.fks.forEach((f,i)=>{
+  const key=f.n+f.c; if(done.has(f.n)&&f.t!=='apprentissage_critique') return; done.add(f.n);
+  const a=T[f.t],b=T[f.tf];
+  let y1=colY(f.t,f.c),y2=colY(f.tf,f.cf);
+  const right=b.x>a.x+10, same=Math.abs(b.x-a.x)<10;
+  let x1,x2,d;
+  if(same){x1=a.x;x2=b.x;const cx=a.x-24-(i%3)*6;d=`M${x1} ${y1}C${cx} ${y1},${cx} ${y2},${x2} ${y2}`;}
+  else{x1=right?a.x+W:a.x;x2=right?b.x:b.x+W;const mx=(x1+x2)/2;d=`M${x1} ${y1}C${mx} ${y1},${mx} ${y2},${x2} ${y2}`;}
+  if(f.t==='preuve'&&f.c==='code_sae'){   // couloir libre entre projet et experience
+    d=`M${a.x} ${y1}H${a.x-14}V275H797V${y2}H${b.x+W}`;
+  }
+  const cross=T[f.t].s!==T[f.tf].s;
+  rels+=`<path class="rel" data-a="${f.t}" data-b="${f.tf}" d="${d}" fill="none" stroke="${cross?'var(--port)':'currentColor'}" stroke-width="1.3" opacity=".75" marker-start="url(#many)" marker-end="url(#one)"/>`;
+});
+svg+=`<g id="rels">${rels}</g>`;
+
+/* tables */
+M.tables.forEach(t=>{
+  const ref=t.s==='referentiel',c=ref?'var(--ref)':'var(--port)',h=hgt(t.t);
+  let g=`<g class="tb" data-t="${t.t}" tabindex="0"><rect x="${t.x}" y="${t.y}" width="${W}" height="${h}" rx="7" fill="var(--card)" stroke="${c}" stroke-width="1.5"/>`;
+  g+=`<rect x="${t.x}" y="${t.y}" width="${W}" height="${H}" rx="7" fill="${c}"/><rect x="${t.x}" y="${t.y+H-7}" width="${W}" height="7" fill="${c}"/>`;
+  g+=`<text x="${t.x+9}" y="${t.y+16.5}" font-family="Space Grotesk" font-weight="700" font-size="12.5" fill="var(--card)">${esc(t.t)}</text>`;
+  t.cols.forEach((k,i)=>{
+    const y=t.y+H+R*i;
+    if(k.pk) g+=`<rect x="${t.x+1}" y="${y}" width="${W-2}" height="${R}" fill="${ref?'var(--refbg)':'var(--portbg)'}"/>`;
+    const tag=(k.pk?'PK ':'')+(k.fk?'FK':'');
+    g+=`<text x="${t.x+8}" y="${y+12.5}" font-family="JetBrains Mono, monospace" font-size="10.5" fill="currentColor" font-weight="${k.pk?600:400}">${esc(k.c)}${k.nn&&!k.pk?'*':''}</text>`;
+    g+=`<text x="${t.x+W-8}" y="${y+12.5}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--soft)">${esc(tag?tag+' · ':'')}${esc(short(k.typ))}</text>`;
+  });
+  g+=`<text x="${t.x+8}" y="${t.y+h-5}" font-size="10" fill="var(--soft)">${t.n} lignes${t.checks?' · '+t.checks+' CHECK':''}</text></g>`;
+  svg+=g;
+});
+const el=document.getElementById('erd');el.innerHTML=svg;
+
+/* survol : isoler une table et ses relations */
+const focus=name=>{
+  const linked=new Set([name]);
+  el.querySelectorAll('path.rel').forEach(p=>{const on=p.dataset.a===name||p.dataset.b===name;p.classList.toggle('on',on);p.classList.toggle('dim',!on);if(on){linked.add(p.dataset.a);linked.add(p.dataset.b)}});
+  el.querySelectorAll('g.tb').forEach(g=>g.classList.toggle('dim',!linked.has(g.dataset.t)));
+};
+const reset=()=>{el.querySelectorAll('.dim,.on').forEach(n=>n.classList.remove('dim','on'))};
+el.querySelectorAll('g.tb').forEach(g=>{g.addEventListener('mouseenter',()=>focus(g.dataset.t));g.addEventListener('focus',()=>focus(g.dataset.t));g.addEventListener('click',e=>{e.stopPropagation();focus(g.dataset.t)})});
+el.addEventListener('mouseleave',reset);el.addEventListener('click',reset);
+
+const nRows=Object.values(M.nrows).reduce((a,b)=>a+b,0);
+const nCols=M.tables.reduce((a,t)=>a+t.cols.length,0);
+const nChk=M.tables.reduce((a,t)=>a+t.checks,0);
+document.getElementById('kpis').innerHTML=[[M.tables.length,'tables'],[nCols,'colonnes'],[M.fks.length,'clés étrangères'],[nChk,'contraintes CHECK'],[M.views.length,'vues'],[nRows,'lignes de données']].map(([v,l])=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('');
+
+const REG=[
+ ['Un code AC suit le format officiel (AC + année + compétence)','domaine code_ac + CHECK'],
+ ['Le chiffre de compétence du code AC correspond à sa compétence','CHECK sur apprentissage_critique'],
+ ['Chaque AC appartient à un niveau existant de sa compétence','clé étrangère composée (id_competence, numero_niveau)'],
+ ['Un semestre appartient à la bonne année (S1-S2 = BUT1…)','CHECK sur semestre'],
+ ['Une SAÉ cible une ou plusieurs compétences','table d’association sae_competence'],
+ ['Une preuve démontre un ou plusieurs AC','table d’association preuve_ac'],
+ ['Une preuve se rattache à une SAÉ au plus','clé étrangère facultative preuve.code_sae'],
+ ['Une preuve vient d’une seule source (projet, expérience ou certificat)','CHECK num_nonnulls(...) = 1'],
+ ['Une preuve a un texte, un titre unique et des captures ordonnées','NOT NULL, UNIQUE, table preuve_image (PK id_preuve, ordre)'],
+ ['Un nom de capture est unique et a un format sûr','UNIQUE + CHECK (expression régulière)'],
+ ['Chaque AC a au plus une auto-évaluation et un visa du tuteur','table evaluation_ac, type ENUM niveau_acquisition'],
+ ['Les AC d’une preuve appartiennent aux compétences de sa SAÉ','déclencheur preuve_ac_coherence'],
+ ['Types fermés (expérience, projet, langue, SAÉ)','types ENUM'],
+ ['Les matières de C4 commencent en 2e année (S3)','CHECK sur activite_pedagogique'],
+ ['Un ISBN-13 et les liens publics ont un format valide','CHECK (expression régulière)'],
+ ['Les pages d\u2019une publication forment un intervalle','type int4range']
+];
+document.getElementById('regles').innerHTML=REG.map(r=>`<tr><td>${esc(r[0])}</td><td><code>${esc(r[1])}</code></td></tr>`).join('');
+const OBJ=[['referentiel.heures_par_annee','vue : heures par année et compétence'],['portfolio.couverture_ac','vue : nombre de preuves et auto-évaluation par AC'],['portfolio.preuve_detail','vue : preuve, source lisible, SAÉ, liste des AC et captures (JSON)'],['preuve_ac_coherence','déclencheur : refuse un AC hors des compétences de la SAÉ']];
+document.getElementById('objets').innerHTML=OBJ.map(r=>`<tr><td><code>${esc(r[0])}</code></td><td>${esc(r[1])}</td></tr>`).join('');
+document.getElementById('dico').innerHTML=[...M.tables].sort((a,b)=>(a.s+a.t).localeCompare(b.s+b.t)).map(t=>`<tr><td>${esc(t.s)}</td><td><code>${esc(t.t)}</code></td><td><code>${t.cols.map(c=>esc(c.c)+(c.pk?' (PK)':c.fk?' (FK→'+esc(c.fk)+')':'')).join(', ')}</code></td><td>${t.n}</td></tr>`).join('');
+}
+</script>
+</body>
+</html>
