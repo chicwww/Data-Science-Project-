@@ -15,7 +15,8 @@ const DB_CONFIG = {
   user: "postgres",
   password: process.env.POSTGRES_PASSWORD, // mot de passe lu dans le fichier .env (jamais sur GitHub)
   database: "butsd",
-  port: 5432
+  port: 5432,
+  options: "-c search_path=portfolio,referentiel"   // les tables sont rangées dans deux schémas
 };
 
 const INIT_SQL_FILE = path.resolve("../bdd/init_db.sql"); // le fichier SQL est dans le dossier bdd
@@ -62,8 +63,13 @@ async function initTables() {
 // ==============================
 // Afficher le contenu d'une table dans le terminal
 // ==============================
-const TABLES_AUTORISEES = ["COMPETENCE", "ANNEE", "ACTIVITE_PEDAGOGIQUE", "APPRENTISSAGE_CRITIQUE",
-  "FORMATION", "EXPERIENCE", "PROJET", "TECHNOLOGIE", "PROJET_TECHNOLOGIE", "CERTIFICAT", "LANGUE", "PREUVE", "HEURES_PAR_ANNEE"];
+const TABLES_AUTORISEES = [
+  // schéma referentiel (programme national)
+  "annee", "semestre", "competence", "composante_essentielle", "niveau", "apprentissage_critique",
+  "sae", "sae_competence", "activite_pedagogique", "heures_par_annee",
+  // schéma portfolio (mon parcours)
+  "formation", "experience", "projet", "technologie", "projet_technologie", "certificat", "langue",
+  "preuve", "preuve_ac", "preuve_detail", "couverture_ac"];
 
 async function afficherTable(pool, nomTable) {
   // Un nom de table ne peut pas passer par $1 : on n'accepte que les tables de la liste (anti-injection SQL)
@@ -87,8 +93,8 @@ async function startServer() {
     const pool = new Pool(DB_CONFIG);
 
     // Contenu de quelques tables dans le terminal, pour vérifier les données au démarrage
-    await afficherTable(pool, "PROJET");
-    await afficherTable(pool, "EXPERIENCE");
+    await afficherTable(pool, "projet");
+    await afficherTable(pool, "preuve_detail");
 
     // Servir le dossier public
     app.use(express.static("../client")); // le site (HTML, CSS, JS, images) est dans le dossier client
@@ -98,8 +104,8 @@ async function startServer() {
       try {
         const query = `
           SELECT c.id_competence, c.intitule, SUM(a.heure) AS total_heures
-          FROM COMPETENCE c
-          LEFT JOIN ACTIVITE_PEDAGOGIQUE a ON a.id_competence = c.id_competence
+          FROM competence c
+          LEFT JOIN activite_pedagogique a ON a.id_competence = c.id_competence
           GROUP BY c.id_competence, c.intitule
           ORDER BY c.id_competence;
         `;
@@ -115,8 +121,8 @@ async function startServer() {
     app.get("/api/competences", async (req, res) => {
       try {
         const query = `
-          SELECT id_competence, intitule, description, preuve
-          FROM COMPETENCE
+          SELECT id_competence, verbe, intitule, parcours
+          FROM competence
           ORDER BY id_competence;
         `;
         const { rows } = await pool.query(query);
@@ -128,26 +134,30 @@ async function startServer() {
     });
 
     // Route API : description d'une compétence spécifique
-app.get("/api/competence/:id", async (req, res) => {
-  const { id } = req.params; // ex: C1, C2...
-  try {
-    const query = `
-      SELECT id_competence, intitule, description, preuve
-      FROM COMPETENCE
-      WHERE id_competence = $1;
-    `;
-    const { rows } = await pool.query(query, [id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "Compétence non trouvée" });
-    }
-
-    res.json(rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erreur lors de la récupération de la compétence" });
-  }
-});
+    app.get("/api/competence/:id", async (req, res) => {
+      const { id } = req.params; // ex: C1, C2...
+      try {
+        const competence = await pool.query(
+          "SELECT id_competence, verbe, intitule, parcours FROM competence WHERE id_competence = $1;", [id]);
+        if (competence.rows.length === 0) {
+          return res.status(404).json({ error: "Compétence non trouvée" });
+        }
+        const composantes = await pool.query(
+          "SELECT code, libelle FROM composante_essentielle WHERE id_competence = $1 ORDER BY code;", [id]);
+        const niveaux = await pool.query(`
+          SELECT n.numero, n.intitule, n.id_annee,
+                 JSON_AGG(JSON_BUILD_OBJECT('code_ac', ac.code_ac, 'intitule', ac.intitule) ORDER BY ac.code_ac) AS acs
+          FROM niveau n
+          JOIN apprentissage_critique ac ON ac.id_competence = n.id_competence AND ac.numero_niveau = n.numero
+          WHERE n.id_competence = $1
+          GROUP BY n.numero, n.intitule, n.id_annee
+          ORDER BY n.numero;`, [id]);
+        res.json({ ...competence.rows[0], composantes: composantes.rows, niveaux: niveaux.rows });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération de la compétence" });
+      }
+    });
 
     // ==============================
     // Routes de mon parcours
@@ -156,7 +166,7 @@ app.get("/api/competence/:id", async (req, res) => {
     // Heures par année et par compétence (vue HEURES_PAR_ANNEE)
     app.get("/api/heures-par-annee", async (req, res) => {
       try {
-        const { rows } = await pool.query("SELECT * FROM HEURES_PAR_ANNEE;");
+        const { rows } = await pool.query("SELECT * FROM heures_par_annee;");
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -177,16 +187,16 @@ app.get("/api/competence/:id", async (req, res) => {
 
       try {
         const query = `
-          SELECT p.id_projet, p.titre, p.type, p.annee, p.description, p.lien,
+          SELECT p.id_projet, p.titre, p.type, p.annee, p.description, p.lien, p.code_sae,
                  STRING_AGG(t.nom, ', ' ORDER BY t.nom) AS technologies
-          FROM PROJET p
-          LEFT JOIN PROJET_TECHNOLOGIE pt ON pt.id_projet = p.id_projet
-          LEFT JOIN TECHNOLOGIE t ON t.id_techno = pt.id_techno
-          WHERE ($1::text IS NULL OR p.type = $1)
+          FROM projet p
+          LEFT JOIN projet_technologie pt ON pt.id_projet = p.id_projet
+          LEFT JOIN technologie t ON t.id_techno = pt.id_techno
+          WHERE ($1::text IS NULL OR p.type::text = $1)
             AND ($2::text IS NULL OR p.id_projet IN (
                   SELECT pt2.id_projet
-                  FROM PROJET_TECHNOLOGIE pt2
-                  JOIN TECHNOLOGIE t2 ON t2.id_techno = pt2.id_techno
+                  FROM projet_technologie pt2
+                  JOIN technologie t2 ON t2.id_techno = pt2.id_techno
                   WHERE t2.nom = $2))
           GROUP BY p.id_projet
           ORDER BY p.annee DESC NULLS LAST, p.titre;
@@ -206,18 +216,20 @@ app.get("/api/competence/:id", async (req, res) => {
         return res.status(400).json({ error: "Identifiant de projet invalide" });
       }
       try {
-        const projet = await pool.query("SELECT * FROM PROJET WHERE id_projet = $1;", [id]);
+        const projet = await pool.query("SELECT * FROM projet WHERE id_projet = $1;", [id]);
         if (projet.rows.length === 0) {
           return res.status(404).json({ error: "Projet non trouvé" });
         }
         const technos = await pool.query(`
           SELECT t.nom, t.categorie
-          FROM PROJET_TECHNOLOGIE pt JOIN TECHNOLOGIE t ON t.id_techno = pt.id_techno
+          FROM projet_technologie pt JOIN technologie t ON t.id_techno = pt.id_techno
           WHERE pt.id_projet = $1 ORDER BY t.nom;`, [id]);
         const preuves = await pool.query(`
-          SELECT pr.id_preuve, pr.fichier, pr.texte, ac.id_ac, ac.intitule AS intitule_ac
-          FROM PREUVE pr JOIN APPRENTISSAGE_CRITIQUE ac ON ac.id_ac = pr.id_ac
-          WHERE pr.id_projet = $1 ORDER BY ac.id_ac;`, [id]);
+          SELECT pr.id_preuve, pr.titre, pr.texte, ac.code_ac, ac.intitule AS intitule_ac
+          FROM preuve pr
+          JOIN preuve_ac pa ON pa.id_preuve = pr.id_preuve
+          JOIN apprentissage_critique ac ON ac.code_ac = pa.code_ac
+          WHERE pr.id_projet = $1 ORDER BY ac.code_ac;`, [id]);
         res.json({ ...projet.rows[0], technologies: technos.rows, preuves: preuves.rows });
       } catch (err) {
         console.error(err);
@@ -230,8 +242,8 @@ app.get("/api/competence/:id", async (req, res) => {
       try {
         const query = `
           SELECT t.nom, t.categorie, COUNT(pt.id_projet) AS nb_projets
-          FROM TECHNOLOGIE t
-          LEFT JOIN PROJET_TECHNOLOGIE pt ON pt.id_techno = t.id_techno
+          FROM technologie t
+          LEFT JOIN projet_technologie pt ON pt.id_techno = t.id_techno
           GROUP BY t.id_techno
           ORDER BY nb_projets DESC, t.nom;
         `;
@@ -249,7 +261,7 @@ app.get("/api/competence/:id", async (req, res) => {
         const { rows } = await pool.query(`
           SELECT id_experience, intitule, structure, type, lieu, description,
                  date_debut::text AS date_debut, date_fin::text AS date_fin   -- dates en texte : pas de décalage horaire
-          FROM EXPERIENCE ORDER BY date_debut DESC;`);
+          FROM experience ORDER BY date_debut DESC;`);
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -263,7 +275,7 @@ app.get("/api/competence/:id", async (req, res) => {
         const { rows } = await pool.query(`
           SELECT id_formation, diplome, etablissement, lieu,
                  date_debut::text AS date_debut, date_fin::text AS date_fin
-          FROM FORMATION ORDER BY date_debut DESC;`);
+          FROM formation ORDER BY date_debut DESC;`);
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -276,7 +288,7 @@ app.get("/api/competence/:id", async (req, res) => {
       try {
         const { rows } = await pool.query(`
           SELECT id_certificat, intitule, organisme, type, fichier, document, date_obtention::text AS date_obtention
-          FROM CERTIFICAT ORDER BY type, date_obtention DESC NULLS LAST;`);
+          FROM certificat ORDER BY type, date_obtention DESC NULLS LAST;`);
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -287,7 +299,7 @@ app.get("/api/competence/:id", async (req, res) => {
     // Langues
     app.get("/api/langues", async (req, res) => {
       try {
-        const { rows } = await pool.query("SELECT nom, niveau FROM LANGUE ORDER BY id_langue;");
+        const { rows } = await pool.query("SELECT nom, niveau FROM langue ORDER BY id_langue;");
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -300,15 +312,13 @@ app.get("/api/competence/:id", async (req, res) => {
       const { id } = req.params;
       try {
         const query = `
-          SELECT pr.id_preuve, pr.fichier, pr.texte, ac.id_ac, ac.intitule AS intitule_ac,
-                 COALESCE(p.titre, e.intitule || ' · ' || e.structure, c.intitule) AS source
-          FROM PREUVE pr
-          JOIN APPRENTISSAGE_CRITIQUE ac ON ac.id_ac = pr.id_ac
-          LEFT JOIN PROJET p ON p.id_projet = pr.id_projet
-          LEFT JOIN EXPERIENCE e ON e.id_experience = pr.id_experience
-          LEFT JOIN CERTIFICAT c ON c.id_certificat = pr.id_certificat
+          SELECT pd.id_preuve, pd.titre, pd.texte, pd.fichier, pd.code_sae, pd.source,
+                 ac.code_ac, ac.intitule AS intitule_ac
+          FROM preuve_detail pd
+          JOIN preuve_ac pa ON pa.id_preuve = pd.id_preuve
+          JOIN apprentissage_critique ac ON ac.code_ac = pa.code_ac
           WHERE ac.id_competence = $1
-          ORDER BY ac.id_ac;
+          ORDER BY ac.code_ac;
         `;
         const { rows } = await pool.query(query, [id]);
         res.json(rows);
@@ -321,7 +331,7 @@ app.get("/api/competence/:id", async (req, res) => {
     // Toutes les preuves
     app.get("/api/preuves", async (req, res) => {
       try {
-        const { rows } = await pool.query("SELECT * FROM PREUVE ORDER BY id_preuve;");
+        const { rows } = await pool.query("SELECT * FROM preuve_detail ORDER BY id_preuve;");
         res.json(rows);
       } catch (err) {
         console.error(err);
@@ -336,7 +346,7 @@ app.get("/api/competence/:id", async (req, res) => {
         return res.status(400).json({ error: "Identifiant de preuve invalide" });
       }
       try {
-        const { rows } = await pool.query("SELECT * FROM PREUVE WHERE id_preuve = $1;", [id]);
+        const { rows } = await pool.query("SELECT * FROM preuve_detail WHERE id_preuve = $1;", [id]);
         if (rows.length === 0) {
           return res.status(404).json({ error: "Preuve non trouvée" });
         }
@@ -344,6 +354,33 @@ app.get("/api/competence/:id", async (req, res) => {
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Erreur lors de la récupération de la preuve" });
+      }
+    });
+
+    // Couverture du référentiel : nombre de preuves par AC (vue couverture_ac)
+    app.get("/api/couverture", async (req, res) => {
+      try {
+        const { rows } = await pool.query("SELECT * FROM couverture_ac;");
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération de la couverture" });
+      }
+    });
+
+    // SAÉ du programme national, avec les compétences qu'elles ciblent
+    app.get("/api/sae", async (req, res) => {
+      try {
+        const { rows } = await pool.query(`
+          SELECT s.code_sae, s.intitule, s.type, s.semestre,
+                 ARRAY_AGG(sc.id_competence::text ORDER BY sc.id_competence) AS competences
+          FROM sae s JOIN sae_competence sc ON sc.code_sae = s.code_sae
+          GROUP BY s.code_sae
+          ORDER BY s.semestre, s.code_sae;`);
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur lors de la récupération des SAÉ" });
       }
     });
 

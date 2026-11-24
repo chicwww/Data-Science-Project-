@@ -139,6 +139,7 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - Configuration d'un Codespace GitHub pour tester le site en ligne
 - Schéma relationnel personnel : le référentiel du BUT SD est complété par mes formations, expériences, projets, technologies, certificats, langues et preuves
 - Base enrichie (`bdd/init_db.sql`), 11 nouvelles routes dans le serveur, et 5 pages reliées à l'API (Accueil, Parcours, Projets, Compétences, Contact)
+- Refonte de la base sur le programme national du BUT SD : schéma `referentiel` (compétences, composantes essentielles, niveaux, 54 AC, 30 SAÉ, stages et portfolios) et schéma `portfolio` ; une preuve peut démontrer plusieurs AC et se rattache à une SAÉ au plus ; règles de cohérence vérifiées par la base
 
 ### À faire ensuite
 - TD3, exercice 1 : schéma relationnel reliant toutes les tables, avec une table des preuves (image et/ou texte), à faire valider par l'enseignante

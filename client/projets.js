@@ -22,7 +22,7 @@ async function chargerProjets() {
   }
   liste.innerHTML = projets.map(p => `
     <article class="carte">
-      <p class="secondaire petit">${esc(p.type)} · ${esc(p.annee ?? "année à confirmer")}</p>
+      <p class="secondaire petit">${esc(p.type)} · ${esc(p.annee ?? "année à confirmer")}${p.code_sae ? " · " + esc(p.code_sae) : ""}</p>
       <h3>${esc(p.titre)}</h3>
       <p class="secondaire petit">${esc(p.technologies ?? "")}</p>
       <button class="filtre" data-id="${p.id_projet}">Voir le détail</button>
@@ -43,8 +43,8 @@ async function chargerDetail(id) {
     <p>${p.technologies.map(t => `<span class="etiquette">${esc(t.nom)}</span>`).join("")}</p>
     <h3>Apprentissages critiques démontrés</h3>
     ${p.preuves.length === 0 ? `<p class="secondaire">Aucune preuve pour l'instant.</p>` :
-      p.preuves.map(pr => `<p><strong>${esc(pr.id_ac)}</strong> · ${esc(pr.intitule_ac)}<br>
-        <span class="secondaire petit">${esc(pr.texte)}</span></p>`).join("")}`;
+      p.preuves.map(pr => `<p><strong>${esc(pr.code_ac)}</strong> · ${esc(pr.intitule_ac)}<br>
+        <span class="secondaire petit">${esc(pr.titre)} : ${esc(pr.texte)}</span></p>`).join("")}`;
   zone.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 

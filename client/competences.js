@@ -63,8 +63,15 @@ async function highlightSelection(comp) {
     if (data.error) {
       document.getElementById("description").innerText = "Description non disponible.";
     } else {
-      document.getElementById("description").innerHTML =
-        `<h2>${esc(data.id_competence)} · ${esc(data.intitule)}</h2><p class="secondaire" style="white-space:pre-line">${esc(data.description.trim())}</p>`;
+      // Référentiel national : composantes essentielles, puis niveaux et leurs AC
+      document.getElementById("description").innerHTML = `
+        <p class="secondaire petit">${esc(data.verbe)}${data.parcours ? " · parcours " + esc(data.parcours) : " · tronc commun"}</p>
+        <h2>${esc(data.id_competence)} · ${esc(data.intitule)}</h2>
+        <h3>Composantes essentielles</h3>
+        <ul class="petit">${data.composantes.map(c => `<li>${esc(c.libelle)}</li>`).join("")}</ul>
+        ${data.niveaux.map(n => `
+          <h3>Niveau ${n.numero} · ${esc(n.intitule)} <span class="secondaire petit">(${esc(n.id_annee)})</span></h3>
+          <ul class="petit">${n.acs.map(ac => `<li><strong>${esc(ac.code_ac)}</strong> ${esc(ac.intitule)}</li>`).join("")}</ul>`).join("")}`;
     }
     afficherPreuves(await chargerJSON(`/api/competence/${comp}/preuves`));
   } catch {
@@ -133,11 +140,29 @@ function afficherPreuves(preuves) {
   }
   zone.innerHTML = preuves.map(p => `
     <div class="carte preuve">
-      ${p.fichier ? `<img src="/preuves/${esc(p.fichier)}" alt="Preuve ${esc(p.id_ac)}">` : ""}
-      <p class="secondaire petit">${esc(p.id_ac)} · ${esc(p.source)}</p>
-      <p><strong>${esc(p.intitule_ac)}</strong></p>
+      ${p.fichier ? `<img src="/preuves/${esc(p.fichier)}" alt="Preuve ${esc(p.code_ac)}">` : ""}
+      <p class="secondaire petit">${esc(p.code_ac)}${p.code_sae ? " · " + esc(p.code_sae) : ""} · ${esc(p.source)}</p>
+      <h3>${esc(p.titre)}</h3>
+      <p class="petit"><strong>${esc(p.intitule_ac)}</strong></p>
       <p class="secondaire petit">${esc(p.texte ?? "")}</p>
     </div>`).join("");
 }
 
+// Couverture du référentiel : AC démontrés par au moins une preuve, par compétence
+async function chargerCouverture() {
+  const data = await chargerJSON("/api/couverture");
+  const comps = ["C1", "C2", "C3", "C4"];
+  const demontres = comps.map(c => data.filter(ac => ac.id_competence === c && Number(ac.nb_preuves) > 0).length);
+  const restants = comps.map((c, i) => data.filter(ac => ac.id_competence === c).length - demontres[i]);
+  new Chart(document.getElementById("chartCouverture"), {
+    type: "bar",
+    data: { labels: comps, datasets: [
+      { label: "AC démontrés", data: demontres, backgroundColor: "#D93A22" },
+      { label: "AC sans preuve", data: restants, backgroundColor: "#CBD2DB" }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: "y",
+      scales: { x: { stacked: true, title: { display: true, text: "Apprentissages critiques" } }, y: { stacked: true } } }
+  });
+}
+
 loadData().then(() => highlightSelection("C1"));   // C1 sélectionnée au chargement
+chargerCouverture();

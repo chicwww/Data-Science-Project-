@@ -68,6 +68,15 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 
 À chaque démarrage, le serveur recrée les tables à partir de `bdd/init_db.sql` : les données à garder doivent donc être écrites dans ce fichier.
 
+## Base de données
+
+![Schéma relationnel](bdd/schema-relationnel.png)
+
+- Une preuve démontre un ou plusieurs apprentissages critiques (table `preuve_ac`), se rattache à une SAÉ au plus, et vient d'un projet, d'une expérience ou d'un certificat.
+- Une SAÉ cible une ou plusieurs compétences (table `sae_competence`), comme dans le programme national.
+- Un déclencheur refuse qu'une preuve démontre un AC qui n'appartient à aucune compétence de sa SAÉ.
+- Types fermés (ENUM), domaines pour les codes de compétence et d'AC, contraintes CHECK et index sur les clés étrangères.
+
 ## Routes de l'API
 
 | Route | Données renvoyées |
@@ -82,6 +91,8 @@ Pour arrêter la base : `docker compose down` (les données sont conservées dan
 | `GET /api/formations`, `GET /api/experiences` | parcours |
 | `GET /api/certificats`, `GET /api/langues` | certificats, distinctions et langues |
 | `GET /api/preuves`, `GET /api/preuve/:id` | preuves |
+| `GET /api/couverture` | nombre de preuves par apprentissage critique |
+| `GET /api/sae` | SAÉ du programme national et compétences ciblées |
 
 Les images (`/preuves/<fichier>`) et les pages sont servies par la route statique du dossier `client/`.
 
@@ -89,7 +100,7 @@ Les images (`/preuves/<fichier>`) et les pages sont servies par la route statiqu
 
 - `client/` : le site vu dans le navigateur : 5 pages (`index.html`, `parcours.html`, `projets.html`, `competences.html`, `contact.html`), un script par page, `commun.js` et `style.css` partagés, images des certificats et preuves dans `preuves/`
 - `serveur/` : le serveur Express (`server.js`) et la liste de ses dépendances (`package.json`)
-- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`) : le référentiel du BUT SD, puis mon parcours (formations, expériences, projets, technologies, certificats, langues, preuves)
+- `bdd/` : le script SQL qui crée et remplit la base (`init_db.sql`) et son diagramme (`schema-relationnel.png`). Deux schémas PostgreSQL : `referentiel` (programme national du BUT SD, parcours VCOD : compétences, composantes essentielles, niveaux, apprentissages critiques, SAÉ) et `portfolio` (formations, expériences, projets, technologies, certificats, langues, preuves)
 - `docker-compose.yml` : la base PostgreSQL lancée dans un conteneur Docker
 - `.devcontainer/` : configuration du Codespace GitHub (Node.js, Docker et lancement automatique de la base)
 - `.gitignore` : fichiers exclus de Git (`node_modules/` et `.env`, qui contient le mot de passe de la base)

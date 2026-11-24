@@ -1,128 +1,361 @@
--- ============================================================
--- BASE DU PORTFOLIO DE FRANCISCA WETIMANE
--- 1re partie : le référentiel du BUT Sciences des Données (base fournie en cours)
--- 2e partie  : mon parcours (formations, expériences, projets, certificats, preuves)
--- Le serveur relance ce fichier à chaque démarrage : toute donnée à garder s'écrit ici.
--- ============================================================
+-- ============================================================================
+--  BASE DU PORTFOLIO DE FRANCISCA WETIMANE · PostgreSQL 16
+--
+--  Schéma « referentiel » : le programme national du BUT Science des données
+--    (PN LP-BUT SD 2022, parcours VCOD) : compétences, composantes essentielles,
+--    niveaux, apprentissages critiques (AC), SAÉ et heures d'enseignement.
+--  Schéma « portfolio »   : mon parcours (formations, expériences, projets,
+--    technologies, certificats, langues) et mes preuves, rattachées aux AC.
+--
+--  Le serveur rejoue ce fichier à chaque démarrage : toute donnée à garder s'écrit ici.
+-- ============================================================================
 
-DROP VIEW IF EXISTS HEURES_PAR_ANNEE CASCADE;
-DROP TABLE IF EXISTS PREUVE CASCADE;
-DROP TABLE IF EXISTS PROJET_TECHNOLOGIE CASCADE;
-DROP TABLE IF EXISTS TECHNOLOGIE CASCADE;
-DROP TABLE IF EXISTS PROJET CASCADE;
-DROP TABLE IF EXISTS EXPERIENCE CASCADE;
-DROP TABLE IF EXISTS CERTIFICAT CASCADE;
-DROP TABLE IF EXISTS FORMATION CASCADE;
-DROP TABLE IF EXISTS LANGUE CASCADE;
-DROP TABLE IF EXISTS ACTIVITE_PEDAGOGIQUE CASCADE;
-DROP TABLE IF EXISTS APPRENTISSAGE_CRITIQUE CASCADE;
-DROP TABLE IF EXISTS COMPETENCE CASCADE;
-DROP TABLE IF EXISTS ANNEE CASCADE;
+DROP SCHEMA IF EXISTS portfolio CASCADE;
+DROP SCHEMA IF EXISTS referentiel CASCADE;
+CREATE SCHEMA referentiel;
+CREATE SCHEMA portfolio;
+COMMENT ON SCHEMA referentiel IS 'Programme national du BUT Science des données (PN 2022), parcours VCOD';
+COMMENT ON SCHEMA portfolio IS 'Parcours personnel et preuves de Francisca Wetimane';
 
--- ============================================================
--- TABLE DES COMPÉTENCES DU BUT SCIENCES DES DONNÉES
--- ============================================================
-CREATE TABLE IF NOT EXISTS COMPETENCE (
-    id_competence CHAR(2) PRIMARY KEY,  -- C1 à C4
-    intitule TEXT NOT NULL,
-    description TEXT NOT NULL,
-    preuve TEXT
+SET search_path = referentiel, portfolio;
+
+-- ############################################################################
+--  1. RÉFÉRENTIEL NATIONAL
+-- ############################################################################
+
+-- Types et domaines : les règles de format sont écrites une seule fois
+CREATE DOMAIN referentiel.code_competence AS char(2) CHECK (VALUE ~ '^C[1-4]$');
+CREATE DOMAIN referentiel.code_ac AS varchar(12) CHECK (VALUE ~ '^AC[1-3][1-4]\.0[1-9](VCOD)?$');
+CREATE TYPE referentiel.type_sae AS ENUM ('SAÉ', 'Stage', 'Portfolio');
+
+CREATE TABLE annee (
+    id_annee   char(4)  PRIMARY KEY CHECK (id_annee ~ '^BUT[1-3]$'),
+    numero     smallint NOT NULL UNIQUE CHECK (numero BETWEEN 1 AND 3),
+    intitule   text     NOT NULL
 );
 
-INSERT INTO COMPETENCE (id_competence, intitule, description, preuve) VALUES
-('C1', 'Traiter des données à des fins décisionnelles', $$
-En intervenant à toutes les étapes du cycle de vie de la donnée (insertion, modification, extraction, suppression)
-En utilisant le modèle de données adapté aux besoins
-En s’inscrivant dans une démarche de documentation des réalisations adaptée au public visé
-En traduisant correctement les demandes métier en programmes, avec le respect du cahier des charges s'il existe
-En écrivant un programme correctement structuré et documenté, respectant les bonnes pratiques
-En identifiant les librairies et langages dédiés
-$$, 'test1.jpg'),
-('C2', 'Analyser statistiquement les données', $$
-En tenant compte du contexte de l’étude (économique, socio-démographique, commerciale, clinique...)
-En mettant en évidence les grandes tendances et les informations principales
-En identifiant et en mettant en œuvre les techniques adaptées aux attentes du client ou de l’instance décisionnaire
-En identifiant et en mettant en œuvre les techniques adaptées aux données complexes (données massives, données mal structurées, flux de données…)
-En tenant compte du contexte inférentiel (variabilité de l’échantillon)
-$$, 'test2.jpg'),
-('C3', 'Valoriser une production dans un contexte professionnel', $$
-En s’adaptant au niveau d’expertise, à la culture et au statut du destinataire
-En s’exprimant correctement, aussi bien en français qu’en anglais, à l'oral comme à l'écrit
-En veillant aux aspects éthiques, déontologiques et réglementaires d’utilisation et de diffusion des données
-En interprétant et contextualisant les résultats (citations, vérification des sources, esprit critique)
-En utilisant la forme de restitution adaptée
-En tenant compte des réalités économiques et managériales des entreprises
-$$, 'test3.jpg'),
-('C4', 'Développer un outil décisionnel', $$
-En mettant en œuvre une structuration des données adaptée à leurs caractéristiques (type, volume...)
-En assurant la qualité des données et minimisant les biais liés à l’incertitude et l’imprécision dans les sources
-En étant sensible aux aspects éthiques, déontologiques et juridiques d’utilisation et de diffusion des données
-En réalisant des solutions de visualisation spécifiques aux données métier
-En intervenant à différents niveaux de la chaîne décisionnelle
-En utilisant des méthodes de développement logiciel
-$$, 'test.png')
-ON CONFLICT DO NOTHING;
-
-
--- ============================================================
--- TABLE DES ANNÉES
--- ============================================================
-CREATE TABLE IF NOT EXISTS ANNEE (
-    id_annee CHAR(4) PRIMARY KEY,  -- ex: BUT1, BUT2, BUT3
-    intitule TEXT NOT NULL
+CREATE TABLE semestre (
+    numero     smallint PRIMARY KEY CHECK (numero BETWEEN 1 AND 6),
+    id_annee   char(4)  NOT NULL REFERENCES annee(id_annee),
+    CHECK ((numero + 1) / 2 = substring(id_annee, 4, 1)::int)   -- S1-S2 = BUT1, S3-S4 = BUT2, S5-S6 = BUT3
 );
 
-INSERT INTO ANNEE (id_annee, intitule) VALUES
-('BUT1', 'Traiter des données structurées / Mettre en œuvre une analyse descriptive / Contextualiser et présenter les données'),
-('BUT2', 'Automatiser le traitement de données multidimensionnelles / Mettre en œuvre une analyse exploratoire / Restituer et argumenter ses résultats / Développer un composant d’une solution décisionnelle'),
-('BUT3', 'Intégrer le traitement de données complexes / Mettre en œuvre l''analyse exploratoire de données complexes / Intégrer et valoriser sa production dans l''écosystème de l''entreprise / Participer au déploiement d''une solution décisionnelle')
-ON CONFLICT DO NOTHING;
-
--- ============================================================
--- TABLE DES ACTIVITÉS PÉDAGOGIQUES
--- ============================================================
-CREATE TABLE IF NOT EXISTS ACTIVITE_PEDAGOGIQUE (
-    num SERIAL PRIMARY KEY,             -- numéro créé automatiquement
-    semestre INT NOT NULL CHECK (semestre BETWEEN 1 AND 6),   -- NOUVEAU : 6 semestres seulement
-    heure INT NOT NULL CHECK (heure > 0),                      -- NOUVEAU : pas d'heures nulles ou négatives
-    skill TEXT NOT NULL,
-    id_competence CHAR(2) NOT NULL,
-    id_annee CHAR(4),                   -- NOUVEAU : année du BUT (déduite du semestre)
-    FOREIGN KEY (id_competence) REFERENCES COMPETENCE(id_competence),
-    FOREIGN KEY (id_annee) REFERENCES ANNEE(id_annee)
+CREATE TABLE competence (
+    id_competence code_competence PRIMARY KEY,
+    verbe         text NOT NULL,                  -- Traiter, Analyser, Valoriser, Développer
+    intitule      text NOT NULL UNIQUE,
+    parcours      text CHECK (parcours IN ('VCOD')) -- vide = tronc commun
 );
 
--- Les 254 vraies matières des 3 années (reprises de init_dbVersionComplete.sql)
-INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
--- SEMESTRE 1
+CREATE TABLE composante_essentielle (
+    code          varchar(6) PRIMARY KEY CHECK (code ~ '^CE[1-4]\.0[1-9]$'),
+    id_competence code_competence NOT NULL REFERENCES competence(id_competence),
+    libelle       text NOT NULL,
+    CHECK (substring(code, 3, 1) = substring(id_competence, 2, 1))
+);
+
+CREATE TABLE niveau (
+    id_competence code_competence NOT NULL REFERENCES competence(id_competence),
+    numero        smallint NOT NULL CHECK (numero BETWEEN 1 AND 3),
+    intitule      text     NOT NULL,
+    id_annee      char(4)  NOT NULL REFERENCES annee(id_annee),
+    PRIMARY KEY (id_competence, numero)          -- clé primaire composée
+);
+
+CREATE TABLE apprentissage_critique (
+    code_ac       code_ac  PRIMARY KEY,
+    intitule      text     NOT NULL,
+    id_competence code_competence NOT NULL,
+    numero_niveau smallint NOT NULL,
+    FOREIGN KEY (id_competence, numero_niveau) REFERENCES niveau(id_competence, numero),
+    -- le code AC<année><compétence> doit correspondre à la compétence
+    CHECK (substring(code_ac, 4, 1) = substring(id_competence, 2, 1))
+);
+CREATE INDEX ON apprentissage_critique (id_competence, numero_niveau);
+
+CREATE TABLE sae (
+    code_sae   varchar(16) PRIMARY KEY,
+    intitule   text     NOT NULL,
+    type       type_sae NOT NULL DEFAULT 'SAÉ',
+    semestre   smallint NOT NULL REFERENCES semestre(numero),
+    parcours   text CHECK (parcours IN ('VCOD'))
+);
+CREATE INDEX ON sae (semestre);
+
+-- Une SAÉ cible une ou plusieurs compétences (lien N-N)
+CREATE TABLE sae_competence (
+    code_sae      varchar(16)     NOT NULL REFERENCES sae(code_sae) ON DELETE CASCADE,
+    id_competence code_competence NOT NULL REFERENCES competence(id_competence),
+    PRIMARY KEY (code_sae, id_competence)
+);
+CREATE INDEX ON sae_competence (id_competence);
+
+-- Matières du programme local et leurs heures (base fournie en cours)
+CREATE TABLE activite_pedagogique (
+    num           integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    semestre      smallint NOT NULL REFERENCES semestre(numero),
+    heure         integer  NOT NULL CHECK (heure > 0),
+    skill         text     NOT NULL,
+    id_competence code_competence NOT NULL REFERENCES competence(id_competence),
+    -- C4 (Développer un outil décisionnel, parcours VCOD) ne commence qu'en 2e année (S3)
+    CHECK (id_competence <> 'C4' OR semestre >= 3)
+);
+CREATE INDEX ON activite_pedagogique (id_competence);
+CREATE INDEX ON activite_pedagogique (semestre);
+
+INSERT INTO annee (id_annee, numero, intitule) VALUES
+('BUT1', 1, '1re année'),
+('BUT2', 2, '2e année'),
+('BUT3', 3, '3e année');
+
+INSERT INTO semestre (numero, id_annee) VALUES (1, 'BUT1'), (2, 'BUT1'), (3, 'BUT2'), (4, 'BUT2'), (5, 'BUT3'), (6, 'BUT3');
+
+INSERT INTO competence (id_competence, verbe, intitule, parcours) VALUES
+('C1', 'Traiter', 'Traiter des données à des fins décisionnelles', NULL),
+('C2', 'Analyser', 'Analyser statistiquement les données', NULL),
+('C3', 'Valoriser', 'Valoriser une production dans un contexte professionnel', NULL),
+('C4', 'Développer', 'Développer un outil décisionnel', 'VCOD');
+
+-- Composantes essentielles (« En ... ») de chaque compétence
+INSERT INTO composante_essentielle (code, id_competence, libelle) VALUES
+('CE1.01', 'C1', 'En intervenant à toutes les étapes du cycle de vie de la donnée (insertion, modification, extraction, suppression)'),
+('CE1.02', 'C1', 'En utilisant le modèle de données adapté aux besoins'),
+('CE1.03', 'C1', 'En s’inscrivant dans une démarche de documentation des réalisations adaptée au public visé'),
+('CE1.04', 'C1', 'En traduisant correctement les demandes métier en programmes, avec le respect du cahier des charges s''il existe'),
+('CE1.05', 'C1', 'En écrivant un programme correctement structuré et documenté, respectant les bonnes pratiques'),
+('CE1.06', 'C1', 'En identifiant les librairies et langages dédiés'),
+('CE2.01', 'C2', 'En tenant compte du contexte de l’étude (économique, socio-démographique, commerciale, clinique...)'),
+('CE2.02', 'C2', 'En mettant en évidence les grandes tendances et les informations principales'),
+('CE2.03', 'C2', 'En identifiant et en mettant en œuvre les techniques adaptées aux attentes du client ou de l’instance décisionnaire'),
+('CE2.04', 'C2', 'En identifiant et en mettant en œuvre les techniques adaptées aux données complexes (données massives, données mal structurées, flux de données…)'),
+('CE2.05', 'C2', 'En tenant compte du contexte inférentiel (variabilité de l’échantillon)'),
+('CE3.01', 'C3', 'En s’adaptant au niveau d’expertise, à la culture et au statut du destinataire'),
+('CE3.02', 'C3', 'En s’exprimant correctement, aussi bien en français qu’en anglais, à l''oral comme à l''écrit'),
+('CE3.03', 'C3', 'En veillant aux aspects éthiques, déontologiques et réglementaires d’utilisation et de diffusion des données'),
+('CE3.04', 'C3', 'En interprétant et contextualisant les résultats (citations, vérification des sources, esprit critique)'),
+('CE3.05', 'C3', 'En utilisant la forme de restitution adaptée'),
+('CE3.06', 'C3', 'En tenant compte des réalités économiques et managériales des entreprises'),
+('CE4.01', 'C4', 'En mettant en œuvre une structuration des données adaptée à leurs caractéristiques (type, volume...)'),
+('CE4.02', 'C4', 'En assurant la qualité des données et minimisant les biais liés à l’incertitude et l’imprécision dans les sources'),
+('CE4.03', 'C4', 'En étant sensible aux aspects éthiques, déontologiques et juridiques d’utilisation et de diffusion des données'),
+('CE4.04', 'C4', 'En réalisant des solutions de visualisation spécifiques aux données métier'),
+('CE4.05', 'C4', 'En intervenant à différents niveaux de la chaîne décisionnelle'),
+('CE4.06', 'C4', 'En utilisant des méthodes de développement logiciel');
+
+-- Niveaux de développement : C1 à C3 sur 3 ans, C4 (parcours VCOD) en 2e et 3e années
+INSERT INTO niveau (id_competence, numero, intitule, id_annee) VALUES
+('C1', 1, 'Traiter des données structurées', 'BUT1'),
+('C1', 2, 'Automatiser le traitement de données multidimensionnelles', 'BUT2'),
+('C1', 3, 'Intégrer le traitement de données complexes', 'BUT3'),
+('C2', 1, 'Mettre en œuvre une analyse descriptive', 'BUT1'),
+('C2', 2, 'Mettre en œuvre une analyse exploratoire', 'BUT2'),
+('C2', 3, 'Mettre en œuvre l''analyse exploratoire de données complexes', 'BUT3'),
+('C3', 1, 'Contextualiser et présenter les données', 'BUT1'),
+('C3', 2, 'Restituer et argumenter ses résultats', 'BUT2'),
+('C3', 3, 'Intégrer et valoriser sa production dans l''écosystème de l''entreprise', 'BUT3'),
+('C4', 1, 'Développer un composant d''une solution décisionnelle', 'BUT2'),
+('C4', 2, 'Participer au déploiement d''une solution décisionnelle', 'BUT3');
+
+-- Les 54 apprentissages critiques (code AC<année><compétence>.<numéro>)
+INSERT INTO apprentissage_critique (code_ac, intitule, id_competence, numero_niveau) VALUES
+('AC11.01', 'Correctement interpréter et prendre en compte le besoin du commanditaire ou du client', 'C1', 1),
+('AC11.02', 'Respecter les formalismes de notation', 'C1', 1),
+('AC11.03', 'Connaître la syntaxe des langages et savoir l’utiliser', 'C1', 1),
+('AC11.04', 'Mesurer l’importance de maîtriser la structure des données à exploiter', 'C1', 1),
+('AC11.05', 'Comprendre les structures algorithmiques de base et leur contexte d’usage', 'C1', 1),
+('AC11.06', 'Prendre conscience de l’intérêt de la programmation', 'C1', 1),
+('AC12.01', 'Réaliser que les sources de données ont des caractéristiques propres à considérer (variation, précision, mise à jour...)', 'C2', 1),
+('AC12.02', 'Comprendre qu’une analyse correcte ne peut émaner que de données propres et préparées', 'C2', 1),
+('AC12.03', 'Comprendre l’intérêt des synthèses numériques et graphiques pour décrire une variable statistique', 'C2', 1),
+('AC12.04', 'Comprendre l’intérêt des synthèses numériques et graphiques pour mettre en évidence des liaisons entre variables.', 'C2', 1),
+('AC12.05', 'Comprendre l''intérêt de l’utilisation d’un modèle probabiliste', 'C2', 1),
+('AC12.06', 'Appréhender la notion de fluctuation d''échantillonnage, notamment à l’aide de simulations probabilistes', 'C2', 1),
+('AC13.01', 'Prendre connaissance des biais rencontrés dans la mise en place d’une enquête', 'C3', 1),
+('AC13.02', 'Identifier l’importance de contextualiser ses données', 'C3', 1),
+('AC13.03', 'Mesurer l’importance de mettre en évidence des résultats clés par l’utilisation d’indicateurs pertinents', 'C3', 1),
+('AC13.04', 'Lors de la restitution des résultats, mesurer l’importance d’expliciter également la démarche suivie', 'C3', 1),
+('AC13.05', 'Comprendre les intérêts de la data visualisation et de l’infographie', 'C3', 1),
+('AC13.06', 'Mesurer l’importance d’une expression précise et nuancée dans la communication en français et dans une langue étrangère des résultats', 'C3', 1),
+('AC21.01', 'Comprendre l''organisation des données de l''entreprise', 'C1', 2),
+('AC21.02', 'Réaliser le rôle central et spécifique de l''entrepôt de données dans la chaine décisionnelle', 'C1', 2),
+('AC21.03', 'Identifier et résoudre les problèmes d’intégration de sources complémentaires et hétérogènes', 'C1', 2),
+('AC21.04', 'Comprendre la nécessité de tester, corriger et documenter un programme', 'C1', 2),
+('AC21.05', 'Apprécier l’intérêt de briques logicielles existantes et savoir les utiliser', 'C1', 2),
+('AC22.01', 'Prendre conscience de la différence entre modélisation statistique et analyse exploratoire', 'C2', 2),
+('AC22.02', 'Saisir la spécificité de l’analyse des données temporelles', 'C2', 2),
+('AC22.03', 'Comprendre l’intérêt des analyses multivariées pour synthétiser et résumer l’information portée par plusieurs variables', 'C2', 2),
+('AC22.04', 'Appréhender l’idée de confronter une hypothèse avec la réalité pour prendre une décision', 'C2', 2),
+('AC22.05', 'Apprécier les limites de validité et les conditions d’application d’une analyse', 'C2', 2),
+('AC23.01', 'Saisir l’intérêt de mobiliser de manière proactive des ressources métiers liées à l''environnement (y compris économique, international…)', 'C3', 2),
+('AC23.02', 'Savoir défendre ses choix d’analyses', 'C3', 2),
+('AC23.03', 'Saisir la nécessité de choisir des indicateurs pertinents pour communiquer sur les résultats', 'C3', 2),
+('AC23.04', 'Prendre conscience de la rigueur requise dans ses productions et dans la communication à leur propos', 'C3', 2),
+('AC23.05', 'Comprendre les enjeux des relations en milieu professionnel adaptées à l’interlocuteur et à sa culture', 'C3', 2),
+('AC24.01VCOD', 'Comprendre le rôle fondamental de l’analyse des besoins et de l’existant dans un projet décisionnel (architecture, visualisation...)', 'C4', 1),
+('AC24.02VCOD', 'Percevoir les enjeux de l’automatisation et de l''interopérabilité d’un ensemble de tâches', 'C4', 1),
+('AC24.03VCOD', 'Prendre conscience des différences entre outils (logiciels, langages) pour choisir le plus adapté', 'C4', 1),
+('AC24.04VCOD', 'Comprendre le cycle de vie d’un projet informatique', 'C4', 1),
+('AC31.01', 'Identifier les solutions technologiques permettant la collecte et la diffusion de données', 'C1', 3),
+('AC31.02', 'Comprendre les spécificités des données complexes et de leur exploitation', 'C1', 3),
+('AC31.03', 'Savoir mener une veille technologique', 'C1', 3),
+('AC32.01', 'Prendre conscience des différences entre des outils statistiques pour choisir le plus adapté', 'C2', 3),
+('AC32.02', 'Saisir l’importance de la mise en œuvre de méthodes adaptées à des domaines et des données spécifiques (Marketing, Biostatistique, Statistique spatiale, Gestion …)', 'C2', 3),
+('AC32.03', 'Prendre conscience des limites des méthodes classiques pour l’analyse des données complexes (données massives, données mal structurées…)', 'C2', 3),
+('AC32.04', 'Comprendre les mécanismes de bases de l’intelligence artificielle (apprentissage statistique supervisé, échantillons d''apprentissage et échantillons de test…)', 'C2', 3),
+('AC33.01', 'Savoir transformer la donnée pour la mettre en conformité avec des normes (anonymisation, normalisation)', 'C3', 3),
+('AC33.02', 'Mesurer l''impact d''un respect de la législation en terme de droit des données.', 'C3', 3),
+('AC33.03', 'Identifier les clés d''une bonne communication (procédures et techniques utilisées)', 'C3', 3),
+('AC33.04', 'Mesurer l’importance de comprendre et de répondre à l''ensemble des problématiques posées', 'C3', 3),
+('AC33.05', 'Être force de proposition', 'C3', 3),
+('AC33.06', 'Prendre conscience de la nécessité d’intégrer la vision de l’interlocuteur (transversalité, international, multiculture, niveau d’expertise…)', 'C3', 3),
+('AC34.01VCOD', 'Prendre conscience de la nécessité d’utiliser des moyens spécifiques pour exploiter les Big Data ou les flux de données', 'C4', 2),
+('AC34.02VCOD', 'Défendre ses choix de solution par un argumentaire éclairé', 'C4', 2),
+('AC34.03VCOD', 'Réaliser l’intérêt d’appliquer les méthodes de développement dans la réalisation d’un projet informatique', 'C4', 2),
+('AC34.04VCOD', 'Apprécier l’intérêt de l’utilisation d’un gestionnaire de versions de code', 'C4', 2);
+
+-- SAÉ, stages et portfolios du parcours VCOD (PN 2022)
+-- À vérifier dans le PN : compétences de SAE3.03 et SAE3.VCOD.04 (fiches tronquées à la lecture)
+INSERT INTO sae (code_sae, intitule, type, semestre, parcours) VALUES
+('SAE1.01', 'Reporting à partir de données stockées dans un SGBD relationnel', 'SAÉ', 1, NULL),
+('SAE1.02', 'Écriture et lecture de fichiers de données', 'SAÉ', 1, NULL),
+('SAE1.03', 'Préparation et synthèse d''un tableau de données en vue d''une analyse exploratoire simple', 'SAÉ', 1, NULL),
+('SAE1.04', 'Apprendre en situation la production de données en entreprise', 'SAÉ', 1, NULL),
+('SAE1.05', 'Présentation en anglais d''un territoire économique et culturel', 'SAÉ', 1, NULL),
+('SAE1.06', 'Mise en œuvre d''une enquête', 'SAÉ', 1, NULL),
+('PORTFOLIO.S1', 'Démarche portfolio', 'Portfolio', 1, NULL),
+('SAE2.01', 'Conception et implémentation d''une base de données', 'SAÉ', 2, NULL),
+('SAE2.02', 'Estimation par échantillonnage', 'SAÉ', 2, NULL),
+('SAE2.03', 'Régression sur données réelles', 'SAÉ', 2, NULL),
+('SAE2.04', 'Datavisualisation', 'SAÉ', 2, NULL),
+('SAE2.05', 'Construction et présentation d''indicateurs de performance', 'SAÉ', 2, NULL),
+('SAE2.06', 'Analyse de données, reporting et datavisualisation', 'SAÉ', 2, NULL),
+('PORTFOLIO.S2', 'Démarche portfolio', 'Portfolio', 2, NULL),
+('SAE3.VCOD.01', 'Collecte automatisée de données web', 'SAÉ', 3, 'VCOD'),
+('SAE3.02', 'Intégration de données dans un datawarehouse', 'SAÉ', 3, NULL),
+('SAE3.03', 'Description et prévision de données temporelles', 'SAÉ', 3, NULL),
+('SAE3.VCOD.04', 'Conformité réglementaire pour traiter des données', 'SAÉ', 3, 'VCOD'),
+('PORTFOLIO.S3', 'Démarche portfolio', 'Portfolio', 3, 'VCOD'),
+('SAE4.VCOD.01', 'Développement d''un composant d''une solution décisionnelle', 'SAÉ', 4, 'VCOD'),
+('SAE4.02', 'Reporting d''une analyse multivariée', 'SAÉ', 4, NULL),
+('STAGE.S4', 'Stage', 'Stage', 4, 'VCOD'),
+('PORTFOLIO.S4', 'Démarche portfolio', 'Portfolio', 4, 'VCOD'),
+('SAE5.VCOD.01', 'Analyse et conception d''un outil décisionnel', 'SAÉ', 5, 'VCOD'),
+('SAE5.02', 'Migration de données vers ou depuis un environnement NoSQL', 'SAÉ', 5, NULL),
+('SAE5.03', 'Mise en œuvre d''un processus de datamining', 'SAÉ', 5, NULL),
+('PORTFOLIO.S5', 'Démarche portfolio', 'Portfolio', 5, 'VCOD'),
+('SAE6.VCOD.01', 'Développement et test d''un outil décisionnel', 'SAÉ', 6, 'VCOD'),
+('STAGE.S6', 'Stage', 'Stage', 6, 'VCOD'),
+('PORTFOLIO.S6', 'Démarche portfolio', 'Portfolio', 6, 'VCOD');
+
+INSERT INTO sae_competence (code_sae, id_competence) VALUES
+('SAE1.01', 'C1'),
+('SAE1.02', 'C1'),
+('SAE1.03', 'C2'),
+('SAE1.04', 'C3'),
+('SAE1.05', 'C3'),
+('SAE1.06', 'C3'),
+('PORTFOLIO.S1', 'C1'),
+('PORTFOLIO.S1', 'C2'),
+('PORTFOLIO.S1', 'C3'),
+('SAE2.01', 'C1'),
+('SAE2.02', 'C2'),
+('SAE2.03', 'C2'),
+('SAE2.04', 'C1'),
+('SAE2.04', 'C2'),
+('SAE2.04', 'C3'),
+('SAE2.05', 'C3'),
+('SAE2.06', 'C1'),
+('SAE2.06', 'C2'),
+('SAE2.06', 'C3'),
+('PORTFOLIO.S2', 'C1'),
+('PORTFOLIO.S2', 'C2'),
+('PORTFOLIO.S2', 'C3'),
+('SAE3.VCOD.01', 'C1'),
+('SAE3.VCOD.01', 'C2'),
+('SAE3.VCOD.01', 'C3'),
+('SAE3.VCOD.01', 'C4'),
+('SAE3.02', 'C1'),
+('SAE3.02', 'C3'),
+('SAE3.03', 'C2'),
+('SAE3.03', 'C3'),
+('SAE3.VCOD.04', 'C1'),
+('SAE3.VCOD.04', 'C2'),
+('SAE3.VCOD.04', 'C3'),
+('PORTFOLIO.S3', 'C1'),
+('PORTFOLIO.S3', 'C2'),
+('PORTFOLIO.S3', 'C3'),
+('PORTFOLIO.S3', 'C4'),
+('SAE4.VCOD.01', 'C1'),
+('SAE4.VCOD.01', 'C3'),
+('SAE4.VCOD.01', 'C4'),
+('SAE4.02', 'C1'),
+('SAE4.02', 'C2'),
+('SAE4.02', 'C3'),
+('STAGE.S4', 'C1'),
+('STAGE.S4', 'C2'),
+('STAGE.S4', 'C3'),
+('STAGE.S4', 'C4'),
+('PORTFOLIO.S4', 'C1'),
+('PORTFOLIO.S4', 'C2'),
+('PORTFOLIO.S4', 'C3'),
+('PORTFOLIO.S4', 'C4'),
+('SAE5.VCOD.01', 'C1'),
+('SAE5.VCOD.01', 'C2'),
+('SAE5.VCOD.01', 'C3'),
+('SAE5.VCOD.01', 'C4'),
+('SAE5.02', 'C1'),
+('SAE5.02', 'C3'),
+('SAE5.03', 'C2'),
+('SAE5.03', 'C3'),
+('PORTFOLIO.S5', 'C1'),
+('PORTFOLIO.S5', 'C2'),
+('PORTFOLIO.S5', 'C3'),
+('PORTFOLIO.S5', 'C4'),
+('SAE6.VCOD.01', 'C1'),
+('SAE6.VCOD.01', 'C2'),
+('SAE6.VCOD.01', 'C3'),
+('SAE6.VCOD.01', 'C4'),
+('STAGE.S6', 'C1'),
+('STAGE.S6', 'C2'),
+('STAGE.S6', 'C3'),
+('STAGE.S6', 'C4'),
+('PORTFOLIO.S6', 'C1'),
+('PORTFOLIO.S6', 'C2'),
+('PORTFOLIO.S6', 'C3'),
+('PORTFOLIO.S6', 'C4');
+
+-- Les 254 matières du programme et leurs heures (version complète fournie en cours)
+-- Correction : les 13 matières de programmation de BUT1 rattachées à C4 dans le fichier
+-- d'origine sont rattachées à C1, car C4 ne commence qu'en BUT2 (programme national)
+INSERT INTO activite_pedagogique (semestre, heure, skill, id_competence) VALUES
 (1, 15, 'Etude données envt ent & éco (intro marketing)', 'C3'),
 (1, 22, 'Base de données relationnelles 1', 'C1'),
 (1, 40, 'Statistique descriptive 1', 'C2'),
-(1, 19, 'Bases de la programmation 2', 'C4'),
+(1, 19, 'Bases de la programmation 2', 'C1'),
 (1, 4, 's1 Analyse des données d''une enquete', 'C2'),
 (1, 15, 'Bases de l''algèbre', 'C2'),
 (1, 22, 'Probabilités 1', 'C2'),
-(1, 15, 'Bases de la programmation 1', 'C4'),
+(1, 15, 'Bases de la programmation 1', 'C1'),
 (1, 38, 'Découverte données entrepreunarial et économique', 'C3'),
 (1, 6, 'Statistique descriptive 1 (TP)', 'C2'),
 (1, 7, 'PPP - tutorat 1P', 'C3'),
 (1, 4, 'Projet Personnel et Professionnel 1', 'C3'),
 (1, 1, 'Bases de l''algèbre', 'C2'),
 (1, 3, 'Probabilités 1 (machine)', 'C2'),
-(1, 5, 'Bases de la programmation 1', 'C4'),
+(1, 5, 'Bases de la programmation 1', 'C1'),
 (1, 4, 'Statistique descriptive 1', 'C2'),
-(1, 10, 'Bases de la programmation 1 (TP)', 'C4'),
+(1, 10, 'Bases de la programmation 1 (TP)', 'C1'),
 (1, 8, 'Base de données relationnelles 1 (TP)', 'C1'),
 (1, 4, 'Probabilités 1', 'C2'),
 (1, 6, 's1 Communication de l''information : l''enquête', 'C3'),
 (1, 2, 'Découverte données entrepreunarial et économique', 'C3'),
 (1, 7, 'Projet Personnel et Professionnel 1 (autonomie)', 'C3'),
 (1, 8, 's1 Communication de l''information et recherche documentaire', 'C3'),
-(1, 6, 'Bases de la programmation 2 (TP)', 'C4'),
+(1, 6, 'Bases de la programmation 2 (TP)', 'C1'),
 (1, 2, 'Projet Personnel et Professionnel 1 : fiches métiers', 'C3'),
-(1, 2, 'Bases de la programmation 2', 'C4'),
+(1, 2, 'Bases de la programmation 2', 'C1'),
 (1, 6, 'Découverte données entrepreunarial et économique (autonomie)', 'C3'),
-(1, 2, 'Bases de la programmation 1 (CJ)', 'C4'),
+(1, 2, 'Bases de la programmation 1 (CJ)', 'C1'),
 (1, 12, 'Tableur et reporting', 'C3'),
 (1, 4, 'Analyse des données d''une enquete (projet)', 'C2'),
 (1, 26, 'Mathématiques - Analyse (CJ)', 'C2'),
@@ -149,7 +382,7 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (1, 20, 'Apprendre en situation la prod°de données en entreprise', 'C3'),
 (1, 6, 'Energie - environnement (POL)', 'C3'),
 (1, 19, 'Communication de l''information et recherche documentaire (A.Morea ux)', 'C3'),
-(1, 6, 'Programmation statistique (VBA)', 'C4'),
+(1, 6, 'Programmation statistique (VBA)', 'C1'),
 (1, 3, 'Apprendre en situation la prod°de données en entreprise (autonomi e)', 'C3'),
 (1, 1, 'Méthodologie du travail universitaire', 'C3'),
 (1, 3, 'Conférence métier (INSEE stat)', 'C3'),
@@ -159,8 +392,6 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (1, 3, 'Reporting et datavisualisation CJ', 'C3'),
 (1, 2, 'rentrée PEC SD', 'C3'),
 (1, 3, 'Présentation en anglais territoire économique culturel', 'C3'),
-
--- SEMESTRE 2
 (2, 4, 'Projet Personnel et Professionnel 2 (autonomie)', 'C3'),
 (2, 8, 'Statistique descriptive 2', 'C2'),
 (2, 21, 'Probabilités 2', 'C2'),
@@ -190,10 +421,10 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (2, 8, 'Analyse de données reporting et datavisualisation (tutorat CJ)', 'C3'),
 (2, 14, 'Mise en oeuvre d''une enquête - projet non encadré', 'C2'),
 (2, 6, 'Préparation et synthèse tableau de données pour analyse', 'C1'),
-(2, 5, 'Programmation statistique (R TD)', 'C4'),
+(2, 5, 'Programmation statistique (R TD)', 'C1'),
 (2, 25, 'Anglais de spécialité', 'C3'),
 (2, 10, 'Portfolio (non encadré)', 'C3'),
-(2, 6, 'Programmation statistique (QGIS)', 'C4'),
+(2, 6, 'Programmation statistique (QGIS)', 'C1'),
 (2, 8, 'Reporting et datavisualisation CJ TP', 'C3'),
 (2, 12, 'Analyse des données d''une enquete (non encadré)', 'C2'),
 (2, 4, 'PPP1 Presentation', 'C3'),
@@ -212,16 +443,16 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (2, 4, 'Communication et sémiologie TP', 'C3'),
 (2, 5, 'Portfolio', 'C3'),
 (2, 5, 'Reporting données stockées dans SGBD relationnel', 'C3'),
-(2, 4, 'Programmation statistique (VBA)', 'C4'),
+(2, 4, 'Programmation statistique (VBA)', 'C1'),
 (2, 4, 'Analyse de données reporting et datavisualisation (rapport)', 'C3'),
 (2, 1, 'Préparation et synthèse tableau de données pour analyse (projet)', 'C1'),
 (2, 1, 'Mathématiques - Analyse (CJ)', 'C2'),
 (2, 3, 'Fresque du climat', 'C3'),
 (2, 1, 'Reporting et datavisualisation CF', 'C3'),
 (2, 3, 'Conception et implémentation d''une base de données (projet)', 'C1'),
-(2, 4, 'Programmation statistique (R TP)', 'C4'),
+(2, 4, 'Programmation statistique (R TP)', 'C1'),
 (2, 1, 'Conseil de département', 'C3'),
-(2, 1, 'Prog - bonnes pratiques', 'C4'),
+(2, 1, 'Prog - bonnes pratiques', 'C1'),
 (2, 3, 'Préparation et synthèse tableau de données pour analyse', 'C1'),
 (2, 2, 'Energie - environnement (POL)', 'C3'),
 (2, 2, 'Apprendre en situation la prod°de données en entreprise (projet)', 'C3'),
@@ -234,8 +465,6 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (2, 2, 'Statistique inférentielle', 'C2'),
 (2, 2, 'Mathématiques - Analyse (CF)', 'C2'),
 (2, 2, 'Tableur et reporting', 'C3'),
-
--- SEMESTRE 3
 (3, 24, 'SAÉ 3.03 - Description et prévision de données temporelles', 'C2'),
 (3, 28, 's3 Communication organisationnelle et professionnelle', 'C3'),
 (3, 12, 'SAÉ 3.01 - Collecte automatisée de données web (Autonomie)', 'C4'),
@@ -274,8 +503,6 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (3, 2, 'Méthodes factorielles', 'C2'),
 (3, 6, 'Automatisation et test (projet)', 'C4'),
 (3, 13, 'Système d''information géographique', 'C3'),
-
--- SEMESTRE 4
 (4, 10, 'SAÉ 4.02 - Reporting d''une analyse multivariée (autonomie)', 'C3'),
 (4, 7, 'SAÉ 4.01 - Développement composant solution décisionnelle (projet )', 'C4'),
 (4, 4, 'Programmation statistique avancée (projet autonomie)', 'C4'),
@@ -314,8 +541,6 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (4, 4, 'Mon alternance en anglais', 'C3'),
 (4, 1, 'Conseil de département', 'C3'),
 (4, 2, 'Test d''hypothèses pour analyse bi-variée', 'C2'),
-
--- SEMESTRE 5
 (5, 12, 'SAÉ 5.01 - Analyse et conception d''un outil décisionnel', 'C4'),
 (5, 7, 'SAÉ 5.01 - Analyse et conception d''un outil décisionnel (projet)', 'C4'),
 (5, 14, 'SAÉ 5.01 - Analyse et conception d''un outil décisionnel JA', 'C4'),
@@ -338,8 +563,6 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (5, 10, 'Communication pour le management', 'C3'),
 (5, 1, 'Conseil de département', 'C3'),
 (5, 6, 'Data Mining (MS)', 'C2'),
-
--- SEMESTRE 6
 (6, 28, 'SAÉ 6.01 - Développement et test d''un outil décisionnel', 'C4'),
 (6, 8, 'SAÉ 6.01 - Développement et test d''un outil décisionnel (projet)', 'C4'),
 (6, 12, 'Applications en économie et gestion 2', 'C3'),
@@ -360,214 +583,174 @@ INSERT INTO ACTIVITE_PEDAGOGIQUE (semestre, heure, skill, id_competence) VALUES
 (6, 5, 'Dolesup', 'C3'),
 (6, 7, 'Classification automatique (renforcements)', 'C2');
 
--- NOUVEAU : chaque activité est rattachée à son année (S1-S2 -> BUT1, S3-S4 -> BUT2, S5-S6 -> BUT3)
-UPDATE ACTIVITE_PEDAGOGIQUE
-SET id_annee = 'BUT' || ((semestre + 1) / 2);
+-- Vue : heures par année et par compétence
+CREATE VIEW heures_par_annee AS
+SELECT s.id_annee, a.id_competence, SUM(a.heure) AS total_heures, COUNT(*) AS nb_activites
+FROM activite_pedagogique a
+JOIN semestre s ON s.numero = a.semestre
+GROUP BY s.id_annee, a.id_competence
+ORDER BY s.id_annee, a.id_competence;
 
--- ============================================================
--- TABLE DES APPRENTISSAGES CRITIQUES
--- ============================================================
-CREATE TABLE IF NOT EXISTS APPRENTISSAGE_CRITIQUE (
-    id_ac VARCHAR(12) PRIMARY KEY,      -- ex: AC11.01, AC24.02VCOD
-    intitule TEXT NOT NULL,             -- description complète
-    id_annee CHAR(4) NOT NULL,         -- référence au BUT
-    niveau INT CHECK (niveau BETWEEN 1 AND 3),   -- NOUVEAU : niveau 1 à 3 seulement
-    id_competence CHAR(2),              -- NOUVEAU : compétence de l'AC
-    FOREIGN KEY (id_annee) REFERENCES ANNEE(id_annee),
-    FOREIGN KEY (id_competence) REFERENCES COMPETENCE(id_competence)
-);
+-- ############################################################################
+--  2. MON PARCOURS
+--  Sources : mon profil LinkedIn, mes certificats, data/projets.csv
+-- ############################################################################
+SET search_path = portfolio, referentiel;
 
--- BUT1 : Traiter des données structurées
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC11.01', 'Correctement interpréter et prendre en compte le besoin du commanditaire ou du client', 'BUT1'),
-('AC11.02', 'Respecter les formalismes de notation', 'BUT1'),
-('AC11.03', 'Connaître la syntaxe des langages et savoir l’utiliser', 'BUT1'),
-('AC11.04', 'Mesurer l’importance de maîtriser la structure des données à exploiter', 'BUT1'),
-('AC11.05', 'Comprendre les structures algorithmiques de base et leur contexte d’usage', 'BUT1'),
-('AC11.06', 'Prendre conscience de l’intérêt de la programmation', 'BUT1'),
-('AC12.01', 'Réaliser que les sources de données ont des caractéristiques propres à considérer (variation, précision, mise à jour...)', 'BUT1'),
-('AC12.02', 'Comprendre qu’une analyse correcte ne peut émaner que de données propres et préparées', 'BUT1'),
-('AC12.03', 'Comprendre l’intérêt des synthèses numériques et graphiques pour décrire une variable statistique', 'BUT1'),
-('AC12.04', 'Comprendre l’intérêt des synthèses numériques et graphiques pour mettre en évidence des liaisons entre variables.', 'BUT1'),
-('AC12.05', 'Comprendre l''intérêt de l’utilisation d’un modèle probabiliste', 'BUT1'),
-('AC12.06', 'Appréhender la notion de fluctuation d''échantillonnage, notamment à l’aide de simulations probabilistes', 'BUT1'),
-('AC13.01', 'Prendre connaissance des biais rencontrés dans la mise en place d’une enquête', 'BUT1'),
-('AC13.02', 'Identifier l’importance de contextualiser ses données', 'BUT1'),
-('AC13.03', 'Mesurer l’importance de mettre en évidence des résultats clés par l’utilisation d’indicateurs pertinents', 'BUT1'),
-('AC13.04', 'Lors de la restitution des résultats, mesurer l’importance d’expliciter également la démarche suivie', 'BUT1'),
-('AC13.05', 'Comprendre les intérêts de la data visualisation et de l’infographie', 'BUT1'),
-('AC13.06', 'Mesurer l’importance d’une expression précise et nuancée dans la communication en français et dans une langue étrangère des résultats', 'BUT1')
-ON CONFLICT DO NOTHING;
+CREATE TYPE portfolio.type_experience AS ENUM ('Alternance', 'Stage', 'Expérience académique', 'Engagement');
+CREATE TYPE portfolio.type_projet AS ENUM ('Projet de formation', 'Projet personnel');
+CREATE TYPE portfolio.type_certificat AS ENUM ('Certificat', 'Distinction');
+CREATE TYPE portfolio.niveau_langue AS ENUM ('Élémentaire', 'Professionnel', 'Langue maternelle ou bilingue');
 
--- BUT2 : Automatiser le traitement de données multidimensionnelles
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC21.01', 'Comprendre l''organisation des données de l''entreprise', 'BUT2'),
-('AC21.02', 'Réaliser le rôle central et spécifique de l''entrepôt de données dans la chaine décisionnelle', 'BUT2'),
-('AC21.03', 'Identifier et résoudre les problèmes d’intégration de sources complémentaires et hétérogènes', 'BUT2'),
-('AC21.04', 'Comprendre la nécessité de tester, corriger et documenter un programme', 'BUT2'),
-('AC21.05', 'Apprécier l’intérêt de briques logicielles existantes et savoir les utiliser', 'BUT2')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC22.01', 'Prendre conscience de la différence entre modélisation statistique et analyse exploratoire', 'BUT2'),
-('AC22.02', 'Saisir la spécificité de l’analyse des données temporelles', 'BUT2'),
-('AC22.03', 'Comprendre l’intérêt des analyses multivariées pour synthétiser et résumer l’information portée par plusieurs variables', 'BUT2'),
-('AC22.04', 'Appréhender l’idée de confronter une hypothèse avec la réalité pour prendre une décision', 'BUT2'),
-('AC22.05', 'Apprécier les limites de validité et les conditions d’application d’une analyse', 'BUT2')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC23.01', 'Saisir l’intérêt de mobiliser de manière proactive des ressources métiers liées à l''environnement (y compris économique, international…)', 'BUT2'),
-('AC23.02', 'Savoir défendre ses choix d’analyses', 'BUT2'),
-('AC23.03', 'Saisir la nécessité de choisir des indicateurs pertinents pour communiquer sur les résultats', 'BUT2'),
-('AC23.04', 'Prendre conscience de la rigueur requise dans ses productions et dans la communication à leur propos', 'BUT2'),
-('AC23.05', 'Comprendre les enjeux des relations en milieu professionnel adaptées à l’interlocuteur et à sa culture', 'BUT2')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC24.01VCOD', 'Comprendre le rôle fondamental de l’analyse des besoins et de l’existant dans un projet décisionnel (architecture, visualisation...)', 'BUT2'),
-('AC24.02VCOD', 'Percevoir les enjeux de l’automatisation et de l''interopérabilité d’un ensemble de tâches', 'BUT2'),
-('AC24.03VCOD', 'Prendre conscience des différences entre outils (logiciels, langages) pour choisir le plus adapté', 'BUT2'),
-('AC24.04VCOD', 'Comprendre le cycle de vie d’un projet informatique', 'BUT2')
-ON CONFLICT DO NOTHING;
-
--- BUT3 : Intégrer le traitement de données complexes
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC31.01', 'Identifier les solutions technologiques permettant la collecte et la diffusion de données', 'BUT3'),
-('AC31.02', 'Comprendre les spécificités des données complexes et de leur exploitation', 'BUT3'),
-('AC31.03', 'Savoir mener une veille technologique', 'BUT3')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC32.01', 'Prendre conscience des différences entre des outils statistiques pour choisir le plus adapté', 'BUT3'),
-('AC32.02', 'Saisir l’importance de la mise en œuvre de méthodes adaptées à des domaines et des données spécifiques (Marketing, Biostatistique, Statistique spatiale, Gestion …)', 'BUT3'),
-('AC32.03', 'Prendre conscience des limites des méthodes classiques pour l’analyse des données complexes (données massives, données mal structurées…)', 'BUT3'),
-('AC32.04', 'Comprendre les mécanismes de bases de l’intelligence artificielle (apprentissage statistique supervisé, échantillons d''apprentissage et échantillons de test…)', 'BUT3')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC33.01', 'Savoir transformer la donnée pour la mettre en conformité avec des normes (anonymisation, normalisation)', 'BUT3'),
-('AC33.02', 'Mesurer l''impact d''un respect de la législation en terme de droit des données.', 'BUT3'),
-('AC33.03', 'Identifier les clés d''une bonne communication (procédures et techniques utilisées)', 'BUT3'),
-('AC33.04', 'Mesurer l’importance de comprendre et de répondre à l''ensemble des problématiques posées', 'BUT3'),
-('AC33.05', 'Être force de proposition', 'BUT3'),
-('AC33.06', 'Prendre conscience de la nécessité d’intégrer la vision de l’interlocuteur (transversalité, international, multiculture, niveau d’expertise…)', 'BUT3')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO APPRENTISSAGE_CRITIQUE (id_ac, intitule, id_annee) VALUES
-('AC34.01VCOD', 'Prendre conscience de la nécessité d’utiliser des moyens spécifiques pour exploiter les Big Data ou les flux de données', 'BUT3'),
-('AC34.02VCOD', 'Défendre ses choix de solution par un argumentaire éclairé', 'BUT3'),
-('AC34.03VCOD', 'Réaliser l’intérêt d’appliquer les méthodes de développement dans la réalisation d’un projet informatique', 'BUT3'),
-('AC34.04VCOD', 'Apprécier l’intérêt de l’utilisation d’un gestionnaire de versions de code', 'BUT3')
-ON CONFLICT DO NOTHING;
-
-
-
--- ============================================================
--- EXERCICE 1 : LIEN AC -> COMPETENCE
--- Le 4e caractère du code donne la compétence (AC11.01 -> C1, AC24.01VCOD -> C4)
--- ============================================================
-UPDATE APPRENTISSAGE_CRITIQUE
-SET id_competence = 'C' || SUBSTRING(id_ac, 4, 1);
-
-
--- Les images de test du cours ne font pas partie du portfolio : pas d'image par compétence
-UPDATE COMPETENCE SET preuve = NULL;
-
--- Vue : heures par année et par compétence (pour le graphique de la page Parcours)
-CREATE VIEW HEURES_PAR_ANNEE AS
-SELECT a.id_annee, a.id_competence, SUM(a.heure) AS total_heures, COUNT(*) AS nb_activites
-FROM ACTIVITE_PEDAGOGIQUE a
-GROUP BY a.id_annee, a.id_competence
-ORDER BY a.id_annee, a.id_competence;
-
-
--- ############################################################
--- 2e PARTIE : MON PARCOURS
--- Source : mon profil LinkedIn, mes certificats et data/projets.csv
--- ############################################################
-
--- ============================================================
--- FORMATIONS
--- ============================================================
-CREATE TABLE FORMATION (
-    id_formation SERIAL PRIMARY KEY,
-    diplome TEXT NOT NULL,
-    etablissement TEXT NOT NULL,
-    lieu TEXT,
-    date_debut DATE NOT NULL,
-    date_fin DATE,                                   -- vide = en cours
+CREATE TABLE formation (
+    id_formation  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    diplome       text NOT NULL,
+    etablissement text NOT NULL,
+    lieu          text,
+    date_debut    date NOT NULL,
+    date_fin      date,                                  -- vide = en cours
     CHECK (date_fin IS NULL OR date_fin >= date_debut)
 );
 
-INSERT INTO FORMATION (diplome, etablissement, lieu, date_debut, date_fin) VALUES
-('BUT Sciences des Données, parcours VCOD', 'IUT de Besançon-Vesoul (antenne de Dôle)', 'Dôle', '2025-09-01', '2027-06-30'),
-('BUT Sciences des Données (1re année)', 'IUT de Vannes', 'Vannes', '2024-09-01', '2025-06-30'),
+CREATE TABLE experience (
+    id_experience integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    intitule      text NOT NULL,
+    structure     text NOT NULL,
+    type          type_experience NOT NULL,
+    lieu          text,
+    date_debut    date NOT NULL,
+    date_fin      date,
+    description   text,
+    code_sae      varchar(16) REFERENCES referentiel.sae(code_sae),   -- stage du BUT : SAÉ « Stage »
+    CHECK (date_fin IS NULL OR date_fin >= date_debut)
+);
+
+CREATE TABLE projet (
+    id_projet   integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    titre       text NOT NULL UNIQUE,
+    type        type_projet NOT NULL,
+    annee       smallint CHECK (annee BETWEEN 2020 AND 2030),   -- vide = à confirmer
+    description text,
+    lien        text CHECK (lien ~ '^https://'),
+    code_sae    varchar(16) REFERENCES referentiel.sae(code_sae)  -- projet réalisé dans une SAÉ
+);
+CREATE INDEX ON projet (code_sae);
+
+CREATE TABLE technologie (
+    id_techno integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom       text NOT NULL UNIQUE,
+    categorie text NOT NULL CHECK (categorie IN ('Langage', 'Base de données', 'Visualisation',
+                                                 'Machine learning', 'Data engineering', 'Web', 'Outil'))
+);
+
+-- Un projet utilise plusieurs technologies, une technologie sert à plusieurs projets (N-N)
+CREATE TABLE projet_technologie (
+    id_projet integer NOT NULL REFERENCES projet(id_projet) ON DELETE CASCADE,
+    id_techno integer NOT NULL REFERENCES technologie(id_techno) ON DELETE CASCADE,
+    PRIMARY KEY (id_projet, id_techno)
+);
+CREATE INDEX ON projet_technologie (id_techno);
+
+CREATE TABLE certificat (
+    id_certificat  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    intitule       text NOT NULL,
+    organisme      text,                 -- vide = à confirmer
+    type           type_certificat NOT NULL,
+    date_obtention date,                 -- vide = à confirmer
+    fichier        text,                 -- image dans client/preuves/
+    document       text                  -- PDF dans client/preuves/
+);
+
+CREATE TABLE langue (
+    id_langue integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nom       text NOT NULL UNIQUE,
+    niveau    niveau_langue NOT NULL
+);
+
+-- Une preuve : vient d'UN projet, d'UNE expérience ou d'UN certificat,
+-- se rattache à UNE SAÉ au plus, et démontre UN OU PLUSIEURS AC (table preuve_ac)
+CREATE TABLE preuve (
+    id_preuve     integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    titre         text NOT NULL,
+    texte         text,
+    fichier       text,
+    code_sae      varchar(16) REFERENCES referentiel.sae(code_sae),
+    id_projet     integer REFERENCES projet(id_projet) ON DELETE CASCADE,
+    id_experience integer REFERENCES experience(id_experience) ON DELETE CASCADE,
+    id_certificat integer REFERENCES certificat(id_certificat) ON DELETE CASCADE,
+    CHECK (texte IS NOT NULL OR fichier IS NOT NULL),                    -- image et/ou texte
+    CHECK (num_nonnulls(id_projet, id_experience, id_certificat) = 1)    -- une seule source
+);
+CREATE INDEX ON preuve (code_sae);
+CREATE INDEX ON preuve (id_projet);
+CREATE INDEX ON preuve (id_experience);
+CREATE INDEX ON preuve (id_certificat);
+
+-- Une preuve démontre plusieurs AC, un AC est démontré par plusieurs preuves (N-N)
+CREATE TABLE preuve_ac (
+    id_preuve integer NOT NULL REFERENCES preuve(id_preuve) ON DELETE CASCADE,
+    code_ac   referentiel.code_ac NOT NULL REFERENCES referentiel.apprentissage_critique(code_ac),
+    PRIMARY KEY (id_preuve, code_ac)
+);
+CREATE INDEX ON preuve_ac (code_ac);
+
+-- Règle de cohérence : si la preuve est rattachée à une SAÉ, chaque AC démontré
+-- doit appartenir à une compétence ciblée par cette SAÉ (programme national)
+CREATE FUNCTION portfolio.verifier_ac_dans_sae() RETURNS trigger AS $$
+DECLARE
+    sae_preuve varchar(16);
+BEGIN
+    SELECT code_sae INTO sae_preuve FROM portfolio.preuve WHERE id_preuve = NEW.id_preuve;
+    IF sae_preuve IS NOT NULL AND NOT EXISTS (
+        SELECT 1
+        FROM referentiel.apprentissage_critique ac
+        JOIN referentiel.sae_competence sc ON sc.id_competence = ac.id_competence
+        WHERE ac.code_ac = NEW.code_ac AND sc.code_sae = sae_preuve
+    ) THEN
+        RAISE EXCEPTION 'L''AC % n''appartient à aucune compétence ciblée par la SAÉ %', NEW.code_ac, sae_preuve;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER preuve_ac_coherence
+BEFORE INSERT OR UPDATE ON preuve_ac
+FOR EACH ROW EXECUTE FUNCTION portfolio.verifier_ac_dans_sae();
+
+-- ----------------------------------------------------------------------------
+--  Données
+-- ----------------------------------------------------------------------------
+INSERT INTO formation (diplome, etablissement, lieu, date_debut, date_fin) VALUES
+('BUT Science des données, parcours VCOD', 'IUT de Besançon-Vesoul (antenne de Dôle)', 'Dôle', '2025-09-01', '2027-06-30'),
+('BUT Science des données (1re année)', 'IUT de Vannes', 'Vannes', '2024-09-01', '2025-06-30'),
 ('Ingénierie informatique et télécommunications', 'Instituto Superior de Transportes e de Comunicações (ISUTC)', 'Mozambique', '2023-02-01', '2024-05-31'),
 ('Baccalauréat Mathématiques et Sciences naturelles', 'Escola Secundária « 29 de Setembro »', 'Maxixe, Mozambique', '2021-02-01', '2022-12-31');
 
--- ============================================================
--- EXPÉRIENCES
--- ============================================================
-CREATE TABLE EXPERIENCE (
-    id_experience SERIAL PRIMARY KEY,
-    intitule TEXT NOT NULL,
-    structure TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('Alternance', 'Stage', 'Expérience académique', 'Engagement')),
-    lieu TEXT,
-    date_debut DATE NOT NULL,
-    date_fin DATE,                                   -- vide = en cours
-    description TEXT,
-    CHECK (date_fin IS NULL OR date_fin >= date_debut)
-);
-
-INSERT INTO EXPERIENCE (intitule, structure, type, lieu, date_debut, date_fin, description) VALUES
+INSERT INTO experience (intitule, structure, type, lieu, date_debut, date_fin, description, code_sae) VALUES
 ('Data scientist apprentie', 'Colas', 'Alternance', 'Nouvelle-Aquitaine', '2026-09-01', NULL,
- 'Alternance en data science, en parallèle de la 3e année de BUT.'),
-('Stage data analyst junior', 'SFMI', 'Stage', 'Charquemont', '2026-07-01', '2026-08-31',
- 'Conception d''une application de covoiturage interne avec navettes en temps réel. Dashboard de pilotage industriel avec gestion des rôles et requêtes SQL Server.'),
-('Cheffe de projet data', 'Serviciale', 'Stage', 'Metz', '2026-04-01', '2026-06-30',
- 'Seule ressource data science et développeuse full stack d''une marketplace de services à domicile, sous la direction du CEO. Score de fiabilité multicritère validé par simulation Monte Carlo, détection d''anomalies (IsolationForest), tableau de bord Dash/Plotly et suite de 132 tests automatisés en CI/CD.'),
+ 'Alternance en data science, en parallèle de la 3e année de BUT.', NULL),
+('Stage d''été data analyst junior', 'SFMI', 'Stage', 'Charquemont', '2026-07-01', '2026-08-31',
+ 'Stage d''été, en dehors du stage officiel du BUT. Conception d''une application de covoiturage interne avec navettes en temps réel. Dashboard de pilotage industriel avec gestion des rôles et requêtes SQL Server.', NULL),
+('Cheffe de projet data (stage officiel du BUT)', 'Serviciale', 'Stage', 'Metz', '2026-04-01', '2026-06-30',
+ 'Seule ressource data science et développeuse full stack d''une marketplace de services à domicile, sous la direction du CEO. Score de fiabilité multicritère validé par simulation Monte Carlo, détection d''anomalies (IsolationForest), tableau de bord Dash/Plotly et suite de 132 tests automatisés en CI/CD.', 'STAGE.S4'),
 ('Analyste de données junior (projet académique)', 'IUT de Vannes', 'Expérience académique', 'Vannes', '2024-09-01', '2025-06-30',
- 'Modèles prédictifs et projets collaboratifs d''analyse de données, avec identification des besoins métier et production de rapports.'),
+ 'Modèles prédictifs et projets collaboratifs d''analyse de données, avec identification des besoins métier et production de rapports.', NULL),
 ('Membre', 'The New York Academy of Sciences', 'Engagement', 'À distance', '2022-06-01', '2024-01-31',
- 'Projets collaboratifs internationaux, communication interculturelle et travail en équipe à distance.');
+ 'Projets collaboratifs internationaux, communication interculturelle et travail en équipe à distance.', NULL);
 
--- ============================================================
--- PROJETS
--- (les projets réalisés pour une entreprise ne sont pas publiés : ils sont décrits dans EXPERIENCE)
--- ============================================================
-CREATE TABLE PROJET (
-    id_projet SERIAL PRIMARY KEY,
-    titre TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('Projet de formation', 'Projet personnel')),
-    annee INT CHECK (annee BETWEEN 2020 AND 2030),   -- vide tant qu'elle n'est pas confirmée
-    description TEXT,
-    lien TEXT
-);
-
-INSERT INTO PROJET (titre, type, annee, description) VALUES
+INSERT INTO projet (titre, type, annee, description, code_sae) VALUES
 ('Portfolio de visualisation de données', 'Projet de formation', 2026,
- 'Ce site : base PostgreSQL lancée dans Docker, serveur Express qui expose une API, pages qui affichent les données avec Chart.js.'),
+ 'Ce site : base PostgreSQL lancée dans Docker, serveur Express qui expose une API, pages qui affichent les données avec Chart.js.', 'PORTFOLIO.S5'),
 ('Analyse multivariée de candidatures (SAE 402)', 'Projet de formation', 2026,
- 'Analyse de données d''admission avec KNIME, anonymisation avec ARX et restitution dans une application R Shiny.'),
+ 'Analyse de données d''admission avec KNIME, anonymisation avec ARX et restitution dans une application R Shiny.', 'SAE4.02'),
 ('Atlas démographique des communes françaises', 'Projet personnel', 2026,
- 'Exploration et visualisation des données INSEE 2016-2022 sur les communes françaises.'),
+ 'Exploration et visualisation des données INSEE 2016-2022 sur les communes françaises.', NULL),
 ('BRICOLIB : location d''outils de bricolage (SAÉ)', 'Projet de formation', 2025,
- 'Cartographie des offres et demandes de location d''outils en France, modèles prédictifs et tableaux de bord interactifs sous Power BI.'),
+ 'Cartographie des offres et demandes de location d''outils en France, modèles prédictifs et tableaux de bord interactifs sous Power BI.', NULL),
 ('Plateforme de données FactoryFlow', 'Projet personnel', NULL,
- 'Plateforme de données de bout en bout : orchestration avec Airflow, transformations avec dbt, modèles scikit-learn et interface Streamlit.');
+ 'Plateforme de données de bout en bout : orchestration avec Airflow, transformations avec dbt, modèles scikit-learn et interface Streamlit.', NULL);
 
--- ============================================================
--- TECHNOLOGIES et TABLE D'ASSOCIATION PROJET <-> TECHNOLOGIE (lien N-N)
--- ============================================================
-CREATE TABLE TECHNOLOGIE (
-    id_techno SERIAL PRIMARY KEY,
-    nom TEXT NOT NULL UNIQUE,
-    categorie TEXT NOT NULL CHECK (categorie IN ('Langage', 'Base de données', 'Visualisation', 'Machine learning', 'Data engineering', 'Web', 'Outil'))
-);
-
-INSERT INTO TECHNOLOGIE (nom, categorie) VALUES
+INSERT INTO technologie (nom, categorie) VALUES
 ('Python', 'Langage'), ('R', 'Langage'), ('JavaScript', 'Langage'), ('SQL', 'Langage'),
 ('PostgreSQL', 'Base de données'),
 ('pandas', 'Data engineering'), ('dbt', 'Data engineering'), ('Airflow', 'Data engineering'),
@@ -577,40 +760,28 @@ INSERT INTO TECHNOLOGIE (nom, categorie) VALUES
 ('HTML', 'Web'), ('Node.js', 'Web'), ('Express', 'Web'),
 ('KNIME', 'Outil'), ('ARX', 'Outil'), ('Docker', 'Outil');
 
-CREATE TABLE PROJET_TECHNOLOGIE (
-    id_projet INT NOT NULL,
-    id_techno INT NOT NULL,
-    PRIMARY KEY (id_projet, id_techno),            -- clé primaire composée : pas de doublon
-    FOREIGN KEY (id_projet) REFERENCES PROJET(id_projet) ON DELETE CASCADE,
-    FOREIGN KEY (id_techno) REFERENCES TECHNOLOGIE(id_techno) ON DELETE CASCADE
-);
-
--- Chaque ligne : (numéro du projet, nom de la technologie)
-INSERT INTO PROJET_TECHNOLOGIE (id_projet, id_techno)
-SELECT v.id_projet, t.id_techno
+-- (titre du projet, nom de la technologie) : on retrouve les identifiants par jointure
+INSERT INTO projet_technologie (id_projet, id_techno)
+SELECT p.id_projet, t.id_techno
 FROM (VALUES
-    (1, 'PostgreSQL'), (1, 'SQL'), (1, 'Docker'), (1, 'Node.js'), (1, 'Express'), (1, 'JavaScript'), (1, 'HTML'), (1, 'Chart.js'),
-    (2, 'KNIME'), (2, 'ARX'), (2, 'R'), (2, 'Shiny'),
-    (3, 'Python'), (3, 'pandas'), (3, 'matplotlib'), (3, 'Plotly'), (3, 'HTML'),
-    (4, 'Power BI'),
-    (5, 'Python'), (5, 'PostgreSQL'), (5, 'dbt'), (5, 'Airflow'), (5, 'scikit-learn'), (5, 'Streamlit')
-) AS v(id_projet, nom)
-JOIN TECHNOLOGIE t ON t.nom = v.nom;   -- on retrouve le numéro de chaque technologie par son nom
+    ('Portfolio de visualisation de données', 'PostgreSQL'), ('Portfolio de visualisation de données', 'SQL'),
+    ('Portfolio de visualisation de données', 'Docker'), ('Portfolio de visualisation de données', 'Node.js'),
+    ('Portfolio de visualisation de données', 'Express'), ('Portfolio de visualisation de données', 'JavaScript'),
+    ('Portfolio de visualisation de données', 'HTML'), ('Portfolio de visualisation de données', 'Chart.js'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'KNIME'), ('Analyse multivariée de candidatures (SAE 402)', 'ARX'),
+    ('Analyse multivariée de candidatures (SAE 402)', 'R'), ('Analyse multivariée de candidatures (SAE 402)', 'Shiny'),
+    ('Atlas démographique des communes françaises', 'Python'), ('Atlas démographique des communes françaises', 'pandas'),
+    ('Atlas démographique des communes françaises', 'matplotlib'), ('Atlas démographique des communes françaises', 'Plotly'),
+    ('Atlas démographique des communes françaises', 'HTML'),
+    ('BRICOLIB : location d''outils de bricolage (SAÉ)', 'Power BI'),
+    ('Plateforme de données FactoryFlow', 'Python'), ('Plateforme de données FactoryFlow', 'PostgreSQL'),
+    ('Plateforme de données FactoryFlow', 'dbt'), ('Plateforme de données FactoryFlow', 'Airflow'),
+    ('Plateforme de données FactoryFlow', 'scikit-learn'), ('Plateforme de données FactoryFlow', 'Streamlit')
+) AS v(titre, nom)
+JOIN projet p ON p.titre = v.titre
+JOIN technologie t ON t.nom = v.nom;
 
--- ============================================================
--- CERTIFICATS ET DISTINCTIONS
--- ============================================================
-CREATE TABLE CERTIFICAT (
-    id_certificat SERIAL PRIMARY KEY,
-    intitule TEXT NOT NULL,
-    organisme TEXT,                                  -- vide = à confirmer
-    type TEXT NOT NULL CHECK (type IN ('Certificat', 'Distinction')),
-    date_obtention DATE,                             -- vide = à confirmer
-    fichier TEXT,                                    -- image du certificat dans client/preuves/
-    document TEXT                                    -- certificat original en PDF dans client/preuves/
-);
-
-INSERT INTO CERTIFICAT (intitule, organisme, type, date_obtention, fichier, document) VALUES
+INSERT INTO certificat (intitule, organisme, type, date_obtention, fichier, document) VALUES
 ('Databricks Fundamentals Accreditation', 'Databricks', 'Certificat', '2026-08-01', 'certificat_databricks.png', 'certificat_databricks.pdf'),
 ('AWS Database Offerings', 'AWS Training & Certification', 'Certificat', '2025-07-21', 'certificat_aws.png', 'certificat_aws.pdf'),
 ('CS403 : Introduction to Modern Database Systems (42 h)', 'Saylor Academy', 'Certificat', '2025-07-21', 'certificat_cs403.png', 'certificat_cs403.pdf'),
@@ -622,50 +793,68 @@ INSERT INTO CERTIFICAT (intitule, organisme, type, date_obtention, fichier, docu
 ('2e prix du concours « Lire en vacances » 2023/2024', 'Ethale Publishing', 'Distinction', NULL, NULL, NULL),
 ('BSGCT Scientific Writing Competition 2026', NULL, 'Distinction', NULL, NULL, NULL);
 
--- ============================================================
--- LANGUES
--- ============================================================
-CREATE TABLE LANGUE (
-    id_langue SERIAL PRIMARY KEY,
-    nom TEXT NOT NULL UNIQUE,
-    niveau TEXT NOT NULL CHECK (niveau IN ('Langue maternelle ou bilingue', 'Professionnel', 'Élémentaire'))
-);
+INSERT INTO langue (nom, niveau) VALUES
+('Portugais', 'Langue maternelle ou bilingue'), ('Anglais', 'Langue maternelle ou bilingue'),
+('Français', 'Professionnel'), ('Espagnol', 'Professionnel'), ('Russe', 'Élémentaire');
 
-INSERT INTO LANGUE (nom, niveau) VALUES
-('Portugais', 'Langue maternelle ou bilingue'),
-('Anglais', 'Langue maternelle ou bilingue'),
-('Français', 'Professionnel'),
-('Espagnol', 'Professionnel'),
-('Russe', 'Élémentaire');
+-- Preuves : PROPOSITIONS À REMPLACER par les fiches de preuves
+INSERT INTO preuve (titre, texte, fichier, code_sae, id_projet, id_experience, id_certificat) VALUES
+('Reporting d''une analyse multivariée', 'Analyse multivariée des données d''admission (KNIME, R Shiny), après anonymisation avec ARX.', NULL, 'SAE4.02',
+ (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAE 402)'), NULL, NULL),
+('Atlas démographique INSEE', 'Visualisations des données démographiques des communes.', NULL, NULL,
+ (SELECT id_projet FROM projet WHERE titre = 'Atlas démographique des communes françaises'), NULL, NULL),
+('Chaîne de données FactoryFlow', 'Chaîne de traitement automatisée avec Airflow et dbt.', NULL, NULL,
+ (SELECT id_projet FROM projet WHERE titre = 'Plateforme de données FactoryFlow'), NULL, NULL),
+('Portfolio versionné avec Git', 'Historique Git du portfolio et suivi de l''avancement.', NULL, 'PORTFOLIO.S5',
+ (SELECT id_projet FROM projet WHERE titre = 'Portfolio de visualisation de données'), NULL, NULL),
+('Qualité et simulation chez Serviciale', 'Suite de 132 tests automatisés en CI/CD et score de fiabilité validé par simulation Monte Carlo.', NULL, 'STAGE.S4',
+ NULL, (SELECT id_experience FROM experience WHERE structure = 'Serviciale'), NULL),
+('Certificat CS403', 'Cours de 42 h sur les bases de données modernes.', 'certificat_cs403.png', NULL,
+ NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'CS403%')),
+('Certificat AWS Database Offerings', 'Panorama des bases de données proposées par AWS.', 'certificat_aws.png', NULL,
+ NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule = 'AWS Database Offerings')),
+('Certificat Databricks', 'Plateforme Databricks pour les grands volumes de données.', 'certificat_databricks.png', NULL,
+ NULL, NULL, (SELECT id_certificat FROM certificat WHERE intitule LIKE 'Databricks%'));
 
--- ============================================================
--- PREUVES : un projet, une expérience OU un certificat qui démontre un AC
--- ============================================================
-CREATE TABLE PREUVE (
-    id_preuve SERIAL PRIMARY KEY,
-    fichier TEXT,                                    -- image (facultative)
-    texte TEXT,                                      -- explication (facultative)
-    id_ac VARCHAR(12) NOT NULL,
-    id_projet INT,
-    id_experience INT,
-    id_certificat INT,
-    FOREIGN KEY (id_ac) REFERENCES APPRENTISSAGE_CRITIQUE(id_ac) ON DELETE CASCADE,
-    FOREIGN KEY (id_projet) REFERENCES PROJET(id_projet) ON DELETE CASCADE,
-    FOREIGN KEY (id_experience) REFERENCES EXPERIENCE(id_experience) ON DELETE CASCADE,
-    FOREIGN KEY (id_certificat) REFERENCES CERTIFICAT(id_certificat) ON DELETE CASCADE,
-    CHECK (fichier IS NOT NULL OR texte IS NOT NULL),                   -- image et/ou texte
-    CHECK (num_nonnulls(id_projet, id_experience, id_certificat) = 1)   -- une seule source
-);
+INSERT INTO preuve_ac (id_preuve, code_ac)
+SELECT p.id_preuve, v.code_ac
+FROM (VALUES
+    ('Reporting d''une analyse multivariée', 'AC22.03'), ('Reporting d''une analyse multivariée', 'AC33.01'),
+    ('Atlas démographique INSEE', 'AC13.05'),
+    ('Chaîne de données FactoryFlow', 'AC24.02VCOD'),
+    ('Portfolio versionné avec Git', 'AC34.04VCOD'),
+    ('Qualité et simulation chez Serviciale', 'AC21.04'), ('Qualité et simulation chez Serviciale', 'AC12.06'),
+    ('Certificat CS403', 'AC11.04'),
+    ('Certificat AWS Database Offerings', 'AC31.01'),
+    ('Certificat Databricks', 'AC34.01VCOD')
+) AS v(titre, code_ac)
+JOIN preuve p ON p.titre = v.titre;
 
--- Propositions à valider : chaque ligne relie une source à l'AC qu'elle démontre
-INSERT INTO PREUVE (fichier, texte, id_ac, id_projet, id_experience, id_certificat) VALUES
-(NULL, 'Analyse multivariée des données d''admission (KNIME, R Shiny).', 'AC22.03', 2, NULL, NULL),
-(NULL, 'Données sensibles anonymisées avec ARX avant l''analyse.', 'AC33.01', 2, NULL, NULL),
-(NULL, 'Visualisations des données démographiques INSEE.', 'AC13.05', 3, NULL, NULL),
-(NULL, 'Chaîne de traitement automatisée avec Airflow et dbt.', 'AC24.02VCOD', 5, NULL, NULL),
-(NULL, 'Historique Git du portfolio et suivi de l''avancement.', 'AC34.04VCOD', 1, NULL, NULL),
-(NULL, 'Suite de 132 tests automatisés en CI/CD.', 'AC21.04', NULL, 3, NULL),
-(NULL, 'Score de fiabilité validé par simulation Monte Carlo.', 'AC12.06', NULL, 3, NULL),
-('certificat_cs403.png', 'Cours de 42 h sur les bases de données modernes.', 'AC11.04', NULL, NULL, 3),
-('certificat_aws.png', 'Panorama des bases de données proposées par AWS.', 'AC31.01', NULL, NULL, 2),
-('certificat_databricks.png', 'Plateforme Databricks pour les grands volumes de données.', 'AC34.01VCOD', NULL, NULL, 1);
+-- ----------------------------------------------------------------------------
+--  Vues utilisées par le site
+-- ----------------------------------------------------------------------------
+-- Couverture du référentiel : pour chaque AC, le nombre de preuves qui le démontrent
+CREATE VIEW couverture_ac AS
+SELECT ac.code_ac, ac.intitule, ac.id_competence, ac.numero_niveau, n.id_annee,
+       COUNT(pa.id_preuve) AS nb_preuves
+FROM referentiel.apprentissage_critique ac
+JOIN referentiel.niveau n ON n.id_competence = ac.id_competence AND n.numero = ac.numero_niveau
+LEFT JOIN preuve_ac pa ON pa.code_ac = ac.code_ac
+GROUP BY ac.code_ac, n.id_annee
+ORDER BY ac.code_ac;
+
+-- Preuves détaillées : source lisible, SAÉ et liste des AC
+CREATE VIEW preuve_detail AS
+SELECT pr.id_preuve, pr.titre, pr.texte, pr.fichier, pr.code_sae, s.intitule AS intitule_sae,
+       COALESCE(p.titre, e.intitule || ' · ' || e.structure, c.intitule) AS source,
+       CASE WHEN p.id_projet IS NOT NULL THEN 'Projet'
+            WHEN e.id_experience IS NOT NULL THEN 'Expérience'
+            ELSE 'Certificat' END AS type_source,
+       ARRAY_AGG(pa.code_ac::text ORDER BY pa.code_ac) AS codes_ac   -- ::text : liste lisible par Node
+FROM preuve pr
+LEFT JOIN referentiel.sae s ON s.code_sae = pr.code_sae
+LEFT JOIN projet p ON p.id_projet = pr.id_projet
+LEFT JOIN experience e ON e.id_experience = pr.id_experience
+LEFT JOIN certificat c ON c.id_certificat = pr.id_certificat
+LEFT JOIN preuve_ac pa ON pa.id_preuve = pr.id_preuve
+GROUP BY pr.id_preuve, s.intitule, p.titre, p.id_projet, e.intitule, e.structure, e.id_experience, c.intitule;
