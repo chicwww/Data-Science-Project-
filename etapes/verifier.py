@@ -70,10 +70,16 @@ try:
                     if not os.path.exists(f"{DEP}/client/preuves/{im['fichier']}"):
                         erreurs.append(f"capture manquante {im['fichier']}")
             # Diagramme de la base, avec les vrais nombres de lignes du jour
-            subprocess.run(["psql", "-h", "localhost", "-U", "postgres", "-q", "-c", "ANALYZE;"], env=ENV, check=True)
-            raw = subprocess.run(["psql", "-h", "localhost", "-U", "postgres", "-At", "-f", f"{ICI}/meta.sql"],
+            subprocess.run(["psql", "-h", "localhost", "-U", "postgres", "-d", "butsd", "-q", "-c", "ANALYZE;"], env=ENV, check=True)
+            raw = subprocess.run(["psql", "-h", "localhost", "-U", "postgres", "-d", "butsd", "-At", "-f", f"{ICI}/meta.sql"],
                                  env=ENV, capture_output=True, text=True, check=True).stdout
             meta = json.loads(raw[raw.index("{"):])
+            # Nombres de lignes exacts (les statistiques de PostgreSQL peuvent être en retard)
+            cnt = subprocess.run(["psql", "-h", "localhost", "-U", "postgres", "-d", "butsd", "-At", "-F", "|", "-c",
+                "SELECT table_name, (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name), false, true, '')))[1]::text "
+                "FROM information_schema.tables WHERE table_schema IN ('referentiel','portfolio') AND table_type = 'BASE TABLE'"],
+                env=ENV, capture_output=True, text=True, check=True).stdout
+            meta["nrows"] = {l.split("|")[0]: int(l.split("|")[1]) for l in cnt.strip().splitlines()}
             html = open(f"{ICI}/erd.html").read()
             ancien = json.loads(re.search(r"const M=(\{.*?\});\n", html).group(1))
             pos = {t["t"]: (t["x"], t["y"]) for t in ancien["tables"]}
