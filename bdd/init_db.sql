@@ -871,6 +871,23 @@ INSERT INTO langue (nom, niveau) VALUES
 -- Les preuves du stage sont décrites sans capture : la plateforme du stage est confidentielle.
 -- (les preuves de mes fiches arrivent dans les prochains jours)
 
+-- Auto-évaluation des AC (fiches portfolio) ; visa du tuteur pour la compétence Traiter niveau 2.
+-- Les AC de la compétence Valoriser ne sont pas évalués dans les fiches : pas de ligne.
+INSERT INTO evaluation_ac (code_ac, auto_evaluation, visa_tuteur) VALUES
+('AC21.01', 'Acquis', 'Acquis'),
+('AC21.02', 'Acquis', 'Acquis'),
+('AC21.03', 'En cours d''acquisition', 'En cours d''acquisition'),
+('AC21.04', 'Acquis', 'Acquis'),
+('AC21.05', 'En cours d''acquisition', 'Acquis'),
+('AC22.01', 'En cours d''acquisition', NULL),
+('AC22.02', 'En cours d''acquisition', NULL),
+('AC22.03', 'En cours d''acquisition', NULL),
+('AC22.04', 'Acquis', NULL),
+('AC22.05', 'Acquis', NULL),
+('AC24.01VCOD', 'Acquis', NULL),
+('AC24.02VCOD', 'Acquis', NULL),
+('AC24.03VCOD', 'En cours d''acquisition', NULL),
+('AC24.04VCOD', 'Acquis', NULL);
 
 -- ----------------------------------------------------------------------------
 --  Vues utilisées par le site
