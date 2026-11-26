@@ -759,8 +759,8 @@ INSERT INTO experience (intitule, structure, type, lieu, date_debut, date_fin, d
 INSERT INTO projet (titre, type, annee, description, code_sae) VALUES
 ('Portfolio de visualisation de données', 'Projet de formation', 2026,
  'Ce site : base PostgreSQL lancée dans Docker, serveur Express qui expose une API, pages qui affichent les données avec Chart.js.', 'PORTFOLIO.S5'),
-('Analyse multivariée de candidatures (SAE 402)', 'Projet de formation', 2026,
- 'Analyse de données d''admission avec KNIME, anonymisation avec ARX et restitution dans une application R Shiny.', 'SAE4.02'),
+('Analyse multivariée de candidatures (SAÉ 4.02)', 'Projet de formation', 2026,
+ 'Restitution d''une analyse multivariée des candidatures à la filière Santé de l''UBFC : préparation avec KNIME, anonymisation avec ARX (k-anonymat k = 5, l-diversité l = 3), ACM puis classification ascendante hiérarchique en 3 classes, application R Shiny pour un commanditaire non statisticien. Projet en équipe de 3 : 80 h au total, dont 41 h pour ma part (anonymisation, application Shiny et analyse statistique).', 'SAE4.02'),
 ('Atlas démographique des communes françaises', 'Projet personnel', 2026,
  'Exploration et visualisation des données INSEE 2016-2022 sur les communes françaises.', NULL),
 ('BRICOLIB : location d''outils de bricolage (SAÉ)', 'Projet de formation', 2025,
@@ -774,7 +774,7 @@ INSERT INTO technologie (nom, categorie) VALUES
 ('matplotlib', 'Visualisation'), ('Plotly', 'Visualisation'), ('Power BI', 'Visualisation'), ('Shiny', 'Visualisation'),
 ('Streamlit', 'Visualisation'), ('Chart.js', 'Visualisation'), ('scikit-learn', 'Machine learning'), ('HTML', 'Web'),
 ('Node.js', 'Web'), ('Express', 'Web'), ('KNIME', 'Outil'), ('ARX', 'Outil'),
-('Docker', 'Outil');
+('Docker', 'Outil'), ('Leaflet', 'Visualisation'), ('FactoMineR', 'Statistique');
 
 -- (titre du projet, nom de la technologie) : on retrouve les identifiants par jointure
 INSERT INTO projet_technologie (id_projet, id_techno)
@@ -788,10 +788,12 @@ FROM (VALUES
     ('Portfolio de visualisation de données', 'JavaScript'),
     ('Portfolio de visualisation de données', 'HTML'),
     ('Portfolio de visualisation de données', 'Chart.js'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'KNIME'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'ARX'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'R'),
-    ('Analyse multivariée de candidatures (SAE 402)', 'Shiny'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'KNIME'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'ARX'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'R'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'Shiny'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'FactoMineR'),
+    ('Analyse multivariée de candidatures (SAÉ 4.02)', 'Leaflet'),
     ('Atlas démographique des communes françaises', 'Python'),
     ('Atlas démographique des communes françaises', 'pandas'),
     ('Atlas démographique des communes françaises', 'matplotlib'),
@@ -869,7 +871,37 @@ INSERT INTO langue (nom, niveau) VALUES
 
 -- Preuves : tirées de mes fiches portfolio (fiches AC, fiche SAÉ 4.02, fiche de stage), ajoutées petit à petit.
 -- Les preuves du stage sont décrites sans capture : la plateforme du stage est confidentielle.
--- (les preuves de mes fiches arrivent dans les prochains jours)
+INSERT INTO preuve (titre, texte, code_sae, id_projet, id_experience, id_certificat) VALUES
+('Préparation des variables des candidats',
+ 'La fonction de chargement structure les variables (sexe, statut boursier, type de bac, zone géographique) après avoir compris la logique de la filière Santé de l''UBFC.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Unification de la palette de couleurs',
+ 'Les graphiques de classification utilisaient deux palettes différentes ; une palette unique et une légende explicite ont corrigé l''incohérence.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Packages R de l''application Shiny',
+ 'L''application s''appuie sur des packages existants : shiny et shinydashboard, FactoMineR et factoextra, leaflet, DT, ggplot2.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL);
+
+-- (titre de la preuve, AC démontré) : le déclencheur vérifie chaque ligne
+INSERT INTO preuve_ac (id_preuve, code_ac)
+SELECT p.id_preuve, v.code_ac
+FROM (VALUES
+    ('Préparation des variables des candidats', 'AC21.01'),
+    ('Unification de la palette de couleurs', 'AC21.04'),
+    ('Packages R de l''application Shiny', 'AC21.05')
+) AS v(titre, code_ac)
+JOIN preuve p ON p.titre = v.titre;
+
+-- Captures d'écran des preuves (dans client/preuves/)
+INSERT INTO preuve_image (id_preuve, ordre, fichier, legende)
+SELECT p.id_preuve, v.ordre, v.fichier, v.legende
+FROM (VALUES
+    ('Préparation des variables des candidats', 1, 's402_data_preparation.png', NULL),
+    ('Unification de la palette de couleurs', 1, 's402_palette_code.png', 'Code'),
+    ('Unification de la palette de couleurs', 2, 's402_palette_rapport.png', 'Rapport de modifications'),
+    ('Packages R de l''application Shiny', 1, 's402_packages.png', NULL)
+) AS v(titre, ordre, fichier, legende)
+JOIN preuve p ON p.titre = v.titre;
 
 -- Auto-évaluation des AC (fiches portfolio) ; visa du tuteur pour la compétence Traiter niveau 2.
 -- Les AC de la compétence Valoriser ne sont pas évalués dans les fiches : pas de ligne.
