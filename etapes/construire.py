@@ -101,6 +101,8 @@ for racine, _, fichiers in os.walk(FIN):
         if rel.startswith("client/preuves/") or rel in ("bdd/init_db.sql", "AVANCEMENT.md",
                                                       "bdd/schema-relationnel.png", "maquette/schema-relationnel.png"):
             continue
+        if os.path.exists(os.path.join(DEP, rel)):
+            continue                       # déjà en place depuis le jour 1 : on garde la version du dépôt
         os.makedirs(os.path.dirname(os.path.join(DEP, rel)), exist_ok=True)
         shutil.copyfile(chemin, os.path.join(DEP, rel))
 open(f"{DEP}/bdd/init_db.sql", "w").write(sql)
@@ -114,12 +116,15 @@ for f in os.listdir(f"{FIN}/client/preuves"):
     elif os.path.exists(cible):
         os.remove(cible)
 
-# AVANCEMENT.md
-av = open(f"{ICI}/AVANCEMENT_avant.md").read()
+# AVANCEMENT.md : on garde le fichier du dépôt (Mestre peut l'avoir modifié).
+# Seul le jour 13 remplace la ligne d'annonce du jour 1 par le bilan.
 L1 = "- Tables `preuve_image` (captures d'écran des preuves) et `evaluation_ac` (auto-évaluation et visa du tuteur) ; les preuves de test sont retirées, les preuves réelles de mes fiches portfolio sont ajoutées petit à petit, une SAÉ à la fois\n"
 L13 = "- Preuves réelles tirées de mes fiches portfolio : 60 preuves (SAÉ 3.01 à 4.02 et stage) qui couvrent tous les AC du niveau 2 de C1, C2, C3 et du niveau 1 de C4 ; 5 projets de SAÉ ajoutés ; captures d'écran rangées dans une table `preuve_image` ; auto-évaluation et visa du tuteur par AC dans une table `evaluation_ac`, affichés sur la page Compétences\n"
-a = "\n### À faire ensuite\n"
-av = av.replace(a, "\n" + (L13 if N == 13 else L1).rstrip("\n") + a, 1) if False else av.replace(a, (L13 if N == 13 else L1) + a, 1)
-av = av.replace("- Remplacer les images de test par les preuves du portfolio\n", "")
-open(f"{DEP}/AVANCEMENT.md", "w").write(av)
+if N == 13:
+    av = open(f"{DEP}/AVANCEMENT.md").read()
+    if L1 in av:
+        av = av.replace(L1, L13, 1)
+    elif L13 not in av:
+        av = av.replace("\n### À faire ensuite\n", L13 + "\n### À faire ensuite\n", 1)
+    open(f"{DEP}/AVANCEMENT.md", "w").write(av)
 print(f"jour {N} : {len(liste)} preuves, {len(voulues)} captures")
