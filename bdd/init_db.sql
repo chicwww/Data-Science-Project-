@@ -880,6 +880,18 @@ INSERT INTO preuve (titre, texte, code_sae, id_projet, id_experience, id_certifi
  'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
 ('Packages R de l''application Shiny',
  'L''application s''appuie sur des packages existants : shiny et shinydashboard, FactoMineR et factoextra, leaflet, DT, ggplot2.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Classification sur les résultats de l''ACM',
+ 'La classification (fonction HCPC de FactoMineR) explore la structure des données sans hypothèse préalable sur les groupes : c''est de l''exploration, pas de la modélisation.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('ACM sur les variables qualitatives des candidats',
+ 'L''analyse des correspondances multiples résume l''information portée par de nombreuses variables qualitatives en quelques axes.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('CAH, dendrogramme et courbe d''inertie',
+ 'La classification ascendante hiérarchique sur les coordonnées de l''ACM forme des groupes homogènes ; le nombre de classes est choisi avec la courbe d''inertie.',
+ 'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL),
+('Limite : la zone géographique est une variable active',
+ 'La zone géographique a servi à construire les classes : dire qu''elle est le facteur le plus discriminant est en partie circulaire. L''interprétation est reformulée en homogénéité des profils dans une même zone.',
  'SAE4.02', (SELECT id_projet FROM projet WHERE titre = 'Analyse multivariée de candidatures (SAÉ 4.02)'), NULL, NULL);
 
 -- (titre de la preuve, AC démontré) : le déclencheur vérifie chaque ligne
@@ -888,7 +900,11 @@ SELECT p.id_preuve, v.code_ac
 FROM (VALUES
     ('Préparation des variables des candidats', 'AC21.01'),
     ('Unification de la palette de couleurs', 'AC21.04'),
-    ('Packages R de l''application Shiny', 'AC21.05')
+    ('Packages R de l''application Shiny', 'AC21.05'),
+    ('Classification sur les résultats de l''ACM', 'AC22.01'),
+    ('ACM sur les variables qualitatives des candidats', 'AC22.03'),
+    ('CAH, dendrogramme et courbe d''inertie', 'AC22.03'),
+    ('Limite : la zone géographique est une variable active', 'AC22.05')
 ) AS v(titre, code_ac)
 JOIN preuve p ON p.titre = v.titre;
 
@@ -899,7 +915,13 @@ FROM (VALUES
     ('Préparation des variables des candidats', 1, 's402_data_preparation.png', NULL),
     ('Unification de la palette de couleurs', 1, 's402_palette_code.png', 'Code'),
     ('Unification de la palette de couleurs', 2, 's402_palette_rapport.png', 'Rapport de modifications'),
-    ('Packages R de l''application Shiny', 1, 's402_packages.png', NULL)
+    ('Packages R de l''application Shiny', 1, 's402_packages.png', NULL),
+    ('Classification sur les résultats de l''ACM', 1, 's402_hcpc.png', NULL),
+    ('ACM sur les variables qualitatives des candidats', 1, 's402_acm.png', NULL),
+    ('CAH, dendrogramme et courbe d''inertie', 1, 's402_dendrogramme.png', 'Code du dendrogramme'),
+    ('CAH, dendrogramme et courbe d''inertie', 2, 's402_courbe_inertie.png', 'Onglet Classification de l''application'),
+    ('Limite : la zone géographique est une variable active', 1, 's402_limite_code.png', 'Code'),
+    ('Limite : la zone géographique est une variable active', 2, 's402_limite_rapport.png', 'Rapport de changements')
 ) AS v(titre, ordre, fichier, legende)
 JOIN preuve p ON p.titre = v.titre;
 
