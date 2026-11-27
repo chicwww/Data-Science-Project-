@@ -126,6 +126,12 @@ La maquette précède l'architecture. L'architecture précède la partie serveur
 - La période prévue pour la tâche sur les données se termine aujourd'hui : `data/projets.csv` et `data/competences.csv` restent des brouillons à relire, avec des années à compléter
 - État du TD2 toujours à confirmer
 
+### Point du 27 novembre
+- Aucune séance encadrée n'est prévue aujourd'hui : la prochaine est le projet du 30 novembre (2h, interactions), dans trois jours
+- Le déroulement du TD4 et de la séance de projet du 24 novembre n'est pas vérifié dans ce document : ils restent « à confirmer » et ne sont pas marqués terminés
+- Reste à faire avant le 30 novembre : rattacher chaque preuve au bon apprentissage critique, compléter les certificats sans date et relire `data/projets.csv`
+- L'interrogation du 11 décembre est dans deux semaines : la préparation reste en cours
+
 ### TD2, 23 novembre
 - Cours sur l'architecture client-serveur : rôle du client, du serveur et du SGBD, protocole HTTP, méthodes et CRUD, codes de statut, routes et paramètres, format JSON, injection SQL et validation des données
 - Comparaison de Laragon et Docker
